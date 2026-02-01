@@ -187,33 +187,29 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     private func setupBottomButtons() {
         let buttonY = buttonAreaHeight / 2 - safeAreaInsets().bottom / 2 + 10
 
-        let buttons: [(icon: [[Int]], category: ActionCategory, label: String)] = [
-            (feedIcon, .feed, "Feed"),
-            (workIcon, .work, "Work"),
-            (careIcon, .selfCare, "Care"),
-            (socialIcon, .social, "Social")
-        ]
+        let categories: [ActionCategory] = [.feed, .work, .selfCare, .social]
 
         let buttonSize: CGFloat = 60
-        let totalWidth = CGFloat(buttons.count) * buttonSize + CGFloat(buttons.count - 1) * 20
+        let totalWidth = CGFloat(categories.count) * buttonSize + CGFloat(categories.count - 1) * 20
         let startX = (size.width - totalWidth) / 2 + buttonSize / 2
 
-        for (index, button) in buttons.enumerated() {
+        for (index, category) in categories.enumerated() {
             let x = startX + CGFloat(index) * (buttonSize + 20)
-            let buttonNode = createPixelButton(icon: button.icon, size: buttonSize)
+            let icon = getIcon(for: category)
+            let buttonNode = createPixelButton(icon: icon, size: buttonSize)
             buttonNode.position = CGPoint(x: x, y: buttonY)
-            buttonNode.name = "category_\(button.category.rawValue)"
+            buttonNode.name = "category_\(category.rawValue)"
             addChild(buttonNode)
             actionButtons.append(buttonNode)
 
             // Add subtle bounce animation
             let delay = Double(index) * 0.1
+            let bounceUp = SKAction.moveBy(x: 0, y: 3, duration: 0.4)
+            let bounceDown = SKAction.moveBy(x: 0, y: -3, duration: 0.4)
+            let bounceSeq = SKAction.sequence([bounceUp, bounceDown])
             let bounce = SKAction.sequence([
                 SKAction.wait(forDuration: delay),
-                SKAction.repeatForever(SKAction.sequence([
-                    SKAction.moveBy(x: 0, y: 3, duration: 0.4),
-                    SKAction.moveBy(x: 0, y: -3, duration: 0.4)
-                ]))
+                SKAction.repeatForever(bounceSeq)
             ])
             buttonNode.run(bounce)
         }
@@ -259,55 +255,20 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         return iconNode
     }
 
-    // MARK: - Pixel Icons (8x8 grid)
+    // MARK: - Pixel Icons
 
-    // Feed icon - apple/food
-    private let feedIcon: [[Int]] = [
-        [0,0,0,1,1,0,0,0],
-        [0,0,1,0,0,0,0,0],
-        [0,1,1,1,1,1,1,0],
-        [1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1],
-        [0,1,1,1,1,1,1,0],
-        [0,0,1,1,1,1,0,0]
-    ]
-
-    // Work icon - laptop/briefcase
-    private let workIcon: [[Int]] = [
-        [0,1,1,1,1,1,1,0],
-        [1,1,1,1,1,1,1,1],
-        [1,0,0,0,0,0,0,1],
-        [1,0,1,1,1,1,0,1],
-        [1,0,1,1,1,1,0,1],
-        [1,0,0,0,0,0,0,1],
-        [1,1,1,1,1,1,1,1],
-        [0,0,1,1,1,1,0,0]
-    ]
-
-    // Care icon - heart
-    private let careIcon: [[Int]] = [
-        [0,1,1,0,0,1,1,0],
-        [1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1],
-        [0,1,1,1,1,1,1,0],
-        [0,0,1,1,1,1,0,0],
-        [0,0,0,1,1,0,0,0],
-        [0,0,0,0,0,0,0,0]
-    ]
-
-    // Social icon - person/chat
-    private let socialIcon: [[Int]] = [
-        [0,0,1,1,1,1,0,0],
-        [0,0,1,1,1,1,0,0],
-        [0,0,0,1,1,0,0,0],
-        [0,1,1,1,1,1,1,0],
-        [1,1,1,1,1,1,1,1],
-        [0,0,1,1,1,1,0,0],
-        [0,0,1,0,0,1,0,0],
-        [0,0,1,0,0,1,0,0]
-    ]
+    private func getIcon(for category: ActionCategory) -> [[Int]] {
+        switch category {
+        case .feed:
+            return PixelIcons.feed
+        case .work:
+            return PixelIcons.work
+        case .selfCare:
+            return PixelIcons.care
+        case .social:
+            return PixelIcons.social
+        }
+    }
 
     // MARK: - Update UI
 
