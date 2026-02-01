@@ -38,7 +38,7 @@ class CharacterSelectModal: SKNode {
         // Row 1 - Free characters
         CharacterData(id: "bro", name: "Tech Bro", emoji: "👨‍💻", archetype: .bro, isPremium: false, isLocked: false),
         CharacterData(id: "gal", name: "Tech Gal", emoji: "👩‍💻", archetype: .gal, isPremium: false, isLocked: false),
-        CharacterData(id: "enby", name: "Tech Enby", emoji: "🧑‍💻", archetype: .nonBinary, isPremium: false, isLocked: false),
+        CharacterData(id: "vibe", name: "Vibe Coder", emoji: "🧑‍💻", archetype: .nonBinary, isPremium: false, isLocked: false),
 
         // Row 2 - Premium characters
         CharacterData(id: "hacker", name: "Hacker", emoji: "🥷", archetype: .bro, isPremium: true, isLocked: false),

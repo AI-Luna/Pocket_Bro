@@ -111,8 +111,8 @@ class OnboardingScene: SKScene {
 
         // Label
         let label = SKLabelNode(text: "Next")
-        label.fontName = "Menlo-Bold"
-        label.fontSize = 20
+        label.fontName = PixelFont.name
+        label.fontSize = PixelFont.large
         label.fontColor = .white
         label.verticalAlignmentMode = .center
         label.horizontalAlignmentMode = .center
@@ -203,8 +203,8 @@ class OnboardingScene: SKScene {
 
         // Name label
         let nameLabel = SKLabelNode(text: archetype.rawValue)
-        nameLabel.fontName = "Menlo-Bold"
-        nameLabel.fontSize = 11
+        nameLabel.fontName = PixelFont.name
+        nameLabel.fontSize = PixelFont.tiny
         nameLabel.fontColor = textColor
         nameLabel.position = CGPoint(x: 0, y: -size.height / 2 + 20)
         nameLabel.verticalAlignmentMode = .center
@@ -263,8 +263,8 @@ class OnboardingScene: SKScene {
 
         // Name display
         let nameDisplay = SKLabelNode(text: founderName.isEmpty ? "Tap to enter name" : founderName)
-        nameDisplay.fontName = "Menlo-Bold"
-        nameDisplay.fontSize = 18
+        nameDisplay.fontName = PixelFont.name
+        nameDisplay.fontSize = PixelFont.medium
         nameDisplay.fontColor = founderName.isEmpty ? SKColor(white: 0.5, alpha: 1.0) : textColor
         nameDisplay.position = fieldBg.position
         nameDisplay.verticalAlignmentMode = .center
@@ -273,8 +273,8 @@ class OnboardingScene: SKScene {
 
         // Tap hint
         let tapHint = SKLabelNode(text: "Tap the field to type")
-        tapHint.fontName = "Menlo"
-        tapHint.fontSize = 12
+        tapHint.fontName = PixelFont.regularName
+        tapHint.fontSize = PixelFont.small
         tapHint.fontColor = SKColor(white: 0.5, alpha: 1.0)
         tapHint.position = CGPoint(x: size.width / 2, y: size.height / 2 - 90)
         tapHint.name = "tapHint"
@@ -356,8 +356,8 @@ class OnboardingScene: SKScene {
 
         // Label
         let label = SKLabelNode(text: location.rawValue)
-        label.fontName = "Menlo-Bold"
-        label.fontSize = 9
+        label.fontName = PixelFont.name
+        label.fontSize = PixelFont.tiny
         label.fontColor = textColor
         label.position = CGPoint(x: 0, y: -size.height / 2 + 14)
         label.verticalAlignmentMode = .center
@@ -403,24 +403,24 @@ class OnboardingScene: SKScene {
 
         // Banner text
         let appName = SKLabelNode(text: "Pocket Bro")
-        appName.fontName = "Menlo-Bold"
-        appName.fontSize = 14
+        appName.fontName = PixelFont.name
+        appName.fontSize = PixelFont.body
         appName.fontColor = textColor
         appName.horizontalAlignmentMode = .left
         appName.position = CGPoint(x: -size.width / 2 + 95, y: 12)
         banner.addChild(appName)
 
         let notifTime = SKLabelNode(text: "now")
-        notifTime.fontName = "Menlo"
-        notifTime.fontSize = 12
+        notifTime.fontName = PixelFont.regularName
+        notifTime.fontSize = PixelFont.small
         notifTime.fontColor = SKColor(white: 0.5, alpha: 1.0)
         notifTime.horizontalAlignmentMode = .right
         notifTime.position = CGPoint(x: size.width / 2 - 50, y: 12)
         banner.addChild(notifTime)
 
         let notifText = SKLabelNode(text: "🚀 \(name) needs your help!")
-        notifText.fontName = "Menlo"
-        notifText.fontSize = 13
+        notifText.fontName = PixelFont.regularName
+        notifText.fontSize = PixelFont.small
         notifText.fontColor = textColor
         notifText.horizontalAlignmentMode = .left
         notifText.position = CGPoint(x: -size.width / 2 + 95, y: -12)
@@ -445,8 +445,8 @@ class OnboardingScene: SKScene {
 
         // Message
         titleLabel = SKLabelNode(text: "\(name) will miss you.\nTurn on notifications to\nreceive messages from\n\(name).")
-        titleLabel.fontName = "Menlo-Bold"
-        titleLabel.fontSize = 18
+        titleLabel.fontName = PixelFont.name
+        titleLabel.fontSize = PixelFont.medium
         titleLabel.fontColor = textColor
         titleLabel.numberOfLines = 4
         titleLabel.horizontalAlignmentMode = .center
@@ -464,8 +464,8 @@ class OnboardingScene: SKScene {
 
     private func createTitle(_ text: String) -> SKLabelNode {
         let label = SKLabelNode(text: text)
-        label.fontName = "Menlo-Bold"
-        label.fontSize = 24
+        label.fontName = PixelFont.name
+        label.fontSize = PixelFont.title
         label.fontColor = textColor
         label.horizontalAlignmentMode = .center
         label.verticalAlignmentMode = .center
@@ -556,18 +556,57 @@ class OnboardingScene: SKScene {
     }
 
     private func promptForName() {
-        // Generate a random tech bro name for now
-        // In a full implementation, this would show a UITextField
-        let names = ["Chad", "Kyle", "Elon", "Zuck", "Satya", "Sundar", "Travis", "Adam", "Jack", "Brian"]
-        founderName = names.randomElement() ?? "Founder"
-
+        // Show a native text input alert for name entry
+        guard let viewController = self.view?.window?.rootViewController else {
+            // Fallback to random name if no view controller
+            let names = ["Chad", "Kyle", "Alex", "Sam", "Jordan", "Taylor", "Morgan", "Quinn"]
+            founderName = names.randomElement() ?? "Founder"
+            updateNameDisplay()
+            return
+        }
+        
+        let alert = UIAlertController(
+            title: "Name Your Founder",
+            message: "What should we call your character?",
+            preferredStyle: .alert
+        )
+        
+        alert.addTextField { textField in
+            textField.placeholder = "Enter name..."
+            textField.text = self.founderName.isEmpty ? "" : self.founderName
+            textField.autocapitalizationType = .words
+            textField.returnKeyType = .done
+            textField.clearButtonMode = .whileEditing
+        }
+        
+        let confirmAction = UIAlertAction(title: "Confirm", style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            if let text = alert.textFields?.first?.text, !text.trimmingCharacters(in: .whitespaces).isEmpty {
+                self.founderName = text.trimmingCharacters(in: .whitespaces)
+            } else {
+                // Generate a random name if empty
+                let names = ["Alex", "Jordan", "Sam", "Casey", "Riley", "Morgan", "Taylor", "Quinn"]
+                self.founderName = names.randomElement() ?? "Founder"
+            }
+            self.updateNameDisplay()
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        alert.addAction(confirmAction)
+        alert.addAction(cancelAction)
+        
+        viewController.present(alert, animated: true, completion: nil)
+    }
+    
+    private func updateNameDisplay() {
         if let nameDisplay = contentNode.childNode(withName: "nameDisplay") as? SKLabelNode {
             nameDisplay.text = founderName
             nameDisplay.fontColor = textColor
         }
 
         if let hint = contentNode.childNode(withName: "tapHint") {
-            hint.isHidden = true
+            hint.isHidden = !founderName.isEmpty
         }
     }
 
