@@ -9,6 +9,8 @@ enum GameSceneType {
     case onboarding
     case mainGame
     case actionMenu(ActionCategory)
+    case settings
+    case paywall
     case gameOver(GameOverReason)
     case victory
     case minigame(MinigameType)
@@ -67,6 +69,10 @@ final class SceneManager {
             return OnboardingScene(size: size, sceneManager: self)
         case .mainGame:
             return MainGameScene(size: size, sceneManager: self)
+        case .settings:
+            return SettingsScene(size: size, sceneManager: self)
+        case .paywall:
+            return PaywallScene(size: size, sceneManager: self)
         case .actionMenu(let category):
             return ActionMenuScene(size: size, sceneManager: self, category: category)
         case .gameOver(let reason):
