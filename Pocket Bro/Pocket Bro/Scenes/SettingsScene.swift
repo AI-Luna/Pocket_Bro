@@ -5,7 +5,7 @@
 
 import SpriteKit
 
-class SettingsScene: SKScene, CharacterSelectModalDelegate, CitySelectModalDelegate {
+class SettingsScene: SKScene {
     weak var sceneManager: SceneManager?
 
     // Colors
@@ -19,7 +19,6 @@ class SettingsScene: SKScene, CharacterSelectModalDelegate, CitySelectModalDeleg
     // State
     private var notificationsEnabled = true
     private var soundEnabled = true
-    private var activeModal: SKNode?
 
     init(size: CGSize, sceneManager: SceneManager) {
         self.sceneManager = sceneManager
