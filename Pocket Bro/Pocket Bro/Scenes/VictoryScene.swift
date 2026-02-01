@@ -137,7 +137,7 @@ class VictoryScene: BaseGameScene {
 
         playAgainButton.onTap = { [weak self] in
             GameManager.shared.deleteGame()
-            self?.sceneManager?.presentScene(.characterCreation)
+            self?.sceneManager?.presentScene(.onboarding)
         }
 
         addChild(playAgainButton)

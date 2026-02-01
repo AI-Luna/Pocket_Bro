@@ -6,7 +6,7 @@
 import SpriteKit
 
 enum GameSceneType {
-    case characterCreation
+    case onboarding
     case mainGame
     case actionMenu(ActionCategory)
     case gameOver(GameOverReason)
@@ -48,10 +48,10 @@ final class SceneManager {
                     presentScene(.mainGame)
                 }
             } else {
-                presentScene(.characterCreation)
+                presentScene(.onboarding)
             }
         } else {
-            presentScene(.characterCreation)
+            presentScene(.onboarding)
         }
     }
 
@@ -63,8 +63,8 @@ final class SceneManager {
         let size = view.bounds.size
 
         switch type {
-        case .characterCreation:
-            return CharacterCreationScene(size: size, sceneManager: self)
+        case .onboarding:
+            return OnboardingScene(size: size, sceneManager: self)
         case .mainGame:
             return MainGameScene(size: size, sceneManager: self)
         case .actionMenu(let category):

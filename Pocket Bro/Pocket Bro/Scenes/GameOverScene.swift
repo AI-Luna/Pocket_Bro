@@ -106,7 +106,7 @@ class GameOverScene: BaseGameScene {
 
         tryAgainButton.onTap = { [weak self] in
             GameManager.shared.deleteGame()
-            self?.sceneManager?.presentScene(.characterCreation)
+            self?.sceneManager?.presentScene(.onboarding)
         }
 
         addChild(tryAgainButton)
