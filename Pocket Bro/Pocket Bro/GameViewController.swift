@@ -10,30 +10,32 @@ import SpriteKit
 import GameplayKit
 
 class GameViewController: UIViewController {
+    private var sceneManager: SceneManager?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        if let view = self.view as! SKView? {
-            // Load the SKScene from 'GameScene.sks'
-            if let scene = SKScene(fileNamed: "GameScene") {
-                // Set the scale mode to scale to fit the window
-                scene.scaleMode = .aspectFill
-                
-                // Present the scene
-                view.presentScene(scene)
-            }
-            
-            view.ignoresSiblingOrder = true
-            
-            view.showsFPS = true
-            view.showsNodeCount = true
+
+        guard let view = self.view as? SKView else {
+            fatalError("View is not an SKView")
         }
+
+        // Configure view
+        view.ignoresSiblingOrder = true
+        #if DEBUG
+        view.showsFPS = true
+        view.showsNodeCount = true
+        #endif
+
+        // Initialize scene manager
+        sceneManager = SceneManager(view: view)
+
+        // Present initial scene
+        sceneManager?.presentInitialScene()
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         if UIDevice.current.userInterfaceIdiom == .phone {
-            return .allButUpsideDown
+            return .portrait
         } else {
             return .all
         }
@@ -41,5 +43,9 @@ class GameViewController: UIViewController {
 
     override var prefersStatusBarHidden: Bool {
         return true
+    }
+
+    override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
+        return .bottom
     }
 }
