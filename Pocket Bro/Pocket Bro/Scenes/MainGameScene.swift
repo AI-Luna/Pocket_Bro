@@ -156,13 +156,15 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
         // Bar fill (pixel segments)
         let segments = 10
-        let segmentWidth = (barWidth - 4) / CGFloat(segments)
-        let segmentHeight = barHeight - 2
+        let segmentWidth: CGFloat = (barWidth - 4) / CGFloat(segments)
+        let segmentHeight: CGFloat = barHeight - 2
+        let startX: CGFloat = -barWidth / 2 + 2 + segmentWidth / 2
 
         for i in 0..<segments {
-            let segment = SKSpriteNode(color: lcdDarkColor,
-                                        size: CGSize(width: segmentWidth - 1, height: segmentHeight))
-            segment.position = CGPoint(x: -barWidth/2 + 2 + CGFloat(i) * segmentWidth + segmentWidth/2, y: 0)
+            let segmentSize = CGSize(width: segmentWidth - 1, height: segmentHeight)
+            let segment = SKSpriteNode(color: lcdDarkColor, size: segmentSize)
+            let xPos: CGFloat = startX + CGFloat(i) * segmentWidth
+            segment.position = CGPoint(x: xPos, y: 0)
             segment.name = "segment_\(i)"
             node.addChild(segment)
         }
