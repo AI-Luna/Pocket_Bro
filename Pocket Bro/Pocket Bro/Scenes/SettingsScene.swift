@@ -526,7 +526,6 @@ class SettingsScene: SKScene, CharacterSelectModalDelegate, CitySelectModalDeleg
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-        let location = touch.location(in: self)
 
         // Handle dialog buttons
         if let dialog = childNode(withName: "resetDialog") {

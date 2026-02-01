@@ -153,7 +153,7 @@ class CitySelectModal: SKNode {
 
     private func setupCityGrid(in modal: SKNode, modalWidth: CGFloat, modalHeight: CGFloat) {
         let cols = 3
-        let rows = 3
+        // 3 rows, derived from StartupCity.allCases.count / cols
         let cardWidth: CGFloat = (modalWidth - 50) / 3
         let cardHeight: CGFloat = 130
         let spacingX: CGFloat = 8

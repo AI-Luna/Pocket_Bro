@@ -115,10 +115,10 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     private func setupStatsArea() {
         let statsY = size.height - safeAreaInsets().top - 50
         let stats: [(name: String, label: String)] = [
-            ("hunger", "HUNGER"),
             ("energy", "ENERGY"),
-            ("hygiene", "HYGIENE"),
-            ("fun", "FUN")
+            ("health", "HEALTH"),
+            ("happiness", "HAPPY"),
+            ("social", "SOCIAL")
         ]
 
         let spacing = (size.width - 40) / CGFloat(stats.count)
@@ -315,10 +315,10 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         guard let state = GameManager.shared.state else { return }
 
         // Update stat bars
-        updateStatBar("hunger", value: state.stats.hunger)
         updateStatBar("energy", value: state.stats.energy)
-        updateStatBar("hygiene", value: state.stats.health) // Using health as hygiene proxy
-        updateStatBar("fun", value: state.stats.happiness)
+        updateStatBar("health", value: state.stats.health)
+        updateStatBar("happiness", value: state.stats.happiness)
+        updateStatBar("social", value: state.stats.social)
 
         // Update character
         broSprite.update(with: state)

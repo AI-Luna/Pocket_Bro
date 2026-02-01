@@ -134,7 +134,7 @@ class CharacterSelectModal: SKNode {
         let spacingY: CGFloat = 10
 
         let gridWidth = CGFloat(cols) * cardWidth + CGFloat(cols - 1) * spacingX
-        let gridHeight = CGFloat(rows) * cardHeight + CGFloat(rows - 1) * spacingY
+        _ = CGFloat(rows) * cardHeight + CGFloat(rows - 1) * spacingY // gridHeight unused
         let startX = -gridWidth / 2 + cardWidth / 2
         let startY = modalHeight / 2 - 90 - cardHeight / 2
 
@@ -220,13 +220,11 @@ class CharacterSelectModal: SKNode {
 
         // Check close button
         for child in children {
-            if let modal = child as? SKNode {
-                for node in modal.children {
-                    if node.name == "closeButton" && node.contains(convert(localLocation, to: modal)) {
-                        animatePress(node)
-                        dismiss()
-                        return true
-                    }
+            for node in child.children {
+                if node.name == "closeButton" && node.contains(convert(localLocation, to: child)) {
+                    animatePress(node)
+                    dismiss()
+                    return true
                 }
             }
         }
