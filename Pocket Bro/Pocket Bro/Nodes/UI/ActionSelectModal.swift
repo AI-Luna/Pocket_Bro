@@ -285,10 +285,10 @@ class ActionSelectModal: SKNode {
         croppedTexture.filteringMode = .nearest
 
         let sprite = SKSpriteNode(texture: croppedTexture)
-
-        // Scale to desired size
-        let scale = size / max(sprite.size.width, sprite.size.height)
-        sprite.setScale(scale)
+        
+        // Use fixed size for all icons to ensure consistency
+        // Set the sprite size directly instead of scaling
+        sprite.size = CGSize(width: size, height: size)
 
         return sprite
     }
