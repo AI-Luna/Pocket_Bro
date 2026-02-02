@@ -18,11 +18,15 @@ class BroSpriteNode: SKNode {
     // Frame textures sliced from the sprite sheet
     private var allFrames: [[SKTexture]] = []
 
+    // Eating/drinking sprite sheet layout: 5 columns x 4 rows
+    private var eatingFrames: [[SKTexture]] = []
+
     // Animation frame groups
     private var idleFrames: [SKTexture] = []
     private var walkFrames: [SKTexture] = []
     private var workFrames: [SKTexture] = []
     private var jumpFrame: SKTexture?
+    private var eatDrinkFrames: [SKTexture] = []
 
     var archetype: Archetype = .bro {
         didSet { updateAppearance() }
@@ -35,6 +39,7 @@ class BroSpriteNode: SKNode {
     override init() {
         super.init()
         loadSpriteSheet()
+        loadEatingDrinkingSpriteSheet()
         setupSprites()
     }
 
@@ -89,6 +94,43 @@ class BroSpriteNode: SKNode {
         ]
 
         jumpFrame = allFrames[1][4]
+    }
+
+    private func loadEatingDrinkingSpriteSheet() {
+        let sheetTexture = SKTexture(imageNamed: "EatingDrinkingSpriteSheet")
+        sheetTexture.filteringMode = .nearest
+
+        let frameWidth = 1.0 / CGFloat(columns)
+        let frameHeight = 1.0 / CGFloat(rows)
+
+        // Inset each texture rect by half a pixel to prevent SpriteKit sampling bleed
+        let insetX = 0.5 / 400.0  // sheet is 400px wide
+        let insetY = 0.5 / 384.0  // sheet is 384px tall
+
+        for row in 0..<rows {
+            var rowFrames: [SKTexture] = []
+            for col in 0..<columns {
+                let x = CGFloat(col) * frameWidth + insetX
+                let y = CGFloat(rows - 1 - row) * frameHeight + insetY
+                let rect = CGRect(x: x, y: y, width: frameWidth - 2 * insetX, height: frameHeight - 2 * insetY)
+                let frame = SKTexture(rect: rect, in: sheetTexture)
+                frame.filteringMode = .nearest
+                rowFrames.append(frame)
+            }
+            eatingFrames.append(rowFrames)
+        }
+
+        // Build eating/drinking animation sequence from the sprite sheet
+        // Row 0: reaching for food / holding (5 frames)
+        // Row 1: bringing to mouth / eating (5 frames)
+        // Row 2: chewing / drinking (5 frames)
+        // Row 3: finishing up / satisfied (4 frames, [3][4] is empty)
+        eatDrinkFrames = [
+            eatingFrames[0][0], eatingFrames[0][1], eatingFrames[0][2], eatingFrames[0][3], eatingFrames[0][4],
+            eatingFrames[1][0], eatingFrames[1][1], eatingFrames[1][2], eatingFrames[1][3], eatingFrames[1][4],
+            eatingFrames[2][0], eatingFrames[2][1], eatingFrames[2][2], eatingFrames[2][3], eatingFrames[2][4],
+            eatingFrames[3][0], eatingFrames[3][1], eatingFrames[3][2], eatingFrames[3][3]
+        ]
     }
 
     // MARK: - Setup
@@ -205,6 +247,29 @@ class BroSpriteNode: SKNode {
         ])
 
         bodySprite.run(jump) { [weak self] in
+            self?.startIdleAnimation()
+        }
+    }
+
+    func playEatingDrinkingAnimation() {
+        guard !eatDrinkFrames.isEmpty else {
+            playActionAnimation()
+            return
+        }
+
+        stopAllAnimations()
+
+        // Play through all eating/drinking frames once, then loop the middle
+        // section a couple times to show sustained eating, then return to idle
+        let fullCycle = SKAction.animate(with: eatDrinkFrames, timePerFrame: 0.15, resize: false, restore: false)
+
+        // Loop the chewing/drinking frames (rows 1-2, indices 5-14) for a second pass
+        let chewingFrames = Array(eatDrinkFrames[5...14])
+        let chewLoop = SKAction.animate(with: chewingFrames, timePerFrame: 0.12, resize: false, restore: false)
+
+        let sequence = SKAction.sequence([fullCycle, chewLoop])
+
+        bodySprite.run(sequence) { [weak self] in
             self?.startIdleAnimation()
         }
     }

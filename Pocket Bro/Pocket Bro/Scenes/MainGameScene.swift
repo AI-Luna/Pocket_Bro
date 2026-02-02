@@ -407,7 +407,22 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     func actionSelectModal(_ modal: ActionSelectModal, didSelect action: GameAction) {
         if let result = GameManager.shared.performAction(action) {
             showDialogue(result.dialogue, emoji: action.emoji)
-            broSprite.playActionAnimation()
+
+            // Stop patrol while performing the action animation
+            broSprite.removeAction(forKey: "patrol")
+
+            if action.category == .feed {
+                broSprite.playEatingDrinkingAnimation()
+                // Resume patrol after eating animation finishes
+                run(SKAction.sequence([
+                    SKAction.wait(forDuration: 4.5),
+                    SKAction.run { [weak self] in
+                        self?.startWalkingPatrol()
+                    }
+                ]))
+            } else {
+                broSprite.playActionAnimation()
+            }
 
             // Check for minigame
             if let minigameType = action.triggersMinigame {
