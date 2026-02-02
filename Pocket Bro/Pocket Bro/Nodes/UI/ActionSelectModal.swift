@@ -149,6 +149,7 @@ class ActionSelectModal: SKNode {
         bg.fillColor = cardColor
         bg.strokeColor = .clear
         bg.name = "cardBg"
+        bg.zPosition = 0 // Background layer
         card.addChild(bg)
 
         // Effect indicator (top right)
@@ -157,14 +158,16 @@ class ActionSelectModal: SKNode {
             let indicator = SKLabelNode(text: emoji)
             indicator.fontSize = 16
             indicator.position = CGPoint(x: size.width/2 - 18, y: size.height/2 - 18)
+            indicator.zPosition = 2
             card.addChild(indicator)
         }
 
         // Action icon or emoji (large, center)
         if let iconIndex = action.foodIconIndex {
-            // Use food sprite sheet icon
-            let iconSprite = createFoodIcon(index: iconIndex, size: 55)
-            iconSprite.position = CGPoint(x: 0, y: 15)
+            // Use food sprite sheet icon - doubled size for better visibility
+            let iconSprite = createFoodIcon(index: iconIndex, size: 110)
+            iconSprite.position = CGPoint(x: 0, y: 20)
+            iconSprite.zPosition = 2 // Ensure icon is above background
             if !canPerform || isOnCooldown {
                 iconSprite.alpha = 0.4
             }
@@ -175,18 +178,20 @@ class ActionSelectModal: SKNode {
             emojiLabel.fontSize = 50
             emojiLabel.position = CGPoint(x: 0, y: 15)
             emojiLabel.verticalAlignmentMode = .center
+            emojiLabel.zPosition = 2
             if !canPerform || isOnCooldown {
                 emojiLabel.alpha = 0.4
             }
             card.addChild(emojiLabel)
         }
 
-        // Cooldown overlay
+        // Cooldown overlay (positioned to not obscure icon)
         if isOnCooldown {
             let cooldownBg = SKShapeNode(rectOf: CGSize(width: size.width - 10, height: size.height - 40), cornerRadius: 8)
             cooldownBg.fillColor = SKColor.black.withAlphaComponent(0.3)
             cooldownBg.strokeColor = .clear
             cooldownBg.position = CGPoint(x: 0, y: 10)
+            cooldownBg.zPosition = 1 // Below icon but above background
             card.addChild(cooldownBg)
 
             let cooldownLabel = SKLabelNode(text: "\(Int(cooldown))s")
@@ -195,6 +200,7 @@ class ActionSelectModal: SKNode {
             cooldownLabel.fontColor = .white
             cooldownLabel.position = CGPoint(x: 0, y: 15)
             cooldownLabel.verticalAlignmentMode = .center
+            cooldownLabel.zPosition = 3 // Above everything
             card.addChild(cooldownLabel)
         }
 
@@ -208,6 +214,7 @@ class ActionSelectModal: SKNode {
         nameLabel.fontSize = 10
         nameLabel.fontColor = canPerform ? textColor : disabledColor
         nameLabel.position = CGPoint(x: 0, y: -size.height/2 + 28)
+        nameLabel.zPosition = 2
         card.addChild(nameLabel)
 
         if !costText.isEmpty {
@@ -216,6 +223,7 @@ class ActionSelectModal: SKNode {
             costLabel.fontSize = 9
             costLabel.fontColor = canPerform ? textColor.withAlphaComponent(0.6) : disabledColor
             costLabel.position = CGPoint(x: 0, y: -size.height/2 + 14)
+            costLabel.zPosition = 2
             card.addChild(costLabel)
         }
 
