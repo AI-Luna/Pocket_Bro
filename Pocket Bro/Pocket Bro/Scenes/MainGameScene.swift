@@ -159,10 +159,10 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     // MARK: - Stats Area
 
     private func setupStatsArea() {
-        // Settings button moved down to avoid notch
-        let settingsY = size.height - safeAreaInsets().top - 40
+        // Settings button in bottom-left corner for easy access
+        let settingsY = buttonAreaHeight / 2 - safeAreaInsets().bottom / 2 + 10
         let settingsButton = createSettingsButton()
-        settingsButton.position = CGPoint(x: size.width - 30, y: settingsY)
+        settingsButton.position = CGPoint(x: 30, y: settingsY)
         settingsButton.name = "settingsButton"
         addChild(settingsButton)
 
