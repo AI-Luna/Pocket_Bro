@@ -57,6 +57,14 @@ final class GameManager {
         notifyStateUpdate()
     }
 
+    func updateArchetype(_ archetype: Archetype) {
+        guard var currentState = state else { return }
+        currentState.archetype = archetype
+        state = currentState
+        saveGame()
+        notifyStateUpdate()
+    }
+
     func saveGame() {
         guard let state = state else { return }
         persistence.save(state)

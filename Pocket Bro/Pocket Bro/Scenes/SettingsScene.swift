@@ -5,7 +5,7 @@
 
 import SpriteKit
 
-class SettingsScene: SKScene {
+class SettingsScene: SKScene, CharacterSelectModalDelegate, CitySelectModalDelegate {
     weak var sceneManager: SceneManager?
 
     // Colors
@@ -19,6 +19,7 @@ class SettingsScene: SKScene {
     // State
     private var notificationsEnabled = true
     private var soundEnabled = true
+    private var activeModal: SKNode?
 
     init(size: CGSize, sceneManager: SceneManager) {
         self.sceneManager = sceneManager
@@ -47,8 +48,8 @@ class SettingsScene: SKScene {
     private func setupHeader() {
         // Title
         let title = SKLabelNode(text: "Settings")
-        title.fontName = "Menlo-Bold"
-        title.fontSize = 28
+        title.fontName = PixelFont.name
+        title.fontSize = PixelFont.huge
         title.fontColor = textColor
         title.horizontalAlignmentMode = .left
         title.position = CGPoint(x: 30, y: size.height - 100)
@@ -71,8 +72,8 @@ class SettingsScene: SKScene {
         button.addChild(bg)
 
         let xLabel = SKLabelNode(text: "✕")
-        xLabel.fontName = "Menlo-Bold"
-        xLabel.fontSize = 18
+        xLabel.fontName = PixelFont.name
+        xLabel.fontSize = PixelFont.medium
         xLabel.fontColor = textColor
         xLabel.verticalAlignmentMode = .center
         button.addChild(xLabel)
@@ -104,9 +105,9 @@ class SettingsScene: SKScene {
         banner.addChild(emojis)
 
         // Text
-        let text = SKLabelNode(text: "Unlock Pro Features!")
-        text.fontName = "Menlo-Bold"
-        text.fontSize = 16
+        let text = SKLabelNode(text: "Get full access Now!")
+        text.fontName = PixelFont.name
+        text.fontSize = PixelFont.medium
         text.fontColor = .white
         text.position = CGPoint(x: 0, y: -18)
         banner.addChild(text)
@@ -115,12 +116,12 @@ class SettingsScene: SKScene {
     // MARK: - Settings Section
 
     private func setupSettingsSection() {
-        let sectionY = size.height - 310
+        let sectionY = size.height - 360
         let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 60
 
         // Section background
-        let section = createSectionBackground(rows: 4, rowHeight: rowHeight, width: sectionWidth)
+        let section = createSectionBackground(rows: 5, rowHeight: rowHeight, width: sectionWidth)
         section.position = CGPoint(x: size.width / 2, y: sectionY)
         addChild(section)
 
@@ -129,7 +130,8 @@ class SettingsScene: SKScene {
             ("Notifications", .toggle("notifications", notificationsEnabled)),
             ("Sound Effects", .toggle("sound", soundEnabled)),
             ("Reset Progress", .arrow("reset")),
-            ("Change Character", .arrow("character"))
+            ("Change Character", .arrow("character")),
+            ("Change City", .arrow("city"))
         ]
 
         for (index, (title, rowType)) in rows.enumerated() {
@@ -151,7 +153,7 @@ class SettingsScene: SKScene {
     // MARK: - About Section
 
     private func setupAboutSection() {
-        let sectionY = size.height - 560
+        let sectionY = size.height - 620
         let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 60
 
@@ -189,8 +191,8 @@ class SettingsScene: SKScene {
 
     private func setupVersionLabel() {
         let version = SKLabelNode(text: "1.0.0 Version")
-        version.fontName = "Menlo"
-        version.fontSize = 12
+        version.fontName = PixelFont.regularName
+        version.fontSize = PixelFont.small
         version.fontColor = textColor.withAlphaComponent(0.5)
         version.position = CGPoint(x: size.width / 2, y: 50)
         addChild(version)
@@ -217,8 +219,8 @@ class SettingsScene: SKScene {
 
         // Title
         let titleLabel = SKLabelNode(text: title)
-        titleLabel.fontName = "Menlo-Bold"
-        titleLabel.fontSize = 15
+        titleLabel.fontName = PixelFont.name
+        titleLabel.fontSize = PixelFont.body
         titleLabel.fontColor = textColor
         titleLabel.horizontalAlignmentMode = .left
         titleLabel.verticalAlignmentMode = .center
@@ -228,8 +230,8 @@ class SettingsScene: SKScene {
         switch type {
         case .arrow(let id):
             let arrow = SKLabelNode(text: "↗")
-            arrow.fontName = "Menlo-Bold"
-            arrow.fontSize = 18
+            arrow.fontName = PixelFont.name
+            arrow.fontSize = PixelFont.medium
             arrow.fontColor = textColor.withAlphaComponent(0.5)
             arrow.horizontalAlignmentMode = .right
             arrow.verticalAlignmentMode = .center
@@ -276,9 +278,60 @@ class SettingsScene: SKScene {
 
     // MARK: - Touch Handling
 
+    // MARK: - Modal Delegates
+
+    func characterSelectModal(_ modal: CharacterSelectModal, didSelect archetype: Archetype) {
+        GameManager.shared.updateArchetype(archetype)
+        activeModal = nil
+    }
+
+    func characterSelectModalDidClose(_ modal: CharacterSelectModal) {
+        activeModal = nil
+    }
+
+    func citySelectModal(_ modal: CitySelectModal, didSelect city: StartupCity) {
+        // City is cosmetic for now - could persist in future
+        activeModal = nil
+    }
+
+    func citySelectModalDidClose(_ modal: CitySelectModal) {
+        activeModal = nil
+    }
+
+    private func showCharacterSelectModal() {
+        guard let state = GameManager.shared.state else { return }
+        let modal = CharacterSelectModal(size: size, currentArchetype: state.archetype)
+        modal.delegate = self
+        modal.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        modal.zPosition = 200
+        addChild(modal)
+        modal.show()
+        activeModal = modal
+    }
+
+    private func showCitySelectModal() {
+        let modal = CitySelectModal(size: size, currentCity: .garage)
+        modal.delegate = self
+        modal.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        modal.zPosition = 200
+        addChild(modal)
+        modal.show()
+        activeModal = modal
+    }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
+
+        // Pass touch to active modal first
+        if let modal = activeModal {
+            if let cityModal = modal as? CitySelectModal, cityModal.handleTouch(at: location) {
+                return
+            }
+            if let charModal = modal as? CharacterSelectModal, charModal.handleTouch(at: location) {
+                return
+            }
+        }
 
         // Close button
         if let closeButton = childNode(withName: "closeButton"), closeButton.contains(location) {
@@ -324,8 +377,10 @@ class SettingsScene: SKScene {
             showResetConfirmation()
 
         case "character":
-            GameManager.shared.deleteGame()
-            sceneManager?.presentScene(.onboarding)
+            showCharacterSelectModal()
+
+        case "city":
+            showCitySelectModal()
 
         case "rate":
             // Open App Store rating
@@ -471,7 +526,6 @@ class SettingsScene: SKScene {
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-        let location = touch.location(in: self)
 
         // Handle dialog buttons
         if let dialog = childNode(withName: "resetDialog") {

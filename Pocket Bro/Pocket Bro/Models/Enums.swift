@@ -10,7 +10,7 @@ import Foundation
 enum Archetype: String, Codable, CaseIterable {
     case bro = "Tech Bro"
     case gal = "Tech Gal"
-    case nonBinary = "Tech Enby"
+    case nonBinary = "Vibe Coder"
 
     var pronoun: String {
         switch self {

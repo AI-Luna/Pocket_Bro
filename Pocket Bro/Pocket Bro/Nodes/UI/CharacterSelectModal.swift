@@ -38,7 +38,7 @@ class CharacterSelectModal: SKNode {
         // Row 1 - Free characters
         CharacterData(id: "bro", name: "Tech Bro", emoji: "👨‍💻", archetype: .bro, isPremium: false, isLocked: false),
         CharacterData(id: "gal", name: "Tech Gal", emoji: "👩‍💻", archetype: .gal, isPremium: false, isLocked: false),
-        CharacterData(id: "enby", name: "Tech Enby", emoji: "🧑‍💻", archetype: .nonBinary, isPremium: false, isLocked: false),
+        CharacterData(id: "vibe", name: "Vibe Coder", emoji: "🧑‍💻", archetype: .nonBinary, isPremium: false, isLocked: false),
 
         // Row 2 - Premium characters
         CharacterData(id: "hacker", name: "Hacker", emoji: "🥷", archetype: .bro, isPremium: true, isLocked: false),
@@ -134,7 +134,7 @@ class CharacterSelectModal: SKNode {
         let spacingY: CGFloat = 10
 
         let gridWidth = CGFloat(cols) * cardWidth + CGFloat(cols - 1) * spacingX
-        let gridHeight = CGFloat(rows) * cardHeight + CGFloat(rows - 1) * spacingY
+        _ = CGFloat(rows) * cardHeight + CGFloat(rows - 1) * spacingY // gridHeight unused
         let startX = -gridWidth / 2 + cardWidth / 2
         let startY = modalHeight / 2 - 90 - cardHeight / 2
 
@@ -220,13 +220,11 @@ class CharacterSelectModal: SKNode {
 
         // Check close button
         for child in children {
-            if let modal = child as? SKNode {
-                for node in modal.children {
-                    if node.name == "closeButton" && node.contains(convert(localLocation, to: modal)) {
-                        animatePress(node)
-                        dismiss()
-                        return true
-                    }
+            for node in child.children {
+                if node.name == "closeButton" && node.contains(convert(localLocation, to: child)) {
+                    animatePress(node)
+                    dismiss()
+                    return true
                 }
             }
         }
