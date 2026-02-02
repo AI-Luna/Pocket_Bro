@@ -57,26 +57,27 @@ class ActionSelectModal: SKNode {
         overlay.name = "overlay"
         addChild(overlay)
 
-        // Modal container
+        // Modal container - centered on screen with reduced height
         let modalWidth = sceneSize.width - 30
-        let modalHeight: CGFloat = 540
+        let modalHeight: CGFloat = 420 // Reduced from 540 to remove dead space
 
         let modal = SKNode()
-        modal.position = CGPoint(x: 0, y: 40)
+        modal.position = CGPoint(x: 0, y: 0) // Centered instead of y: 40
         modal.zPosition = 1
         modal.name = "modalContainer"
         addChild(modal)
 
-        // Modal background
+        // Modal background with pixelated border
         let bg = SKShapeNode(rectOf: CGSize(width: modalWidth, height: modalHeight), cornerRadius: 16)
         bg.fillColor = modalBackground
-        bg.strokeColor = .clear
+        bg.strokeColor = textColor.withAlphaComponent(0.3)
+        bg.lineWidth = 3
         modal.addChild(bg)
 
-        // Title
+        // Title - using PixelFont
         let title = SKLabelNode(text: categoryTitle)
-        title.fontName = "Menlo-Bold"
-        title.fontSize = 22
+        title.fontName = PixelFont.name
+        title.fontSize = PixelFont.title
         title.fontColor = textColor
         title.horizontalAlignmentMode = .left
         title.position = CGPoint(x: -modalWidth/2 + 20, y: modalHeight/2 - 45)
@@ -101,9 +102,10 @@ class ActionSelectModal: SKNode {
         bg.lineWidth = 2
         button.addChild(bg)
 
-        let x = SKLabelNode(text: "✕")
-        x.fontName = "Menlo-Bold"
-        x.fontSize = 18
+        // Pixelated X using font
+        let x = SKLabelNode(text: "X")
+        x.fontName = PixelFont.name
+        x.fontSize = 20
         x.fontColor = textColor
         x.verticalAlignmentMode = .center
         button.addChild(x)
@@ -120,7 +122,8 @@ class ActionSelectModal: SKNode {
 
         let gridWidth = CGFloat(cols) * cardWidth + CGFloat(cols - 1) * spacingX
         let startX = -gridWidth / 2 + cardWidth / 2
-        let startY = modalHeight / 2 - 90 - cardHeight / 2
+        // Adjusted to center grid better with reduced modal height
+        let startY = modalHeight / 2 - 80 - cardHeight / 2
 
         for (index, action) in actions.enumerated() {
             let row = index / cols
@@ -144,72 +147,128 @@ class ActionSelectModal: SKNode {
         let cooldown = GameManager.shared.cooldownRemaining(for: action)
         let isOnCooldown = cooldown > 0
 
-        // Card background
+        // Card background with pixelated border
         let bg = SKShapeNode(rectOf: size, cornerRadius: 10)
         bg.fillColor = cardColor
-        bg.strokeColor = .clear
+        bg.strokeColor = textColor.withAlphaComponent(0.2)
+        bg.lineWidth = 2
         bg.name = "cardBg"
+        bg.zPosition = 0 // Background layer
         card.addChild(bg)
 
-        // Effect indicator (top right)
-        let effectEmoji = getEffectIndicator(for: action)
-        if let emoji = effectEmoji {
-            let indicator = SKLabelNode(text: emoji)
-            indicator.fontSize = 16
-            indicator.position = CGPoint(x: size.width/2 - 18, y: size.height/2 - 18)
-            card.addChild(indicator)
+        // Action icon or emoji (large, centered in cell)
+        if let iconIndex = action.foodIconIndex {
+            // Use food sprite sheet icon - doubled size for better visibility
+            let iconSprite = createIconFromSheet(sheetName: "FoodIcons", index: iconIndex, size: 110)
+            iconSprite.position = CGPoint(x: 0, y: 10) // Centered vertically in card
+            iconSprite.zPosition = 2 // Ensure icon is above background
+            // Only reduce opacity if can't perform, NOT for cooldown
+            if !canPerform {
+                iconSprite.alpha = 0.4
+            }
+            card.addChild(iconSprite)
+        } else if let iconIndex = action.socialIconIndex {
+            // Use social sprite sheet icon - same size as food icons
+            let iconSprite = createIconFromSheet(sheetName: "SocialIcons", index: iconIndex, size: 110)
+            iconSprite.position = CGPoint(x: 0, y: 10) // Centered vertically in card
+            iconSprite.zPosition = 2 // Ensure icon is above background
+            // Only reduce opacity if can't perform, NOT for cooldown
+            if !canPerform {
+                iconSprite.alpha = 0.4
+            }
+            card.addChild(iconSprite)
+        } else {
+            // Use emoji
+            let emojiLabel = SKLabelNode(text: action.emoji)
+            emojiLabel.fontSize = 50
+            emojiLabel.position = CGPoint(x: 0, y: 10) // Centered vertically in card
+            emojiLabel.verticalAlignmentMode = .center
+            emojiLabel.zPosition = 2
+            if !canPerform {
+                emojiLabel.alpha = 0.4
+            }
+            card.addChild(emojiLabel)
         }
 
-        // Action emoji (large, center)
-        let emojiLabel = SKLabelNode(text: action.emoji)
-        emojiLabel.fontSize = 50
-        emojiLabel.position = CGPoint(x: 0, y: 15)
-        emojiLabel.verticalAlignmentMode = .center
-
-        if !canPerform || isOnCooldown {
-            emojiLabel.alpha = 0.4
-        }
-        card.addChild(emojiLabel)
-
-        // Cooldown overlay
+        // Cooldown overlay (positioned to not obscure icon)
         if isOnCooldown {
             let cooldownBg = SKShapeNode(rectOf: CGSize(width: size.width - 10, height: size.height - 40), cornerRadius: 8)
             cooldownBg.fillColor = SKColor.black.withAlphaComponent(0.3)
             cooldownBg.strokeColor = .clear
-            cooldownBg.position = CGPoint(x: 0, y: 10)
+            cooldownBg.position = CGPoint(x: 0, y: 5)
+            cooldownBg.zPosition = 1 // Below icon but above background
             card.addChild(cooldownBg)
 
             let cooldownLabel = SKLabelNode(text: "\(Int(cooldown))s")
-            cooldownLabel.fontName = "Menlo-Bold"
-            cooldownLabel.fontSize = 14
+            cooldownLabel.fontName = PixelFont.name
+            cooldownLabel.fontSize = PixelFont.body
             cooldownLabel.fontColor = .white
-            cooldownLabel.position = CGPoint(x: 0, y: 15)
+            cooldownLabel.position = CGPoint(x: 0, y: 10)
             cooldownLabel.verticalAlignmentMode = .center
+            cooldownLabel.zPosition = 3 // Above everything
             card.addChild(cooldownLabel)
         }
 
-        // Name and quantity/energy cost
+        // Name and quantity/energy cost - using PixelFont
         let nameText = action.name
         let energyCost = action.effects[.energy] ?? 0
         let costText = energyCost < 0 ? "⚡\(abs(energyCost))" : ""
 
         let nameLabel = SKLabelNode(text: nameText)
-        nameLabel.fontName = "Menlo-Bold"
-        nameLabel.fontSize = 10
+        nameLabel.fontName = PixelFont.name
+        nameLabel.fontSize = PixelFont.tiny
         nameLabel.fontColor = canPerform ? textColor : disabledColor
         nameLabel.position = CGPoint(x: 0, y: -size.height/2 + 28)
+        nameLabel.zPosition = 2
         card.addChild(nameLabel)
 
         if !costText.isEmpty {
             let costLabel = SKLabelNode(text: costText)
-            costLabel.fontName = "Menlo"
+            costLabel.fontName = PixelFont.regularName
             costLabel.fontSize = 9
             costLabel.fontColor = canPerform ? textColor.withAlphaComponent(0.6) : disabledColor
             costLabel.position = CGPoint(x: 0, y: -size.height/2 + 14)
+            costLabel.zPosition = 2
             card.addChild(costLabel)
         }
 
         return card
+    }
+
+    private func createIconFromSheet(sheetName: String, index: Int, size: CGFloat) -> SKSpriteNode {
+        // Both food and social sprite sheets are 3 columns x 2 rows
+        // Food: 0=energy drink, 1=protein shake, 2=ramen, 3=doordash, 4=healthy meal, 5=team dinner
+        // Social: 0=phone, 1=coffee, 2=dinner plate, 3=heart, 4=party, 5=book/pipe
+        let texture = SKTexture(imageNamed: sheetName)
+
+        // Calculate grid position
+        let col = index % 3
+        let row = index / 3
+
+        // Each icon is 1/3 width and 1/2 height of the sprite sheet
+        let iconWidth: CGFloat = 1.0 / 3.0
+        let iconHeight: CGFloat = 1.0 / 2.0
+
+        // Create texture rect (SKTexture y=0 is bottom, y=1 is top)
+        // Row 0 (visual top) needs y=0.5, Row 1 (visual bottom) needs y=0
+        let rectY = 1.0 - CGFloat(row + 1) * iconHeight
+        let rect = CGRect(
+            x: CGFloat(col) * iconWidth,
+            y: rectY,
+            width: iconWidth,
+            height: iconHeight
+        )
+
+        let croppedTexture = SKTexture(rect: rect, in: texture)
+        croppedTexture.filteringMode = .nearest
+
+        let sprite = SKSpriteNode(texture: croppedTexture)
+
+        // Scale to desired size
+        let scale = size / max(sprite.size.width, sprite.size.height)
+        sprite.setScale(scale)
+
+        return sprite
     }
 
     private func getEffectIndicator(for action: GameAction) -> String? {

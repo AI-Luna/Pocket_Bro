@@ -5,6 +5,10 @@
 
 import Foundation
 
+// Social icon indices in sprite sheet (3 cols x 2 rows):
+// 0: Phone  1: Coffee  2: Dinner Plate
+// 3: Heart  4: Party   5: Book/Pipe
+
 enum SocialActions {
     static let all: [GameAction] = [
         callFamily,
@@ -26,7 +30,8 @@ enum SocialActions {
             .happiness: 15,
             .burnout: -5
         ],
-        cooldownSeconds: 300
+        cooldownSeconds: 300,
+        socialIconIndex: 0
     )
 
     static let coffeeChat = GameAction(
@@ -41,7 +46,7 @@ enum SocialActions {
             .energy: 5,
             .funding: 3
         ],
-        requirements: [.energy: 10]
+        socialIconIndex: 1
     )
 
     static let founderDinner = GameAction(
@@ -57,8 +62,7 @@ enum SocialActions {
             .energy: -10,
             .runway: -2
         ],
-        requirements: [.energy: 15],
-        minStage: .preSeed
+        socialIconIndex: 2
     )
 
     static let dating = GameAction(
@@ -73,12 +77,9 @@ enum SocialActions {
             .energy: -15,
             .burnout: -10
         ],
-        requirements: [
-            .energy: 20,
-            .happiness: 30
-        ],
         cooldownSeconds: 900,
-        triggersMinigame: .dating
+        triggersMinigame: .dating,
+        socialIconIndex: 3
     )
 
     static let partyTime = GameAction(
@@ -94,9 +95,8 @@ enum SocialActions {
             .funding: 15,
             .runway: -5
         ],
-        requirements: [.energy: 25],
         cooldownSeconds: 1800,
-        minStage: .seed
+        socialIconIndex: 4
     )
 
     static let mentorMeeting = GameAction(
@@ -112,8 +112,7 @@ enum SocialActions {
             .funding: 5,
             .product: 5
         ],
-        requirements: [.energy: 10],
         cooldownSeconds: 600,
-        minStage: .preSeed
+        socialIconIndex: 5
     )
 }

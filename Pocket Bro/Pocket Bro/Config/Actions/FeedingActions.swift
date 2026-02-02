@@ -5,6 +5,10 @@
 
 import Foundation
 
+// Food icon indices in sprite sheet (3 cols x 2 rows):
+// 0: Energy Drink  1: Protein Shake  2: Ramen
+// 3: Takeout Bag   4: Salad          5: Pizza
+
 enum FeedingActions {
     static let all: [GameAction] = [
         energyDrink,
@@ -25,12 +29,13 @@ enum FeedingActions {
             .energy: 20,
             .health: -5,
             .burnout: 5
-        ]
+        ],
+        foodIconIndex: 0
     )
 
     static let soylent = GameAction(
         id: "feed_soylent",
-        name: "Soylent",
+        name: "Protein Shake",
         category: .feed,
         description: "Efficient nutrition for efficient people.",
         emoji: "🧴",
@@ -38,7 +43,8 @@ enum FeedingActions {
             .energy: 15,
             .health: 5,
             .happiness: -5
-        ]
+        ],
+        foodIconIndex: 1
     )
 
     static let ramen = GameAction(
@@ -51,7 +57,8 @@ enum FeedingActions {
             .energy: 15,
             .happiness: 5,
             .health: -3
-        ]
+        ],
+        foodIconIndex: 2
     )
 
     static let doordash = GameAction(
@@ -65,12 +72,12 @@ enum FeedingActions {
             .happiness: 15,
             .runway: -1
         ],
-        minStage: .preSeed
+        foodIconIndex: 3
     )
 
     static let healthyMeal = GameAction(
         id: "feed_healthy",
-        name: "Healthy Meal Prep",
+        name: "Healthy Meal",
         category: .feed,
         description: "Takes time but worth it for long-term health.",
         emoji: "🥗",
@@ -80,8 +87,8 @@ enum FeedingActions {
             .happiness: 10,
             .burnout: -5
         ],
-        requirements: [.energy: 20],
-        cooldownSeconds: 300
+        cooldownSeconds: 300,
+        foodIconIndex: 4
     )
 
     static let teamLunch = GameAction(
@@ -96,6 +103,6 @@ enum FeedingActions {
             .social: 15,
             .runway: -2
         ],
-        minStage: .seed
+        foodIconIndex: 5
     )
 }

@@ -72,25 +72,26 @@ class CharacterSelectModal: SKNode {
         overlay.name = "overlay"
         addChild(overlay)
 
-        // Modal container
-        let modalWidth = sceneSize.width - 40
-        let modalHeight: CGFloat = 480
+        // Modal container - centered on screen
+        let modalWidth = sceneSize.width - 30
+        let modalHeight: CGFloat = 420
 
         let modal = SKNode()
-        modal.position = CGPoint(x: 0, y: 30)
+        modal.position = CGPoint(x: 0, y: 0) // Centered
         modal.zPosition = 1
         addChild(modal)
 
-        // Modal background
+        // Modal background with pixelated border
         let bg = SKShapeNode(rectOf: CGSize(width: modalWidth, height: modalHeight), cornerRadius: 16)
         bg.fillColor = modalBackground
-        bg.strokeColor = .clear
+        bg.strokeColor = textColor.withAlphaComponent(0.3)
+        bg.lineWidth = 3
         modal.addChild(bg)
 
-        // Title
+        // Title - using PixelFont
         let title = SKLabelNode(text: "Change Character")
-        title.fontName = "Menlo-Bold"
-        title.fontSize = 22
+        title.fontName = PixelFont.name
+        title.fontSize = PixelFont.title
         title.fontColor = textColor
         title.horizontalAlignmentMode = .left
         title.position = CGPoint(x: -modalWidth/2 + 20, y: modalHeight/2 - 45)
@@ -115,9 +116,10 @@ class CharacterSelectModal: SKNode {
         bg.lineWidth = 2
         button.addChild(bg)
 
-        let x = SKLabelNode(text: "✕")
-        x.fontName = "Menlo-Bold"
-        x.fontSize = 18
+        // Pixelated X using font
+        let x = SKLabelNode(text: "X")
+        x.fontName = PixelFont.name
+        x.fontSize = 20
         x.fontColor = textColor
         x.verticalAlignmentMode = .center
         button.addChild(x)
@@ -159,10 +161,11 @@ class CharacterSelectModal: SKNode {
         // Determine if selected
         let isSelected = character.archetype == selectedArchetype && !character.isLocked
 
-        // Card background
+        // Card background with pixelated border
         let bg = SKShapeNode(rectOf: size, cornerRadius: 10)
         bg.fillColor = isSelected ? selectedCardColor : cardColor
-        bg.strokeColor = .clear
+        bg.strokeColor = textColor.withAlphaComponent(0.2)
+        bg.lineWidth = 2
         bg.name = "cardBg"
         card.addChild(bg)
 

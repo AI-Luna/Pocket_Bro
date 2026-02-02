@@ -30,10 +30,10 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     private var gameAreaHeight: CGFloat = 0
 
     override func setupScene() {
-        // Calculate layout
+        // Calculate layout with reduced stats area to prevent overlap
         let safeTop = safeAreaInsets().top
         let safeBottom = safeAreaInsets().bottom
-        statsAreaHeight = 120 + safeTop
+        statsAreaHeight = 100 + safeTop // Reduced from 120 to 100
         buttonAreaHeight = 100 + safeBottom
         gameAreaHeight = size.height - statsAreaHeight - buttonAreaHeight
 
@@ -46,74 +46,128 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
     // MARK: - Background
 
+    private var cityBackgroundSprite: SKSpriteNode?
+    private var currentIsNighttime: Bool = false
+    private var screenWidth: CGFloat = 0
+    private var screenHeight: CGFloat = 0
+    private var screenY: CGFloat = 0
+
     private func setupBackground() {
-        // Full LCD green background
+        // Full background color
         let bg = SKSpriteNode(color: lcdBackground, size: size)
         bg.position = CGPoint(x: size.width / 2, y: size.height / 2)
         bg.zPosition = -100
         addChild(bg)
 
-        // LCD screen area (game area)
+        // Screen area dimensions
         let screenPadding: CGFloat = 15
-        let screenWidth = size.width - screenPadding * 2
-        let screenHeight = gameAreaHeight - 20
-        let screenY = buttonAreaHeight + screenHeight / 2 + 10
+        screenWidth = size.width - screenPadding * 2
+        screenHeight = gameAreaHeight - 20
+        screenY = buttonAreaHeight + screenHeight / 2 + 10
 
-        // Screen border
-        let screenBorder = SKShapeNode(rectOf: CGSize(width: screenWidth + 8, height: screenHeight + 8), cornerRadius: 4)
-        screenBorder.fillColor = lcdDarkColor.withAlphaComponent(0.3)
+        // Screen border/frame
+        let borderWidth: CGFloat = 6
+        let screenBorder = SKShapeNode(rectOf: CGSize(width: screenWidth + borderWidth * 2, height: screenHeight + borderWidth * 2), cornerRadius: 8)
+        screenBorder.fillColor = lcdDarkColor
         screenBorder.strokeColor = .clear
         screenBorder.position = CGPoint(x: size.width / 2, y: screenY)
         screenBorder.zPosition = -90
         addChild(screenBorder)
 
-        // LCD screen with grid effect
-        let screen = SKShapeNode(rectOf: CGSize(width: screenWidth, height: screenHeight), cornerRadius: 2)
-        screen.fillColor = lcdScreenColor
-        screen.strokeColor = .clear
-        screen.position = CGPoint(x: size.width / 2, y: screenY)
-        screen.zPosition = -80
-        addChild(screen)
+        // Track current time state
+        currentIsNighttime = City.isNighttime
 
-        // Pixel grid overlay
-        addPixelGrid(in: CGRect(x: screenPadding, y: buttonAreaHeight + 10,
-                                width: screenWidth, height: screenHeight))
+        // City background image from selected city (auto day/night)
+        let cityImageName = GameManager.shared.state?.city.currentImageName ?? City.sanFrancisco.currentImageName
+        let texture = SKTexture(imageNamed: cityImageName)
+        texture.filteringMode = .linear
+
+        let citySprite = SKSpriteNode(texture: texture)
+        citySprite.name = "cityBackground"
+
+        // Scale to fill the screen area
+        let scaleX = screenWidth / texture.size().width
+        let scaleY = screenHeight / texture.size().height
+        let scale = max(scaleX, scaleY)
+        citySprite.setScale(scale)
+        citySprite.position = CGPoint(x: size.width / 2, y: screenY)
+        citySprite.zPosition = -85
+
+        // Create crop node to clip to screen bounds
+        let maskNode = SKShapeNode(rectOf: CGSize(width: screenWidth, height: screenHeight), cornerRadius: 4)
+        maskNode.fillColor = .white
+        maskNode.strokeColor = .clear
+        maskNode.position = CGPoint(x: size.width / 2, y: screenY)
+
+        let cropNode = SKCropNode()
+        cropNode.maskNode = maskNode
+        cropNode.addChild(citySprite)
+        cropNode.zPosition = -85
+        cropNode.name = "cityCropNode"
+        addChild(cropNode)
+
+        cityBackgroundSprite = citySprite
+
+        // Start checking for day/night changes
+        startDayNightCheck()
     }
 
-    private func addPixelGrid(in rect: CGRect) {
-        let gridNode = SKNode()
-        gridNode.zPosition = -70
-        gridNode.alpha = 0.15
+    private func startDayNightCheck() {
+        // Check every 60 seconds if day/night status has changed
+        let checkAction = SKAction.sequence([
+            SKAction.wait(forDuration: 60),
+            SKAction.run { [weak self] in
+                self?.checkDayNightChange()
+            }
+        ])
+        run(SKAction.repeatForever(checkAction), withKey: "dayNightCheck")
+    }
 
-        let pixelSize: CGFloat = 6
-        let cols = Int(rect.width / pixelSize)
-        let rows = Int(rect.height / pixelSize)
+    private func checkDayNightChange() {
+        let isNightNow = City.isNighttime
 
-        // Draw vertical lines
-        for col in 0...cols {
-            let x = rect.minX + CGFloat(col) * pixelSize
-            let line = SKSpriteNode(color: lcdDarkColor, size: CGSize(width: 1, height: rect.height))
-            line.position = CGPoint(x: x, y: rect.midY)
-            line.anchorPoint = CGPoint(x: 0, y: 0.5)
-            gridNode.addChild(line)
+        // If time period changed, update the background
+        if isNightNow != currentIsNighttime {
+            currentIsNighttime = isNightNow
+            updateCityBackground()
         }
+    }
 
-        // Draw horizontal lines
-        for row in 0...rows {
-            let y = rect.minY + CGFloat(row) * pixelSize
-            let line = SKSpriteNode(color: lcdDarkColor, size: CGSize(width: rect.width, height: 1))
-            line.position = CGPoint(x: rect.minX, y: y)
-            line.anchorPoint = CGPoint(x: 0, y: 0)
-            gridNode.addChild(line)
+    private func updateCityBackground() {
+        guard let citySprite = cityBackgroundSprite,
+              let city = GameManager.shared.state?.city else { return }
+
+        let newImageName = city.currentImageName
+        let newTexture = SKTexture(imageNamed: newImageName)
+        newTexture.filteringMode = .linear
+
+        // Fade transition
+        let fadeOut = SKAction.fadeAlpha(to: 0.5, duration: 0.5)
+        let changeTexture = SKAction.run {
+            citySprite.texture = newTexture
+            // Recalculate scale for new texture
+            let scaleX = self.screenWidth / newTexture.size().width
+            let scaleY = self.screenHeight / newTexture.size().height
+            let scale = max(scaleX, scaleY)
+            citySprite.setScale(scale)
         }
+        let fadeIn = SKAction.fadeAlpha(to: 1.0, duration: 0.5)
 
-        addChild(gridNode)
+        citySprite.run(SKAction.sequence([fadeOut, changeTexture, fadeIn]))
     }
 
     // MARK: - Stats Area
 
     private func setupStatsArea() {
-        let statsY = size.height - safeAreaInsets().top - 50
+        // Settings button moved down to avoid notch
+        let settingsY = size.height - safeAreaInsets().top - 40
+        let settingsButton = createSettingsButton()
+        settingsButton.position = CGPoint(x: size.width - 30, y: settingsY)
+        settingsButton.name = "settingsButton"
+        addChild(settingsButton)
+
+        // Stats positioned well below notch/camera
+        let statsY = size.height - safeAreaInsets().top - 90
         let stats: [(name: String, label: String)] = [
             ("energy", "ENERGY"),
             ("health", "HEALTH"),
@@ -121,6 +175,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             ("social", "SOCIAL")
         ]
 
+        // Full width for stats now
         let spacing = (size.width - 40) / CGFloat(stats.count)
         let startX = 20 + spacing / 2
 
@@ -131,6 +186,60 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             addChild(statNode)
             statBars[stat.name] = statNode
         }
+    }
+
+    private func createSettingsButton() -> SKNode {
+        let button = SKNode()
+
+        // Button background
+        let bg = SKShapeNode(rectOf: CGSize(width: 36, height: 36), cornerRadius: 6)
+        bg.fillColor = lcdDarkColor.withAlphaComponent(0.2)
+        bg.strokeColor = lcdDarkColor.withAlphaComponent(0.4)
+        bg.lineWidth = 1
+        button.addChild(bg)
+
+        // Gear icon (pixel art style)
+        let gearIcon = drawGearIcon()
+        button.addChild(gearIcon)
+
+        return button
+    }
+
+    private func drawGearIcon() -> SKNode {
+        let node = SKNode()
+        let pixelSize: CGFloat = 2.5
+        let color = lcdDarkColor
+
+        // Simple 8x8 gear pattern
+        let gear: [[Int]] = [
+            [0,0,1,1,1,1,0,0],
+            [0,1,1,0,0,1,1,0],
+            [1,1,0,0,0,0,1,1],
+            [1,0,0,1,1,0,0,1],
+            [1,0,0,1,1,0,0,1],
+            [1,1,0,0,0,0,1,1],
+            [0,1,1,0,0,1,1,0],
+            [0,0,1,1,1,1,0,0]
+        ]
+
+        let rows = gear.count
+        let cols = gear[0].count
+        let totalW = CGFloat(cols) * pixelSize
+        let totalH = CGFloat(rows) * pixelSize
+
+        for (rowIdx, row) in gear.enumerated() {
+            for (colIdx, pixel) in row.enumerated() {
+                if pixel == 1 {
+                    let px = SKSpriteNode(color: color, size: CGSize(width: pixelSize, height: pixelSize))
+                    let xPos = CGFloat(colIdx) * pixelSize - totalW / 2 + pixelSize / 2
+                    let yPos = CGFloat(rows - 1 - rowIdx) * pixelSize - totalH / 2 + pixelSize / 2
+                    px.position = CGPoint(x: xPos, y: yPos)
+                    node.addChild(px)
+                }
+            }
+        }
+
+        return node
     }
 
     private func createStatBar(name: String) -> SKNode {
@@ -264,17 +373,6 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             buttonNode.name = "category_\(category.rawValue)"
             addChild(buttonNode)
             actionButtons.append(buttonNode)
-
-            // Add subtle bounce animation
-            let delay = Double(index) * 0.1
-            let bounceUp = SKAction.moveBy(x: 0, y: 3, duration: 0.4)
-            let bounceDown = SKAction.moveBy(x: 0, y: -3, duration: 0.4)
-            let bounceSeq = SKAction.sequence([bounceUp, bounceDown])
-            let bounce = SKAction.sequence([
-                SKAction.wait(forDuration: delay),
-                SKAction.repeatForever(bounceSeq)
-            ])
-            buttonNode.run(bounce)
         }
     }
 
@@ -354,9 +452,28 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         let normalizedValue = max(0, min(100, value))
         let filledSegments = normalizedValue / 10
 
+        // Determine color based on value
+        let barColor: SKColor
+        if normalizedValue < 33 {
+            // Low - Red
+            barColor = SKColor(red: 0.8, green: 0.2, blue: 0.2, alpha: 1.0)
+        } else if normalizedValue < 66 {
+            // Medium - Orange
+            barColor = SKColor(red: 0.9, green: 0.6, blue: 0.2, alpha: 1.0)
+        } else {
+            // High - Green
+            barColor = SKColor(red: 0.3, green: 0.7, blue: 0.3, alpha: 1.0)
+        }
+
         for i in 0..<10 {
             if let segment = bar.childNode(withName: "segment_\(i)") as? SKSpriteNode {
-                segment.alpha = i < filledSegments ? 1.0 : 0.2
+                if i < filledSegments {
+                    segment.color = barColor
+                    segment.alpha = 1.0
+                } else {
+                    segment.color = lcdDarkColor
+                    segment.alpha = 0.2
+                }
             }
         }
     }
@@ -372,6 +489,13 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             if modal.handleTouch(at: location) {
                 return
             }
+        }
+
+        // Check settings button
+        if let settingsButton = childNode(withName: "settingsButton"), settingsButton.contains(location) {
+            animateButtonPress(settingsButton)
+            sceneManager?.presentScene(.settings)
+            return
         }
 
         // Check action buttons

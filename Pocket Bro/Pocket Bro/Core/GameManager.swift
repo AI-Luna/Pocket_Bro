@@ -50,8 +50,8 @@ final class GameManager {
         return true
     }
 
-    func newGame(name: String, archetype: Archetype) {
-        state = BroState.new(name: name, archetype: archetype)
+    func newGame(name: String, archetype: Archetype, city: City = .sanFrancisco) {
+        state = BroState.new(name: name, archetype: archetype, city: city)
         saveGame()
         startGameLoop()
         notifyStateUpdate()
@@ -60,6 +60,22 @@ final class GameManager {
     func updateArchetype(_ archetype: Archetype) {
         guard var currentState = state else { return }
         currentState.archetype = archetype
+        state = currentState
+        saveGame()
+        notifyStateUpdate()
+    }
+
+    func updateName(_ name: String) {
+        guard var currentState = state else { return }
+        currentState.name = name
+        state = currentState
+        saveGame()
+        notifyStateUpdate()
+    }
+
+    func updateCity(_ city: City) {
+        guard var currentState = state else { return }
+        currentState.city = city
         state = currentState
         saveGame()
         notifyStateUpdate()
