@@ -284,7 +284,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     // MARK: - Character
 
     private func setupCharacter() {
-        let characterY = buttonAreaHeight + gameAreaHeight / 2 - 30
+        let characterY = buttonAreaHeight + gameAreaHeight / 2 - 80
 
         broSprite = BroSpriteNode()
         broSprite.position = CGPoint(x: size.width / 2, y: characterY)
