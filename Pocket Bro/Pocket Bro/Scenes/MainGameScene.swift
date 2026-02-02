@@ -431,6 +431,15 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
                         self?.startWalkingPatrol()
                     }
                 ]))
+            } else if action.id == "care_nap" || action.id == "care_sleep" {
+                broSprite.playSleepingAnimation()
+                // Resume patrol after sleeping animation finishes
+                run(SKAction.sequence([
+                    SKAction.wait(forDuration: 9.5),
+                    SKAction.run { [weak self] in
+                        self?.startWalkingPatrol()
+                    }
+                ]))
             } else {
                 broSprite.playActionAnimation()
             }

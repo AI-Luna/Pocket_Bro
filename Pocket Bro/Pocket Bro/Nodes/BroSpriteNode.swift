@@ -24,6 +24,9 @@ class BroSpriteNode: SKNode {
     // Typing sprite sheet layout: 5 columns x 4 rows (7 frames used)
     private var typingSheetFrames: [[SKTexture]] = []
 
+    // Sleeping sprite sheet layout: 3 columns x 1 row (3 frames)
+    private var sleepingSheetFrames: [SKTexture] = []
+
     // Animation frame groups
     private var idleFrames: [SKTexture] = []
     private var walkFrames: [SKTexture] = []
@@ -31,6 +34,7 @@ class BroSpriteNode: SKNode {
     private var jumpFrame: SKTexture?
     private var eatDrinkFrames: [SKTexture] = []
     private var typingFrames: [SKTexture] = []
+    private var sleepingFrames: [SKTexture] = []
 
     var archetype: Archetype = .bro {
         didSet { updateAppearance() }
@@ -45,6 +49,7 @@ class BroSpriteNode: SKNode {
         loadSpriteSheet()
         loadEatingDrinkingSpriteSheet()
         loadTypingSpriteSheet()
+        loadSleepingSpriteSheet()
         setupSprites()
     }
 
@@ -169,6 +174,30 @@ class BroSpriteNode: SKNode {
             typingSheetFrames[0][0], typingSheetFrames[0][1], typingSheetFrames[0][2], typingSheetFrames[0][3],
             typingSheetFrames[1][0], typingSheetFrames[1][1], typingSheetFrames[1][2]
         ]
+    }
+
+    private func loadSleepingSpriteSheet() {
+        let sheetTexture = SKTexture(imageNamed: "SleepingSpriteSheet")
+        sheetTexture.filteringMode = .nearest
+
+        let sleepColumns = 3
+        let frameWidth = 1.0 / CGFloat(sleepColumns)
+
+        // Inset each texture rect by half a pixel to prevent SpriteKit sampling bleed
+        let insetX = 0.5 / 480.0  // sheet is 480px wide
+        let insetY = 0.5 / 128.0  // sheet is 128px tall
+
+        for col in 0..<sleepColumns {
+            let x = CGFloat(col) * frameWidth + insetX
+            let y = insetY
+            let rect = CGRect(x: x, y: y, width: frameWidth - 2 * insetX, height: 1.0 - 2 * insetY)
+            let frame = SKTexture(rect: rect, in: sheetTexture)
+            frame.filteringMode = .nearest
+            sleepingSheetFrames.append(frame)
+        }
+
+        // Build sleeping animation: 3 frames showing sleeping with Zzz
+        sleepingFrames = sleepingSheetFrames
     }
 
     // MARK: - Setup
@@ -334,6 +363,33 @@ class BroSpriteNode: SKNode {
 
         bodySprite.run(sequence) { [weak self] in
             self?.startIdleAnimation()
+        }
+    }
+
+    func playSleepingAnimation() {
+        guard !sleepingFrames.isEmpty else {
+            playActionAnimation()
+            return
+        }
+
+        stopAllAnimations()
+
+        // Scale down to 75% for the sleeping pose
+        let originalScale = bodySprite.xScale
+        let sleepScale = originalScale * 0.60
+        let shrink = SKAction.scale(to: sleepScale, duration: 0.2)
+
+        // Cycle through the 3 sleeping frames (Zzz poses) in a loop,
+        // play a few cycles then return to idle
+        let sleepCycle = SKAction.animate(with: sleepingFrames, timePerFrame: 0.6, resize: true, restore: false)
+        let sleepLoop = SKAction.repeat(sleepCycle, count: 5)
+
+        let sequence = SKAction.sequence([shrink, sleepLoop])
+
+        bodySprite.run(sequence) { [weak self] in
+            guard let self = self else { return }
+            self.bodySprite.setScale(originalScale)
+            self.startIdleAnimation()
         }
     }
 
