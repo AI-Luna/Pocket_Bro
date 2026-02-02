@@ -281,14 +281,16 @@ class OnboardingScene: SKScene {
         let name = founderName.isEmpty ? "your founder" : founderName
         titleLabel = createTitle("Where will \(name)\nbuild their startup?")
         titleLabel.numberOfLines = 2
-        titleLabel.position.y = size.height - 120
+        titleLabel.horizontalAlignmentMode = .center
+        titleLabel.preferredMaxLayoutWidth = size.width - 40
+        titleLabel.position.y = size.height - 140
         contentNode.addChild(titleLabel)
 
         // Two city cards side by side
         let cardWidth: CGFloat = (size.width - 60) / 2
         let cardHeight: CGFloat = 280
         let spacing: CGFloat = 20
-        let cardY = size.height / 2 - 20
+        let cardY = size.height / 2 + 20
 
         let cities = City.allCases
         let totalWidth = CGFloat(cities.count) * cardWidth + spacing
