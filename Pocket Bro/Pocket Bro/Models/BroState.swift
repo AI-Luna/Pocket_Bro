@@ -5,6 +5,27 @@
 
 import Foundation
 
+// MARK: - City
+
+enum City: String, Codable, CaseIterable {
+    case sanFrancisco = "San Francisco"
+    case newYork = "New York"
+
+    var imageName: String {
+        switch self {
+        case .sanFrancisco: return "SFDaytime"
+        case .newYork: return "NYCDaytime"
+        }
+    }
+
+    var emoji: String {
+        switch self {
+        case .sanFrancisco: return "🌉"
+        case .newYork: return "🗽"
+        }
+    }
+}
+
 // MARK: - Bro Stats
 
 struct BroStats: Codable, Equatable {
@@ -111,6 +132,7 @@ struct StartupState: Codable, Equatable {
 struct BroState: Codable, Equatable {
     var name: String
     var archetype: Archetype
+    var city: City
     var stats: BroStats
     var startup: StartupState
     var createdAt: Date
@@ -118,11 +140,12 @@ struct BroState: Codable, Equatable {
     var totalActionsPerformed: Int
     var eventsExperienced: [String]
 
-    static func new(name: String, archetype: Archetype) -> BroState {
+    static func new(name: String, archetype: Archetype, city: City = .sanFrancisco) -> BroState {
         let now = Date()
         return BroState(
             name: name,
             archetype: archetype,
+            city: city,
             stats: .initial,
             startup: .initial,
             createdAt: now,

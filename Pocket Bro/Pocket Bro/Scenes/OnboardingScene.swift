@@ -13,36 +13,7 @@ enum OnboardingStep: Int, CaseIterable {
     case notifications = 3
 }
 
-enum StartupLocation: String, CaseIterable {
-    case garage = "Garage"
-    case parentBasement = "Parent's Basement"
-    case coffeeShop = "Coffee Shop"
-    case weWork = "WeWork"
-    case sfApartment = "SF Studio"
-    case hacker = "Hacker House"
-
-    var emoji: String {
-        switch self {
-        case .garage: return "🏠"
-        case .parentBasement: return "🏡"
-        case .coffeeShop: return "☕"
-        case .weWork: return "🏢"
-        case .sfApartment: return "🌉"
-        case .hacker: return "💻"
-        }
-    }
-
-    var color: SKColor {
-        switch self {
-        case .garage: return SKColor(red: 0.6, green: 0.5, blue: 0.4, alpha: 1.0)
-        case .parentBasement: return SKColor(red: 0.5, green: 0.6, blue: 0.5, alpha: 1.0)
-        case .coffeeShop: return SKColor(red: 0.6, green: 0.4, blue: 0.3, alpha: 1.0)
-        case .weWork: return SKColor(red: 0.3, green: 0.4, blue: 0.6, alpha: 1.0)
-        case .sfApartment: return SKColor(red: 0.7, green: 0.5, blue: 0.3, alpha: 1.0)
-        case .hacker: return SKColor(red: 0.2, green: 0.3, blue: 0.4, alpha: 1.0)
-        }
-    }
-}
+// Using City enum from BroState.swift
 
 class OnboardingScene: SKScene {
     weak var sceneManager: SceneManager?
@@ -50,7 +21,7 @@ class OnboardingScene: SKScene {
     // Onboarding state
     private var currentStep: OnboardingStep = .chooseFounder
     private var selectedArchetype: Archetype = .bro
-    private var selectedLocation: StartupLocation = .garage
+    private var selectedCity: City = .sanFrancisco
     private var founderName: String = ""
 
     // UI Colors - warm beige theme
@@ -67,7 +38,7 @@ class OnboardingScene: SKScene {
 
     // Selection tracking
     private var founderCards: [SKNode] = []
-    private var locationCards: [SKNode] = []
+    private var cityCards: [SKNode] = []
 
     init(size: CGSize, sceneManager: SceneManager) {
         self.sceneManager = sceneManager
@@ -129,7 +100,7 @@ class OnboardingScene: SKScene {
         addChild(contentNode)
 
         founderCards.removeAll()
-        locationCards.removeAll()
+        cityCards.removeAll()
 
         switch step {
         case .chooseFounder:
@@ -281,94 +252,102 @@ class OnboardingScene: SKScene {
         contentNode.addChild(tapHint)
     }
 
-    // MARK: - Step 3: Choose Location
+    // MARK: - Step 3: Choose City
 
     private func setupChooseLocationStep() {
         // Title with name
         let name = founderName.isEmpty ? "your founder" : founderName
         titleLabel = createTitle("Where will \(name)\nbuild their startup?")
         titleLabel.numberOfLines = 2
-        titleLabel.position.y = size.height - 150
+        titleLabel.position.y = size.height - 120
         contentNode.addChild(titleLabel)
 
-        let locations = StartupLocation.allCases
-        let cardSize = CGSize(width: 100, height: 100)
-        let cols = 3
-        let rows = 2
-        let spacingX: CGFloat = 15
-        let spacingY: CGFloat = 20
+        // Two city cards side by side
+        let cardWidth: CGFloat = (size.width - 60) / 2
+        let cardHeight: CGFloat = 280
+        let spacing: CGFloat = 20
+        let cardY = size.height / 2 - 20
 
-        let totalWidth = CGFloat(cols) * cardSize.width + CGFloat(cols - 1) * spacingX
-        let totalHeight = CGFloat(rows) * cardSize.height + CGFloat(rows - 1) * spacingY
-        let startX = (size.width - totalWidth) / 2 + cardSize.width / 2
-        let startY = size.height / 2 + totalHeight / 2 - cardSize.height / 2 - 30
+        let cities = City.allCases
+        let totalWidth = CGFloat(cities.count) * cardWidth + spacing
+        let startX = (size.width - totalWidth) / 2 + cardWidth / 2
 
-        for (index, location) in locations.enumerated() {
-            let row = index / cols
-            let col = index % cols
-
-            let card = createLocationCard(location: location, size: cardSize)
-            card.position = CGPoint(
-                x: startX + CGFloat(col) * (cardSize.width + spacingX),
-                y: startY - CGFloat(row) * (cardSize.height + spacingY)
-            )
-            card.name = "location_\(location.rawValue)"
+        for (index, city) in cities.enumerated() {
+            let card = createCityCard(city: city, size: CGSize(width: cardWidth, height: cardHeight))
+            let xPos = startX + CGFloat(index) * (cardWidth + spacing)
+            card.position = CGPoint(x: xPos, y: cardY)
+            card.name = "city_\(city.rawValue)"
             contentNode.addChild(card)
-            locationCards.append(card)
+            cityCards.append(card)
         }
 
-        updateLocationSelection()
+        updateCitySelection()
     }
 
-    private func createLocationCard(location: StartupLocation, size: CGSize) -> SKNode {
+    private func createCityCard(city: City, size: CGSize) -> SKNode {
         let card = SKNode()
 
-        // Card background with image area
-        let bg = SKShapeNode(rectOf: size, cornerRadius: 10)
+        // Card background
+        let bg = SKShapeNode(rectOf: size, cornerRadius: 12)
         bg.fillColor = cardColor
         bg.strokeColor = .clear
         bg.name = "cardBg"
         card.addChild(bg)
 
         // Selection border
-        let border = SKShapeNode(rectOf: CGSize(width: size.width + 6, height: size.height + 6), cornerRadius: 12)
+        let borderSize = CGSize(width: size.width + 8, height: size.height + 8)
+        let border = SKShapeNode(rectOf: borderSize, cornerRadius: 14)
         border.fillColor = .clear
         border.strokeColor = selectedBorderColor
-        border.lineWidth = 3
+        border.lineWidth = 4
         border.name = "selectionBorder"
         border.isHidden = true
         card.addChild(border)
 
-        // Image area (colored placeholder)
-        let imageSize = CGSize(width: size.width - 16, height: size.height - 36)
-        let imageArea = SKShapeNode(rectOf: imageSize, cornerRadius: 6)
-        imageArea.fillColor = location.color
-        imageArea.strokeColor = .clear
-        imageArea.position = CGPoint(x: 0, y: 10)
-        card.addChild(imageArea)
+        // Image preview area
+        let imageWidth = size.width - 20
+        let imageHeight = size.height - 60
+        let imageY: CGFloat = 15
 
-        // Location emoji on image
-        let emoji = SKLabelNode(text: location.emoji)
-        emoji.fontSize = 30
-        emoji.position = CGPoint(x: 0, y: 10)
-        emoji.verticalAlignmentMode = .center
-        card.addChild(emoji)
+        // Clip mask for rounded corners on image
+        let maskNode = SKShapeNode(rectOf: CGSize(width: imageWidth, height: imageHeight), cornerRadius: 8)
+        maskNode.fillColor = .white
+        maskNode.strokeColor = .clear
+        maskNode.position = CGPoint(x: 0, y: imageY)
 
-        // Label
-        let label = SKLabelNode(text: location.rawValue)
-        label.fontName = PixelFont.name
-        label.fontSize = PixelFont.tiny
-        label.fontColor = textColor
-        label.position = CGPoint(x: 0, y: -size.height / 2 + 14)
-        label.verticalAlignmentMode = .center
-        card.addChild(label)
+        // City preview image
+        let texture = SKTexture(imageNamed: city.imageName)
+        texture.filteringMode = .linear
+        let imageSprite = SKSpriteNode(texture: texture)
+
+        // Scale to fill the image area
+        let scaleX = imageWidth / texture.size().width
+        let scaleY = imageHeight / texture.size().height
+        let scale = max(scaleX, scaleY)
+        imageSprite.setScale(scale)
+        imageSprite.position = CGPoint(x: 0, y: imageY)
+
+        // Create crop node to clip the image
+        let cropNode = SKCropNode()
+        cropNode.maskNode = maskNode
+        cropNode.addChild(imageSprite)
+        card.addChild(cropNode)
+
+        // City name label
+        let nameLabel = SKLabelNode(text: "\(city.emoji) \(city.rawValue)")
+        nameLabel.fontName = PixelFont.name
+        nameLabel.fontSize = PixelFont.body
+        nameLabel.fontColor = textColor
+        nameLabel.position = CGPoint(x: 0, y: -size.height / 2 + 22)
+        nameLabel.verticalAlignmentMode = .center
+        card.addChild(nameLabel)
 
         return card
     }
 
-    private func updateLocationSelection() {
-        for card in locationCards {
-            let isSelected = card.name == "location_\(selectedLocation.rawValue)"
+    private func updateCitySelection() {
+        for card in cityCards {
+            let isSelected = card.name == "city_\(selectedCity.rawValue)"
             if let border = card.childNode(withName: "selectionBorder") {
                 border.isHidden = !isSelected
             }
@@ -500,14 +479,14 @@ class OnboardingScene: SKScene {
             }
         }
 
-        // Check location cards
-        for card in locationCards {
+        // Check city cards
+        for card in cityCards {
             if card.contains(touch.location(in: contentNode)) {
-                if let name = card.name, name.hasPrefix("location_") {
-                    let locationName = String(name.dropFirst("location_".count))
-                    if let location = StartupLocation.allCases.first(where: { $0.rawValue == locationName }) {
-                        selectedLocation = location
-                        updateLocationSelection()
+                if let name = card.name, name.hasPrefix("city_") {
+                    let cityName = String(name.dropFirst("city_".count))
+                    if let city = City.allCases.first(where: { $0.rawValue == cityName }) {
+                        selectedCity = city
+                        updateCitySelection()
                     }
                 }
                 return
@@ -619,7 +598,7 @@ class OnboardingScene: SKScene {
     }
 
     private func startGame() {
-        GameManager.shared.newGame(name: founderName, archetype: selectedArchetype)
+        GameManager.shared.newGame(name: founderName, archetype: selectedArchetype, city: selectedCity)
 
         // Fade out and transition
         let fadeOut = SKAction.fadeOut(withDuration: 0.4)

@@ -47,67 +47,53 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     // MARK: - Background
 
     private func setupBackground() {
-        // Full LCD green background
+        // Full background color
         let bg = SKSpriteNode(color: lcdBackground, size: size)
         bg.position = CGPoint(x: size.width / 2, y: size.height / 2)
         bg.zPosition = -100
         addChild(bg)
 
-        // LCD screen area (game area)
+        // Screen area dimensions
         let screenPadding: CGFloat = 15
         let screenWidth = size.width - screenPadding * 2
         let screenHeight = gameAreaHeight - 20
         let screenY = buttonAreaHeight + screenHeight / 2 + 10
 
-        // Screen border
-        let screenBorder = SKShapeNode(rectOf: CGSize(width: screenWidth + 8, height: screenHeight + 8), cornerRadius: 4)
-        screenBorder.fillColor = lcdDarkColor.withAlphaComponent(0.3)
+        // Screen border/frame
+        let borderWidth: CGFloat = 6
+        let screenBorder = SKShapeNode(rectOf: CGSize(width: screenWidth + borderWidth * 2, height: screenHeight + borderWidth * 2), cornerRadius: 8)
+        screenBorder.fillColor = lcdDarkColor
         screenBorder.strokeColor = .clear
         screenBorder.position = CGPoint(x: size.width / 2, y: screenY)
         screenBorder.zPosition = -90
         addChild(screenBorder)
 
-        // LCD screen with grid effect
-        let screen = SKShapeNode(rectOf: CGSize(width: screenWidth, height: screenHeight), cornerRadius: 2)
-        screen.fillColor = lcdScreenColor
-        screen.strokeColor = .clear
-        screen.position = CGPoint(x: size.width / 2, y: screenY)
-        screen.zPosition = -80
-        addChild(screen)
+        // City background image from selected city
+        let cityImageName = GameManager.shared.state?.city.imageName ?? City.sanFrancisco.imageName
+        let texture = SKTexture(imageNamed: cityImageName)
+        texture.filteringMode = .linear
 
-        // Pixel grid overlay
-        addPixelGrid(in: CGRect(x: screenPadding, y: buttonAreaHeight + 10,
-                                width: screenWidth, height: screenHeight))
-    }
+        let citySprite = SKSpriteNode(texture: texture)
 
-    private func addPixelGrid(in rect: CGRect) {
-        let gridNode = SKNode()
-        gridNode.zPosition = -70
-        gridNode.alpha = 0.15
+        // Scale to fill the screen area
+        let scaleX = screenWidth / texture.size().width
+        let scaleY = screenHeight / texture.size().height
+        let scale = max(scaleX, scaleY)
+        citySprite.setScale(scale)
+        citySprite.position = CGPoint(x: size.width / 2, y: screenY)
+        citySprite.zPosition = -85
 
-        let pixelSize: CGFloat = 6
-        let cols = Int(rect.width / pixelSize)
-        let rows = Int(rect.height / pixelSize)
+        // Create crop node to clip to screen bounds
+        let maskNode = SKShapeNode(rectOf: CGSize(width: screenWidth, height: screenHeight), cornerRadius: 4)
+        maskNode.fillColor = .white
+        maskNode.strokeColor = .clear
+        maskNode.position = CGPoint(x: size.width / 2, y: screenY)
 
-        // Draw vertical lines
-        for col in 0...cols {
-            let x = rect.minX + CGFloat(col) * pixelSize
-            let line = SKSpriteNode(color: lcdDarkColor, size: CGSize(width: 1, height: rect.height))
-            line.position = CGPoint(x: x, y: rect.midY)
-            line.anchorPoint = CGPoint(x: 0, y: 0.5)
-            gridNode.addChild(line)
-        }
-
-        // Draw horizontal lines
-        for row in 0...rows {
-            let y = rect.minY + CGFloat(row) * pixelSize
-            let line = SKSpriteNode(color: lcdDarkColor, size: CGSize(width: rect.width, height: 1))
-            line.position = CGPoint(x: rect.minX, y: y)
-            line.anchorPoint = CGPoint(x: 0, y: 0)
-            gridNode.addChild(line)
-        }
-
-        addChild(gridNode)
+        let cropNode = SKCropNode()
+        cropNode.maskNode = maskNode
+        cropNode.addChild(citySprite)
+        cropNode.zPosition = -85
+        addChild(cropNode)
     }
 
     // MARK: - Stats Area
