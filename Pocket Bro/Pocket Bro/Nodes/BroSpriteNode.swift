@@ -7,22 +7,34 @@ import SpriteKit
 
 class BroSpriteNode: SKNode {
     private var bodySprite: SKSpriteNode!
-    private var faceSprite: SKSpriteNode!
     private var accessorySprite: SKSpriteNode?
 
     private let pixelScale: CGFloat = 4.0
-    private let spriteSize = CGSize(width: 32, height: 32)
+
+    // Sprite sheet layout: 5 columns x 4 rows
+    private let columns = 5
+    private let rows = 4
+
+    // Frame textures sliced from the sprite sheet
+    private var allFrames: [[SKTexture]] = []
+
+    // Animation frame groups
+    private var idleFrames: [SKTexture] = []
+    private var walkFrames: [SKTexture] = []
+    private var workFrames: [SKTexture] = []
+    private var jumpFrame: SKTexture?
 
     var archetype: Archetype = .bro {
         didSet { updateAppearance() }
     }
 
     var mood: BroMood = .neutral {
-        didSet { updateFace() }
+        didSet { }
     }
 
     override init() {
         super.init()
+        loadSpriteSheet()
         setupSprites()
     }
 
@@ -30,104 +42,169 @@ class BroSpriteNode: SKNode {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Sprite Sheet Loading
+
+    private func loadSpriteSheet() {
+        let sheetTexture = SKTexture(imageNamed: "BroSpriteSheet")
+        sheetTexture.filteringMode = .nearest
+
+        let frameWidth = 1.0 / CGFloat(columns)
+        let frameHeight = 1.0 / CGFloat(rows)
+
+        // Slice the sheet into a 2D array of textures
+        // SKTexture rect origin is bottom-left, so row 0 in the image (top) = row index (rows-1) in texture coords
+        for row in 0..<rows {
+            var rowFrames: [SKTexture] = []
+            for col in 0..<columns {
+                let x = CGFloat(col) * frameWidth
+                let y = CGFloat(rows - 1 - row) * frameHeight
+                let rect = CGRect(x: x, y: y, width: frameWidth, height: frameHeight)
+                let frame = SKTexture(rect: rect, in: sheetTexture)
+                frame.filteringMode = .nearest
+                rowFrames.append(frame)
+            }
+            allFrames.append(rowFrames)
+        }
+
+        // Assign animation groups based on the sprite sheet layout:
+        // Row 0: idle/standing (0-2), walk start (3), run (4)
+        // Row 1: walk cycle (0-3), jump/excited (4)
+        // Row 2: walk variants (0-3), sitting at desk (4)
+        // Row 3: idle variations (0-3), sitting at desk typing (4)
+
+        idleFrames = [
+            allFrames[0][0], allFrames[0][1], allFrames[0][2],
+            allFrames[0][1], allFrames[0][0],
+            allFrames[3][0], allFrames[3][1], allFrames[3][2], allFrames[3][3],
+            allFrames[3][2], allFrames[3][1], allFrames[3][0]
+        ]
+
+        walkFrames = [
+            allFrames[1][0], allFrames[1][1], allFrames[1][2], allFrames[1][3],
+            allFrames[2][0], allFrames[2][1], allFrames[2][2], allFrames[2][3]
+        ]
+
+        workFrames = [
+            allFrames[2][4], allFrames[3][4]
+        ]
+
+        jumpFrame = allFrames[1][4]
+    }
+
+    // MARK: - Setup
+
     private func setupSprites() {
-        bodySprite = createPlaceholderSprite(color: .systemBlue)
+        guard !allFrames.isEmpty else { return }
+
+        bodySprite = SKSpriteNode(texture: allFrames[0][0])
+        bodySprite.texture?.filteringMode = .nearest
+        bodySprite.setScale(pixelScale)
         bodySprite.position = .zero
         addChild(bodySprite)
-
-        faceSprite = createFaceSprite()
-        faceSprite.position = CGPoint(x: 0, y: 20)
-        addChild(faceSprite)
 
         startIdleAnimation()
     }
 
-    private func createPlaceholderSprite(color: SKColor) -> SKSpriteNode {
-        let size = CGSize(width: spriteSize.width, height: spriteSize.height)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        let image = renderer.image { context in
-            // Body
-            color.setFill()
-            let bodyRect = CGRect(x: 8, y: 0, width: 16, height: 24)
-            context.fill(bodyRect)
-
-            // Head
-            let headColor = SKColor(red: 1.0, green: 0.85, blue: 0.7, alpha: 1.0)
-            headColor.setFill()
-            let headRect = CGRect(x: 6, y: 16, width: 20, height: 16)
-            context.fill(headRect)
-
-            // Legs
-            SKColor.darkGray.setFill()
-            context.fill(CGRect(x: 10, y: 0, width: 5, height: 8))
-            context.fill(CGRect(x: 17, y: 0, width: 5, height: 8))
-        }
-
-        let texture = SKTexture(image: image)
-        texture.filteringMode = .nearest
-        let sprite = SKSpriteNode(texture: texture)
-        sprite.setScale(pixelScale)
-        return sprite
-    }
-
-    private func createFaceSprite() -> SKSpriteNode {
-        let label = SKLabelNode(text: mood.emoji)
-        label.fontSize = 24
-        label.verticalAlignmentMode = .center
-        label.horizontalAlignmentMode = .center
-
-        let sprite = SKSpriteNode(color: .clear, size: CGSize(width: 40, height: 40))
-        label.position = .zero
-        sprite.addChild(label)
-        return sprite
-    }
+    // MARK: - Appearance
 
     private func updateAppearance() {
-        let color: SKColor
+        // The sprite sheet has a single character design;
+        // archetype could tint or swap sheets in the future.
+        // For now, apply a subtle color blend to differentiate archetypes.
+        let blendColor: SKColor
+        let blendFactor: CGFloat
+
         switch archetype {
         case .bro:
-            color = SKColor(red: 0.2, green: 0.4, blue: 0.8, alpha: 1.0)
+            blendColor = .clear
+            blendFactor = 0.0
         case .gal:
-            color = SKColor(red: 0.8, green: 0.3, blue: 0.5, alpha: 1.0)
+            blendColor = SKColor(red: 0.85, green: 0.3, blue: 0.55, alpha: 1.0)
+            blendFactor = 0.2
         case .nonBinary:
-            color = SKColor(red: 0.6, green: 0.4, blue: 0.8, alpha: 1.0)
+            blendColor = SKColor(red: 0.6, green: 0.35, blue: 0.85, alpha: 1.0)
+            blendFactor = 0.2
         }
 
-        bodySprite.removeFromParent()
-        bodySprite = createPlaceholderSprite(color: color)
-        addChild(bodySprite)
+        bodySprite.color = blendColor
+        bodySprite.colorBlendFactor = blendFactor
     }
 
-    private func updateFace() {
-        if let label = faceSprite.children.first as? SKLabelNode {
-            label.text = mood.emoji
-        }
-    }
+    // MARK: - Animations
 
     func startIdleAnimation() {
-        let moveUp = SKAction.moveBy(x: 0, y: 4, duration: 0.5)
+        guard !idleFrames.isEmpty else { return }
+
+        bodySprite.removeAction(forKey: "idle")
+        bodySprite.removeAction(forKey: "idleBounce")
+
+        // Frame animation: cycle through idle poses
+        let animateFrames = SKAction.animate(with: idleFrames, timePerFrame: 0.2, resize: false, restore: false)
+        let idleLoop = SKAction.repeatForever(animateFrames)
+        bodySprite.run(idleLoop, withKey: "idle")
+
+        // Subtle bounce
+        let moveUp = SKAction.moveBy(x: 0, y: 3, duration: 0.6)
         moveUp.timingMode = .easeInEaseOut
         let moveDown = moveUp.reversed()
         let bounce = SKAction.sequence([moveUp, moveDown])
-        let idle = SKAction.repeatForever(bounce)
-        bodySprite.run(idle, withKey: "idle")
+        bodySprite.run(SKAction.repeatForever(bounce), withKey: "idleBounce")
     }
 
     func stopIdleAnimation() {
         bodySprite.removeAction(forKey: "idle")
+        bodySprite.removeAction(forKey: "idleBounce")
+        bodySprite.position = .zero
+    }
+
+    func startWalkAnimation() {
+        guard !walkFrames.isEmpty else { return }
+
+        stopAllAnimations()
+
+        let animateFrames = SKAction.animate(with: walkFrames, timePerFrame: 0.12, resize: false, restore: false)
+        let walkLoop = SKAction.repeatForever(animateFrames)
+        bodySprite.run(walkLoop, withKey: "walk")
+    }
+
+    func stopWalkAnimation() {
+        bodySprite.removeAction(forKey: "walk")
+    }
+
+    func startWorkAnimation() {
+        guard !workFrames.isEmpty else { return }
+
+        stopAllAnimations()
+
+        let animateFrames = SKAction.animate(with: workFrames, timePerFrame: 0.5, resize: false, restore: false)
+        let workLoop = SKAction.repeatForever(animateFrames)
+        bodySprite.run(workLoop, withKey: "work")
+    }
+
+    func stopWorkAnimation() {
+        bodySprite.removeAction(forKey: "work")
+    }
+
+    func stopAllAnimations() {
+        bodySprite.removeAllActions()
+        bodySprite.position = .zero
     }
 
     func playActionAnimation() {
-        stopIdleAnimation()
+        stopAllAnimations()
+
+        // Show jump frame, then bounce back to idle
+        if let jumpTexture = jumpFrame {
+            bodySprite.texture = jumpTexture
+            bodySprite.texture?.filteringMode = .nearest
+        }
 
         let jump = SKAction.sequence([
             SKAction.moveBy(x: 0, y: 20, duration: 0.15),
             SKAction.moveBy(x: 0, y: -20, duration: 0.15)
         ])
 
-        let spin = SKAction.rotate(byAngle: .pi * 2, duration: 0.3)
-
-        bodySprite.run(SKAction.group([jump, spin])) { [weak self] in
+        bodySprite.run(jump) { [weak self] in
             self?.startIdleAnimation()
         }
     }
