@@ -21,10 +21,9 @@ class GameViewController: UIViewController {
 
         // Configure view
         view.ignoresSiblingOrder = true
-        #if DEBUG
-        view.showsFPS = true
-        view.showsNodeCount = true
-        #endif
+        // Debug info disabled
+        view.showsFPS = false
+        view.showsNodeCount = false
 
         // Initialize scene manager
         sceneManager = SceneManager(view: view)

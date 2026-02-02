@@ -250,17 +250,6 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             buttonNode.name = "category_\(category.rawValue)"
             addChild(buttonNode)
             actionButtons.append(buttonNode)
-
-            // Add subtle bounce animation
-            let delay = Double(index) * 0.1
-            let bounceUp = SKAction.moveBy(x: 0, y: 3, duration: 0.4)
-            let bounceDown = SKAction.moveBy(x: 0, y: -3, duration: 0.4)
-            let bounceSeq = SKAction.sequence([bounceUp, bounceDown])
-            let bounce = SKAction.sequence([
-                SKAction.wait(forDuration: delay),
-                SKAction.repeatForever(bounceSeq)
-            ])
-            buttonNode.run(bounce)
         }
     }
 
@@ -340,9 +329,28 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         let normalizedValue = max(0, min(100, value))
         let filledSegments = normalizedValue / 10
 
+        // Determine color based on value
+        let barColor: SKColor
+        if normalizedValue < 33 {
+            // Low - Red
+            barColor = SKColor(red: 0.8, green: 0.2, blue: 0.2, alpha: 1.0)
+        } else if normalizedValue < 66 {
+            // Medium - Orange
+            barColor = SKColor(red: 0.9, green: 0.6, blue: 0.2, alpha: 1.0)
+        } else {
+            // High - Green
+            barColor = SKColor(red: 0.3, green: 0.7, blue: 0.3, alpha: 1.0)
+        }
+
         for i in 0..<10 {
             if let segment = bar.childNode(withName: "segment_\(i)") as? SKSpriteNode {
-                segment.alpha = i < filledSegments ? 1.0 : 0.2
+                if i < filledSegments {
+                    segment.color = barColor
+                    segment.alpha = 1.0
+                } else {
+                    segment.color = lcdDarkColor
+                    segment.alpha = 0.2
+                }
             }
         }
     }
