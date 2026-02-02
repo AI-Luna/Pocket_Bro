@@ -72,7 +72,6 @@ enum FeedingActions {
             .happiness: 15,
             .runway: -1
         ],
-        minStage: .preSeed,
         foodIconIndex: 3
     )
 
@@ -88,7 +87,6 @@ enum FeedingActions {
             .happiness: 10,
             .burnout: -5
         ],
-        requirements: [.energy: 20],
         cooldownSeconds: 300,
         foodIconIndex: 4
     )
@@ -105,7 +103,6 @@ enum FeedingActions {
             .social: 15,
             .runway: -2
         ],
-        minStage: .seed,
         foodIconIndex: 5
     )
 }

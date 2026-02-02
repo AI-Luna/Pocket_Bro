@@ -67,10 +67,11 @@ class ActionSelectModal: SKNode {
         modal.name = "modalContainer"
         addChild(modal)
 
-        // Modal background
+        // Modal background with pixelated border
         let bg = SKShapeNode(rectOf: CGSize(width: modalWidth, height: modalHeight), cornerRadius: 16)
         bg.fillColor = modalBackground
-        bg.strokeColor = .clear
+        bg.strokeColor = textColor.withAlphaComponent(0.3)
+        bg.lineWidth = 3
         modal.addChild(bg)
 
         // Title - using PixelFont
@@ -101,9 +102,10 @@ class ActionSelectModal: SKNode {
         bg.lineWidth = 2
         button.addChild(bg)
 
-        let x = SKLabelNode(text: "✕")
+        // Pixelated X using font
+        let x = SKLabelNode(text: "X")
         x.fontName = PixelFont.name
-        x.fontSize = 18
+        x.fontSize = 20
         x.fontColor = textColor
         x.verticalAlignmentMode = .center
         button.addChild(x)
@@ -145,23 +147,14 @@ class ActionSelectModal: SKNode {
         let cooldown = GameManager.shared.cooldownRemaining(for: action)
         let isOnCooldown = cooldown > 0
 
-        // Card background
+        // Card background with pixelated border
         let bg = SKShapeNode(rectOf: size, cornerRadius: 10)
         bg.fillColor = cardColor
-        bg.strokeColor = .clear
+        bg.strokeColor = textColor.withAlphaComponent(0.2)
+        bg.lineWidth = 2
         bg.name = "cardBg"
         bg.zPosition = 0 // Background layer
         card.addChild(bg)
-
-        // Effect indicator (top right)
-        let effectEmoji = getEffectIndicator(for: action)
-        if let emoji = effectEmoji {
-            let indicator = SKLabelNode(text: emoji)
-            indicator.fontSize = 16
-            indicator.position = CGPoint(x: size.width/2 - 18, y: size.height/2 - 18)
-            indicator.zPosition = 2
-            card.addChild(indicator)
-        }
 
         // Action icon or emoji (large, centered in cell)
         if let iconIndex = action.foodIconIndex {
