@@ -289,14 +289,14 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         broSprite = BroSpriteNode()
         broSprite.position = CGPoint(x: size.width / 2, y: characterY)
         broSprite.zPosition = 10
-        broSprite.setScale(1.2)
+        broSprite.setScale(0.72)
         addChild(broSprite)
 
         startWalkingPatrol()
     }
 
     private func startWalkingPatrol() {
-        let margin: CGFloat = 50
+        let margin: CGFloat = 100
         let leftEdge = margin
         let rightEdge = size.width - margin
         let walkSpeed: CGFloat = 60 // points per second
@@ -531,7 +531,42 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     func actionSelectModal(_ modal: ActionSelectModal, didSelect action: GameAction) {
         if let result = GameManager.shared.performAction(action) {
             showDialogue(result.dialogue, emoji: action.emoji)
-            broSprite.playActionAnimation()
+
+            // Stop patrol while performing the action animation
+            broSprite.removeAction(forKey: "patrol")
+
+            if action.category == .feed {
+                broSprite.playEatingDrinkingAnimation()
+                // Resume patrol after eating animation finishes
+                run(SKAction.sequence([
+                    SKAction.wait(forDuration: 4.5),
+                    SKAction.run { [weak self] in
+                        self?.startWalkingPatrol()
+                    }
+                ]))
+            } else if action.category == .work {
+                // Face right while typing
+                broSprite.xScale = abs(broSprite.xScale)
+                broSprite.playTypingAnimation()
+                // Resume patrol after typing animation finishes
+                run(SKAction.sequence([
+                    SKAction.wait(forDuration: 4.0),
+                    SKAction.run { [weak self] in
+                        self?.startWalkingPatrol()
+                    }
+                ]))
+            } else if action.id == "care_nap" || action.id == "care_sleep" {
+                broSprite.playSleepingAnimation()
+                // Resume patrol after sleeping animation finishes
+                run(SKAction.sequence([
+                    SKAction.wait(forDuration: 9.5),
+                    SKAction.run { [weak self] in
+                        self?.startWalkingPatrol()
+                    }
+                ]))
+            } else {
+                broSprite.playActionAnimation()
+            }
 
             // Check for minigame
             if let minigameType = action.triggersMinigame {

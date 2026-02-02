@@ -9,7 +9,7 @@ class BroSpriteNode: SKNode {
     private var bodySprite: SKSpriteNode!
     private var accessorySprite: SKSpriteNode?
 
-    private let pixelScale: CGFloat = 4.0
+    private let pixelScale: CGFloat = 3.4
 
     // Sprite sheet layout: 5 columns x 4 rows
     private let columns = 5
@@ -18,11 +18,23 @@ class BroSpriteNode: SKNode {
     // Frame textures sliced from the sprite sheet
     private var allFrames: [[SKTexture]] = []
 
+    // Eating/drinking sprite sheet layout: 5 columns x 4 rows
+    private var eatingFrames: [[SKTexture]] = []
+
+    // Typing sprite sheet layout: 5 columns x 4 rows (7 frames used)
+    private var typingSheetFrames: [[SKTexture]] = []
+
+    // Sleeping sprite sheet layout: 3 columns x 1 row (3 frames)
+    private var sleepingSheetFrames: [SKTexture] = []
+
     // Animation frame groups
     private var idleFrames: [SKTexture] = []
     private var walkFrames: [SKTexture] = []
     private var workFrames: [SKTexture] = []
     private var jumpFrame: SKTexture?
+    private var eatDrinkFrames: [SKTexture] = []
+    private var typingFrames: [SKTexture] = []
+    private var sleepingFrames: [SKTexture] = []
 
     var archetype: Archetype = .bro {
         didSet { updateAppearance() }
@@ -35,6 +47,9 @@ class BroSpriteNode: SKNode {
     override init() {
         super.init()
         loadSpriteSheet()
+        loadEatingDrinkingSpriteSheet()
+        loadTypingSpriteSheet()
+        loadSleepingSpriteSheet()
         setupSprites()
     }
 
@@ -89,6 +104,100 @@ class BroSpriteNode: SKNode {
         ]
 
         jumpFrame = allFrames[1][4]
+    }
+
+    private func loadEatingDrinkingSpriteSheet() {
+        let sheetTexture = SKTexture(imageNamed: "EatingDrinkingSpriteSheet")
+        sheetTexture.filteringMode = .nearest
+
+        let frameWidth = 1.0 / CGFloat(columns)
+        let frameHeight = 1.0 / CGFloat(rows)
+
+        // Inset each texture rect by half a pixel to prevent SpriteKit sampling bleed
+        let insetX = 0.5 / 400.0  // sheet is 400px wide
+        let insetY = 0.5 / 384.0  // sheet is 384px tall
+
+        for row in 0..<rows {
+            var rowFrames: [SKTexture] = []
+            for col in 0..<columns {
+                let x = CGFloat(col) * frameWidth + insetX
+                let y = CGFloat(rows - 1 - row) * frameHeight + insetY
+                let rect = CGRect(x: x, y: y, width: frameWidth - 2 * insetX, height: frameHeight - 2 * insetY)
+                let frame = SKTexture(rect: rect, in: sheetTexture)
+                frame.filteringMode = .nearest
+                rowFrames.append(frame)
+            }
+            eatingFrames.append(rowFrames)
+        }
+
+        // Build eating/drinking animation sequence from the sprite sheet
+        // Row 0: reaching for food / holding (5 frames)
+        // Row 1: bringing to mouth / eating (5 frames)
+        // Row 2: chewing / drinking (5 frames)
+        // Row 3: finishing up / satisfied (4 frames, [3][4] is empty)
+        eatDrinkFrames = [
+            eatingFrames[0][0], eatingFrames[0][1], eatingFrames[0][2], eatingFrames[0][3], eatingFrames[0][4],
+            eatingFrames[1][0], eatingFrames[1][1], eatingFrames[1][2], eatingFrames[1][3], eatingFrames[1][4],
+            eatingFrames[2][0], eatingFrames[2][1], eatingFrames[2][2], eatingFrames[2][3], eatingFrames[2][4],
+            eatingFrames[3][0], eatingFrames[3][1], eatingFrames[3][2], eatingFrames[3][3]
+        ]
+    }
+
+    private func loadTypingSpriteSheet() {
+        let sheetTexture = SKTexture(imageNamed: "TypingSpriteSheet")
+        sheetTexture.filteringMode = .nearest
+
+        let frameWidth = 1.0 / CGFloat(columns)
+        let frameHeight = 1.0 / CGFloat(rows)
+
+        // Inset each texture rect by half a pixel to prevent SpriteKit sampling bleed
+        let insetX = 0.5 / 400.0  // sheet is 400px wide
+        let insetY = 0.5 / 384.0  // sheet is 384px tall
+
+        for row in 0..<rows {
+            var rowFrames: [SKTexture] = []
+            for col in 0..<columns {
+                let x = CGFloat(col) * frameWidth + insetX
+                let y = CGFloat(rows - 1 - row) * frameHeight + insetY
+                let rect = CGRect(x: x, y: y, width: frameWidth - 2 * insetX, height: frameHeight - 2 * insetY)
+                let frame = SKTexture(rect: rect, in: sheetTexture)
+                frame.filteringMode = .nearest
+                rowFrames.append(frame)
+            }
+            typingSheetFrames.append(rowFrames)
+        }
+
+        // Build typing animation sequence from the sprite sheet
+        // Row 0: 4 typing frames (hands on keyboard poses)
+        // Row 1: 3 typing frames (leaning forward poses)
+        typingFrames = [
+            typingSheetFrames[0][0], typingSheetFrames[0][1], typingSheetFrames[0][2], typingSheetFrames[0][3],
+            typingSheetFrames[1][0], typingSheetFrames[1][1], typingSheetFrames[1][2]
+        ]
+    }
+
+    private func loadSleepingSpriteSheet() {
+        let sheetTexture = SKTexture(imageNamed: "SleepingSpriteSheet")
+        sheetTexture.filteringMode = .nearest
+
+        let sleepColumns = 3
+        let frameWidth = 1.0 / CGFloat(sleepColumns)
+
+        // Inset each texture rect by half a pixel to prevent SpriteKit sampling bleed
+        let insetX = 0.5 / 480.0  // sheet is 480px wide
+        let insetY = 0.5 / 128.0  // sheet is 128px tall
+
+        for col in 0..<sleepColumns {
+            let x = CGFloat(col) * frameWidth + insetX
+            let y = insetY
+            let rect = CGRect(x: x, y: y, width: frameWidth - 2 * insetX, height: 1.0 - 2 * insetY)
+            let frame = SKTexture(rect: rect, in: sheetTexture)
+            frame.filteringMode = .nearest
+            sleepingSheetFrames.append(frame)
+        }
+
+        // Build sleeping animation: 3 frames showing sleeping with Zzz
+        sleepingFrames = sleepingSheetFrames
     }
 
     // MARK: - Setup
@@ -206,6 +315,81 @@ class BroSpriteNode: SKNode {
 
         bodySprite.run(jump) { [weak self] in
             self?.startIdleAnimation()
+        }
+    }
+
+    func playEatingDrinkingAnimation() {
+        guard !eatDrinkFrames.isEmpty else {
+            playActionAnimation()
+            return
+        }
+
+        stopAllAnimations()
+
+        // Play through all eating/drinking frames once, then loop the middle
+        // section a couple times to show sustained eating, then return to idle
+        let fullCycle = SKAction.animate(with: eatDrinkFrames, timePerFrame: 0.15, resize: false, restore: false)
+
+        // Loop the chewing/drinking frames (rows 1-2, indices 5-14) for a second pass
+        let chewingFrames = Array(eatDrinkFrames[5...14])
+        let chewLoop = SKAction.animate(with: chewingFrames, timePerFrame: 0.12, resize: false, restore: false)
+
+        let sequence = SKAction.sequence([fullCycle, chewLoop])
+
+        bodySprite.run(sequence) { [weak self] in
+            self?.startIdleAnimation()
+        }
+    }
+
+    func playTypingAnimation() {
+        guard !typingFrames.isEmpty else {
+            playActionAnimation()
+            return
+        }
+
+        stopAllAnimations()
+
+        // Play through all typing frames, then loop the main typing cycle
+        let fullCycle = SKAction.animate(with: typingFrames, timePerFrame: 0.18, resize: false, restore: false)
+
+        // Loop the hand-movement frames (row 0, indices 0-3) for sustained typing
+        let keystrokeFrames = Array(typingFrames[0...3])
+        let keystrokeLoop = SKAction.repeat(
+            SKAction.animate(with: keystrokeFrames, timePerFrame: 0.15, resize: false, restore: false),
+            count: 3
+        )
+
+        let sequence = SKAction.sequence([fullCycle, keystrokeLoop])
+
+        bodySprite.run(sequence) { [weak self] in
+            self?.startIdleAnimation()
+        }
+    }
+
+    func playSleepingAnimation() {
+        guard !sleepingFrames.isEmpty else {
+            playActionAnimation()
+            return
+        }
+
+        stopAllAnimations()
+
+        // Scale down to 75% for the sleeping pose
+        let originalScale = bodySprite.xScale
+        let sleepScale = originalScale * 0.60
+        let shrink = SKAction.scale(to: sleepScale, duration: 0.2)
+
+        // Cycle through the 3 sleeping frames (Zzz poses) in a loop,
+        // play a few cycles then return to idle
+        let sleepCycle = SKAction.animate(with: sleepingFrames, timePerFrame: 0.6, resize: true, restore: false)
+        let sleepLoop = SKAction.repeat(sleepCycle, count: 5)
+
+        let sequence = SKAction.sequence([shrink, sleepLoop])
+
+        bodySprite.run(sequence) { [weak self] in
+            guard let self = self else { return }
+            self.bodySprite.setScale(originalScale)
+            self.startIdleAnimation()
         }
     }
 
