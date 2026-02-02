@@ -5,6 +5,10 @@
 
 import Foundation
 
+// Work icon indices in sprite sheet (3 cols x 2 rows):
+// 0: Laptop  1: Brain  2: Handshake
+// 3: Microphone  4: Briefcase  5: Lock
+
 enum WorkActions {
     static let all: [GameAction] = [
         grind,
@@ -27,7 +31,7 @@ enum WorkActions {
             .burnout: 10,
             .happiness: -5
         ],
-        requirements: [.energy: 20]
+        workIconIndex: 0
     )
 
     static let deepWork = GameAction(
@@ -42,8 +46,8 @@ enum WorkActions {
             .burnout: 15,
             .social: -5
         ],
-        requirements: [.energy: 40],
-        cooldownSeconds: 600
+        cooldownSeconds: 600,
+        workIconIndex: 1
     )
 
     static let networking = GameAction(
@@ -58,7 +62,7 @@ enum WorkActions {
             .social: 20,
             .burnout: 5
         ],
-        requirements: [.energy: 15]
+        workIconIndex: 2
     )
 
     static let pitchPractice = GameAction(
@@ -73,7 +77,7 @@ enum WorkActions {
             .happiness: -5,
             .burnout: 5
         ],
-        requirements: [.energy: 15]
+        workIconIndex: 3
     )
 
     static let investorMeeting = GameAction(
@@ -88,12 +92,8 @@ enum WorkActions {
             .burnout: 10,
             .happiness: 10
         ],
-        requirements: [
-            .energy: 30,
-            .happiness: 40
-        ],
         cooldownSeconds: 900,
-        minStage: .preSeed
+        workIconIndex: 4
     )
 
     static let lockIn = GameAction(
@@ -109,9 +109,8 @@ enum WorkActions {
             .health: -10,
             .social: -10
         ],
-        requirements: [.energy: 50],
         cooldownSeconds: 1800,
-        minStage: .seed,
-        triggersMinigame: .lockIn
+        triggersMinigame: .lockIn,
+        workIconIndex: 5
     )
 }

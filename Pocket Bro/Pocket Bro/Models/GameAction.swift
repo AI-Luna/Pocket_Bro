@@ -18,6 +18,7 @@ struct GameAction: Identifiable, Equatable {
     let triggersMinigame: MinigameType?
     let foodIconIndex: Int? // Index in food sprite sheet (0-5), nil if using emoji
     let socialIconIndex: Int? // Index in social sprite sheet (0-5), nil if using emoji
+    let workIconIndex: Int? // Index in work sprite sheet (0-5), nil if using emoji
 
     init(
         id: String,
@@ -31,7 +32,8 @@ struct GameAction: Identifiable, Equatable {
         minStage: StartupStage = .garage,
         triggersMinigame: MinigameType? = nil,
         foodIconIndex: Int? = nil,
-        socialIconIndex: Int? = nil
+        socialIconIndex: Int? = nil,
+        workIconIndex: Int? = nil
     ) {
         self.id = id
         self.name = name
@@ -45,6 +47,7 @@ struct GameAction: Identifiable, Equatable {
         self.triggersMinigame = triggersMinigame
         self.foodIconIndex = foodIconIndex
         self.socialIconIndex = socialIconIndex
+        self.workIconIndex = workIconIndex
     }
 
     static func == (lhs: GameAction, rhs: GameAction) -> Bool {

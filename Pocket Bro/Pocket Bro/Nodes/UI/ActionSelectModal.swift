@@ -177,6 +177,16 @@ class ActionSelectModal: SKNode {
                 iconSprite.alpha = 0.4
             }
             card.addChild(iconSprite)
+        } else if let iconIndex = action.workIconIndex {
+            // Use work sprite sheet icon - same size as food/social icons
+            let iconSprite = createIconFromSheet(sheetName: "WorkIcons", index: iconIndex, size: 110)
+            iconSprite.position = CGPoint(x: 0, y: 10) // Centered vertically in card
+            iconSprite.zPosition = 2 // Ensure icon is above background
+            // Only reduce opacity if can't perform, NOT for cooldown
+            if !canPerform {
+                iconSprite.alpha = 0.4
+            }
+            card.addChild(iconSprite)
         } else {
             // Use emoji
             let emojiLabel = SKLabelNode(text: action.emoji)
@@ -236,9 +246,10 @@ class ActionSelectModal: SKNode {
     }
 
     private func createIconFromSheet(sheetName: String, index: Int, size: CGFloat) -> SKSpriteNode {
-        // Both food and social sprite sheets are 3 columns x 2 rows
+        // All sprite sheets are 3 columns x 2 rows
         // Food: 0=energy drink, 1=protein shake, 2=ramen, 3=doordash, 4=healthy meal, 5=team dinner
         // Social: 0=phone, 1=coffee, 2=dinner plate, 3=heart, 4=party, 5=book/pipe
+        // Work: 0=laptop, 1=brain, 2=handshake, 3=microphone, 4=briefcase, 5=lock
         let texture = SKTexture(imageNamed: sheetName)
 
         // Calculate grid position
