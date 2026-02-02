@@ -180,14 +180,14 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         broSprite = BroSpriteNode()
         broSprite.position = CGPoint(x: size.width / 2, y: characterY)
         broSprite.zPosition = 10
-        broSprite.setScale(1.2)
+        broSprite.setScale(0.72)
         addChild(broSprite)
 
         startWalkingPatrol()
     }
 
     private func startWalkingPatrol() {
-        let margin: CGFloat = 50
+        let margin: CGFloat = 100
         let leftEdge = margin
         let rightEdge = size.width - margin
         let walkSpeed: CGFloat = 60 // points per second
