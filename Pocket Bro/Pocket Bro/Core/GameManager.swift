@@ -65,6 +65,22 @@ final class GameManager {
         notifyStateUpdate()
     }
 
+    func updateName(_ name: String) {
+        guard var currentState = state else { return }
+        currentState.name = name
+        state = currentState
+        saveGame()
+        notifyStateUpdate()
+    }
+
+    func updateCity(_ city: City) {
+        guard var currentState = state else { return }
+        currentState.city = city
+        state = currentState
+        saveGame()
+        notifyStateUpdate()
+    }
+
     func saveGame() {
         guard let state = state else { return }
         persistence.save(state)

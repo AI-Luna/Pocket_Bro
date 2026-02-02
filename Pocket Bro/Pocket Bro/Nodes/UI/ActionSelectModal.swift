@@ -224,21 +224,24 @@ class ActionSelectModal: SKNode {
 
     private func createFoodIcon(index: Int, size: CGFloat) -> SKSpriteNode {
         // Food sprite sheet is 3 columns x 2 rows
-        // Index: 0=energy drink, 1=shake, 2=ramen, 3=bag, 4=salad, 5=pizza
+        // Top row (row 0): 0=energy drink, 1=protein shake, 2=ramen
+        // Bottom row (row 1): 3=doordash, 4=healthy meal, 5=team dinner
         let texture = SKTexture(imageNamed: "FoodIcons")
 
         // Calculate grid position
         let col = index % 3
         let row = index / 3
 
-        // Each icon is roughly 1/3 width and 1/2 height of the sprite sheet
+        // Each icon is 1/3 width and 1/2 height of the sprite sheet
         let iconWidth: CGFloat = 1.0 / 3.0
         let iconHeight: CGFloat = 1.0 / 2.0
 
-        // Create texture rect (in normalized coordinates, y is flipped)
+        // Create texture rect (SKTexture y=0 is bottom, y=1 is top)
+        // Row 0 (visual top) needs y=0.5, Row 1 (visual bottom) needs y=0
+        let rectY = 1.0 - CGFloat(row + 1) * iconHeight
         let rect = CGRect(
             x: CGFloat(col) * iconWidth,
-            y: CGFloat(1 - row) * iconHeight - iconHeight,
+            y: rectY,
             width: iconWidth,
             height: iconHeight
         )

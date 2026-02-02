@@ -159,7 +159,15 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     // MARK: - Stats Area
 
     private func setupStatsArea() {
-        let statsY = size.height - safeAreaInsets().top - 50
+        // Settings button at very top right (separate from stats)
+        let settingsY = size.height - safeAreaInsets().top - 25
+        let settingsButton = createSettingsButton()
+        settingsButton.position = CGPoint(x: size.width - 30, y: settingsY)
+        settingsButton.name = "settingsButton"
+        addChild(settingsButton)
+
+        // Stats below settings button
+        let statsY = size.height - safeAreaInsets().top - 70
         let stats: [(name: String, label: String)] = [
             ("energy", "ENERGY"),
             ("health", "HEALTH"),
@@ -167,9 +175,8 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             ("social", "SOCIAL")
         ]
 
-        // Leave space for settings button on the right
-        let availableWidth = size.width - 80
-        let spacing = availableWidth / CGFloat(stats.count)
+        // Full width for stats now
+        let spacing = (size.width - 40) / CGFloat(stats.count)
         let startX = 20 + spacing / 2
 
         for (index, stat) in stats.enumerated() {
@@ -179,12 +186,6 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             addChild(statNode)
             statBars[stat.name] = statNode
         }
-
-        // Settings button (top right)
-        let settingsButton = createSettingsButton()
-        settingsButton.position = CGPoint(x: size.width - 35, y: statsY)
-        settingsButton.name = "settingsButton"
-        addChild(settingsButton)
     }
 
     private func createSettingsButton() -> SKNode {
