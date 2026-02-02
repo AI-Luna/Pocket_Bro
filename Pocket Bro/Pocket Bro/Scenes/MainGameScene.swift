@@ -46,6 +46,12 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
     // MARK: - Background
 
+    private var cityBackgroundSprite: SKSpriteNode?
+    private var currentIsNighttime: Bool = false
+    private var screenWidth: CGFloat = 0
+    private var screenHeight: CGFloat = 0
+    private var screenY: CGFloat = 0
+
     private func setupBackground() {
         // Full background color
         let bg = SKSpriteNode(color: lcdBackground, size: size)
@@ -55,9 +61,9 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
         // Screen area dimensions
         let screenPadding: CGFloat = 15
-        let screenWidth = size.width - screenPadding * 2
-        let screenHeight = gameAreaHeight - 20
-        let screenY = buttonAreaHeight + screenHeight / 2 + 10
+        screenWidth = size.width - screenPadding * 2
+        screenHeight = gameAreaHeight - 20
+        screenY = buttonAreaHeight + screenHeight / 2 + 10
 
         // Screen border/frame
         let borderWidth: CGFloat = 6
@@ -68,12 +74,16 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         screenBorder.zPosition = -90
         addChild(screenBorder)
 
-        // City background image from selected city
-        let cityImageName = GameManager.shared.state?.city.imageName ?? City.sanFrancisco.imageName
+        // Track current time state
+        currentIsNighttime = City.isNighttime
+
+        // City background image from selected city (auto day/night)
+        let cityImageName = GameManager.shared.state?.city.currentImageName ?? City.sanFrancisco.currentImageName
         let texture = SKTexture(imageNamed: cityImageName)
         texture.filteringMode = .linear
 
         let citySprite = SKSpriteNode(texture: texture)
+        citySprite.name = "cityBackground"
 
         // Scale to fill the screen area
         let scaleX = screenWidth / texture.size().width
@@ -93,7 +103,57 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         cropNode.maskNode = maskNode
         cropNode.addChild(citySprite)
         cropNode.zPosition = -85
+        cropNode.name = "cityCropNode"
         addChild(cropNode)
+
+        cityBackgroundSprite = citySprite
+
+        // Start checking for day/night changes
+        startDayNightCheck()
+    }
+
+    private func startDayNightCheck() {
+        // Check every 60 seconds if day/night status has changed
+        let checkAction = SKAction.sequence([
+            SKAction.wait(forDuration: 60),
+            SKAction.run { [weak self] in
+                self?.checkDayNightChange()
+            }
+        ])
+        run(SKAction.repeatForever(checkAction), withKey: "dayNightCheck")
+    }
+
+    private func checkDayNightChange() {
+        let isNightNow = City.isNighttime
+
+        // If time period changed, update the background
+        if isNightNow != currentIsNighttime {
+            currentIsNighttime = isNightNow
+            updateCityBackground()
+        }
+    }
+
+    private func updateCityBackground() {
+        guard let citySprite = cityBackgroundSprite,
+              let city = GameManager.shared.state?.city else { return }
+
+        let newImageName = city.currentImageName
+        let newTexture = SKTexture(imageNamed: newImageName)
+        newTexture.filteringMode = .linear
+
+        // Fade transition
+        let fadeOut = SKAction.fadeAlpha(to: 0.5, duration: 0.5)
+        let changeTexture = SKAction.run {
+            citySprite.texture = newTexture
+            // Recalculate scale for new texture
+            let scaleX = self.screenWidth / newTexture.size().width
+            let scaleY = self.screenHeight / newTexture.size().height
+            let scale = max(scaleX, scaleY)
+            citySprite.setScale(scale)
+        }
+        let fadeIn = SKAction.fadeAlpha(to: 1.0, duration: 0.5)
+
+        citySprite.run(SKAction.sequence([fadeOut, changeTexture, fadeIn]))
     }
 
     // MARK: - Stats Area
