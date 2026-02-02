@@ -9,7 +9,7 @@ class BroSpriteNode: SKNode {
     private var bodySprite: SKSpriteNode!
     private var accessorySprite: SKSpriteNode?
 
-    private let pixelScale: CGFloat = 4.0
+    private let pixelScale: CGFloat = 3.4
 
     // Sprite sheet layout: 5 columns x 4 rows
     private let columns = 5
