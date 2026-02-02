@@ -16,6 +16,7 @@ struct GameAction: Identifiable, Equatable {
     let cooldownSeconds: TimeInterval
     let minStage: StartupStage
     let triggersMinigame: MinigameType?
+    let foodIconIndex: Int? // Index in food sprite sheet (0-5), nil if using emoji
 
     init(
         id: String,
@@ -27,7 +28,8 @@ struct GameAction: Identifiable, Equatable {
         requirements: [StatType: Int] = [:],
         cooldownSeconds: TimeInterval = 0,
         minStage: StartupStage = .garage,
-        triggersMinigame: MinigameType? = nil
+        triggersMinigame: MinigameType? = nil,
+        foodIconIndex: Int? = nil
     ) {
         self.id = id
         self.name = name
@@ -39,6 +41,7 @@ struct GameAction: Identifiable, Equatable {
         self.cooldownSeconds = cooldownSeconds
         self.minStage = minStage
         self.triggersMinigame = triggersMinigame
+        self.foodIconIndex = foodIconIndex
     }
 
     static func == (lhs: GameAction, rhs: GameAction) -> Bool {

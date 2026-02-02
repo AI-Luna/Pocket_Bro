@@ -160,16 +160,26 @@ class ActionSelectModal: SKNode {
             card.addChild(indicator)
         }
 
-        // Action emoji (large, center)
-        let emojiLabel = SKLabelNode(text: action.emoji)
-        emojiLabel.fontSize = 50
-        emojiLabel.position = CGPoint(x: 0, y: 15)
-        emojiLabel.verticalAlignmentMode = .center
-
-        if !canPerform || isOnCooldown {
-            emojiLabel.alpha = 0.4
+        // Action icon or emoji (large, center)
+        if let iconIndex = action.foodIconIndex {
+            // Use food sprite sheet icon
+            let iconSprite = createFoodIcon(index: iconIndex, size: 55)
+            iconSprite.position = CGPoint(x: 0, y: 15)
+            if !canPerform || isOnCooldown {
+                iconSprite.alpha = 0.4
+            }
+            card.addChild(iconSprite)
+        } else {
+            // Use emoji
+            let emojiLabel = SKLabelNode(text: action.emoji)
+            emojiLabel.fontSize = 50
+            emojiLabel.position = CGPoint(x: 0, y: 15)
+            emojiLabel.verticalAlignmentMode = .center
+            if !canPerform || isOnCooldown {
+                emojiLabel.alpha = 0.4
+            }
+            card.addChild(emojiLabel)
         }
-        card.addChild(emojiLabel)
 
         // Cooldown overlay
         if isOnCooldown {
@@ -210,6 +220,39 @@ class ActionSelectModal: SKNode {
         }
 
         return card
+    }
+
+    private func createFoodIcon(index: Int, size: CGFloat) -> SKSpriteNode {
+        // Food sprite sheet is 3 columns x 2 rows
+        // Index: 0=energy drink, 1=shake, 2=ramen, 3=bag, 4=salad, 5=pizza
+        let texture = SKTexture(imageNamed: "FoodIcons")
+
+        // Calculate grid position
+        let col = index % 3
+        let row = index / 3
+
+        // Each icon is roughly 1/3 width and 1/2 height of the sprite sheet
+        let iconWidth: CGFloat = 1.0 / 3.0
+        let iconHeight: CGFloat = 1.0 / 2.0
+
+        // Create texture rect (in normalized coordinates, y is flipped)
+        let rect = CGRect(
+            x: CGFloat(col) * iconWidth,
+            y: CGFloat(1 - row) * iconHeight - iconHeight,
+            width: iconWidth,
+            height: iconHeight
+        )
+
+        let croppedTexture = SKTexture(rect: rect, in: texture)
+        croppedTexture.filteringMode = .nearest
+
+        let sprite = SKSpriteNode(texture: croppedTexture)
+
+        // Scale to desired size
+        let scale = size / max(sprite.size.width, sprite.size.height)
+        sprite.setScale(scale)
+
+        return sprite
     }
 
     private func getEffectIndicator(for action: GameAction) -> String? {
