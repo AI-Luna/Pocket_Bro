@@ -107,7 +107,9 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             ("social", "SOCIAL")
         ]
 
-        let spacing = (size.width - 40) / CGFloat(stats.count)
+        // Leave space for settings button on the right
+        let availableWidth = size.width - 80
+        let spacing = availableWidth / CGFloat(stats.count)
         let startX = 20 + spacing / 2
 
         for (index, stat) in stats.enumerated() {
@@ -117,6 +119,66 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             addChild(statNode)
             statBars[stat.name] = statNode
         }
+
+        // Settings button (top right)
+        let settingsButton = createSettingsButton()
+        settingsButton.position = CGPoint(x: size.width - 35, y: statsY)
+        settingsButton.name = "settingsButton"
+        addChild(settingsButton)
+    }
+
+    private func createSettingsButton() -> SKNode {
+        let button = SKNode()
+
+        // Button background
+        let bg = SKShapeNode(rectOf: CGSize(width: 36, height: 36), cornerRadius: 6)
+        bg.fillColor = lcdDarkColor.withAlphaComponent(0.2)
+        bg.strokeColor = lcdDarkColor.withAlphaComponent(0.4)
+        bg.lineWidth = 1
+        button.addChild(bg)
+
+        // Gear icon (pixel art style)
+        let gearIcon = drawGearIcon()
+        button.addChild(gearIcon)
+
+        return button
+    }
+
+    private func drawGearIcon() -> SKNode {
+        let node = SKNode()
+        let pixelSize: CGFloat = 2.5
+        let color = lcdDarkColor
+
+        // Simple 8x8 gear pattern
+        let gear: [[Int]] = [
+            [0,0,1,1,1,1,0,0],
+            [0,1,1,0,0,1,1,0],
+            [1,1,0,0,0,0,1,1],
+            [1,0,0,1,1,0,0,1],
+            [1,0,0,1,1,0,0,1],
+            [1,1,0,0,0,0,1,1],
+            [0,1,1,0,0,1,1,0],
+            [0,0,1,1,1,1,0,0]
+        ]
+
+        let rows = gear.count
+        let cols = gear[0].count
+        let totalW = CGFloat(cols) * pixelSize
+        let totalH = CGFloat(rows) * pixelSize
+
+        for (rowIdx, row) in gear.enumerated() {
+            for (colIdx, pixel) in row.enumerated() {
+                if pixel == 1 {
+                    let px = SKSpriteNode(color: color, size: CGSize(width: pixelSize, height: pixelSize))
+                    let xPos = CGFloat(colIdx) * pixelSize - totalW / 2 + pixelSize / 2
+                    let yPos = CGFloat(rows - 1 - rowIdx) * pixelSize - totalH / 2 + pixelSize / 2
+                    px.position = CGPoint(x: xPos, y: yPos)
+                    node.addChild(px)
+                }
+            }
+        }
+
+        return node
     }
 
     private func createStatBar(name: String) -> SKNode {
@@ -366,6 +428,13 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             if modal.handleTouch(at: location) {
                 return
             }
+        }
+
+        // Check settings button
+        if let settingsButton = childNode(withName: "settingsButton"), settingsButton.contains(location) {
+            animateButtonPress(settingsButton)
+            sceneManager?.presentScene(.settings)
+            return
         }
 
         // Check action buttons
