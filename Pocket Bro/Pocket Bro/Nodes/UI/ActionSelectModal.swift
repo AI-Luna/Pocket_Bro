@@ -57,12 +57,12 @@ class ActionSelectModal: SKNode {
         overlay.name = "overlay"
         addChild(overlay)
 
-        // Modal container
+        // Modal container - centered on screen with reduced height
         let modalWidth = sceneSize.width - 30
-        let modalHeight: CGFloat = 540
+        let modalHeight: CGFloat = 420 // Reduced from 540 to remove dead space
 
         let modal = SKNode()
-        modal.position = CGPoint(x: 0, y: 40)
+        modal.position = CGPoint(x: 0, y: 0) // Centered instead of y: 40
         modal.zPosition = 1
         modal.name = "modalContainer"
         addChild(modal)
@@ -73,10 +73,10 @@ class ActionSelectModal: SKNode {
         bg.strokeColor = .clear
         modal.addChild(bg)
 
-        // Title
+        // Title - using PixelFont
         let title = SKLabelNode(text: categoryTitle)
-        title.fontName = "Menlo-Bold"
-        title.fontSize = 22
+        title.fontName = PixelFont.name
+        title.fontSize = PixelFont.title
         title.fontColor = textColor
         title.horizontalAlignmentMode = .left
         title.position = CGPoint(x: -modalWidth/2 + 20, y: modalHeight/2 - 45)
@@ -102,7 +102,7 @@ class ActionSelectModal: SKNode {
         button.addChild(bg)
 
         let x = SKLabelNode(text: "✕")
-        x.fontName = "Menlo-Bold"
+        x.fontName = PixelFont.name
         x.fontSize = 18
         x.fontColor = textColor
         x.verticalAlignmentMode = .center
@@ -120,7 +120,8 @@ class ActionSelectModal: SKNode {
 
         let gridWidth = CGFloat(cols) * cardWidth + CGFloat(cols - 1) * spacingX
         let startX = -gridWidth / 2 + cardWidth / 2
-        let startY = modalHeight / 2 - 90 - cardHeight / 2
+        // Adjusted to center grid better with reduced modal height
+        let startY = modalHeight / 2 - 80 - cardHeight / 2
 
         for (index, action) in actions.enumerated() {
             let row = index / cols
@@ -162,13 +163,14 @@ class ActionSelectModal: SKNode {
             card.addChild(indicator)
         }
 
-        // Action icon or emoji (large, center)
+        // Action icon or emoji (large, centered in cell)
         if let iconIndex = action.foodIconIndex {
             // Use food sprite sheet icon - doubled size for better visibility
             let iconSprite = createFoodIcon(index: iconIndex, size: 110)
-            iconSprite.position = CGPoint(x: 0, y: 20)
+            iconSprite.position = CGPoint(x: 0, y: 10) // Centered vertically in card
             iconSprite.zPosition = 2 // Ensure icon is above background
-            if !canPerform || isOnCooldown {
+            // Only reduce opacity if can't perform, NOT for cooldown
+            if !canPerform {
                 iconSprite.alpha = 0.4
             }
             card.addChild(iconSprite)
@@ -176,10 +178,10 @@ class ActionSelectModal: SKNode {
             // Use emoji
             let emojiLabel = SKLabelNode(text: action.emoji)
             emojiLabel.fontSize = 50
-            emojiLabel.position = CGPoint(x: 0, y: 15)
+            emojiLabel.position = CGPoint(x: 0, y: 10) // Centered vertically in card
             emojiLabel.verticalAlignmentMode = .center
             emojiLabel.zPosition = 2
-            if !canPerform || isOnCooldown {
+            if !canPerform {
                 emojiLabel.alpha = 0.4
             }
             card.addChild(emojiLabel)
@@ -190,28 +192,28 @@ class ActionSelectModal: SKNode {
             let cooldownBg = SKShapeNode(rectOf: CGSize(width: size.width - 10, height: size.height - 40), cornerRadius: 8)
             cooldownBg.fillColor = SKColor.black.withAlphaComponent(0.3)
             cooldownBg.strokeColor = .clear
-            cooldownBg.position = CGPoint(x: 0, y: 10)
+            cooldownBg.position = CGPoint(x: 0, y: 5)
             cooldownBg.zPosition = 1 // Below icon but above background
             card.addChild(cooldownBg)
 
             let cooldownLabel = SKLabelNode(text: "\(Int(cooldown))s")
-            cooldownLabel.fontName = "Menlo-Bold"
-            cooldownLabel.fontSize = 14
+            cooldownLabel.fontName = PixelFont.name
+            cooldownLabel.fontSize = PixelFont.body
             cooldownLabel.fontColor = .white
-            cooldownLabel.position = CGPoint(x: 0, y: 15)
+            cooldownLabel.position = CGPoint(x: 0, y: 10)
             cooldownLabel.verticalAlignmentMode = .center
             cooldownLabel.zPosition = 3 // Above everything
             card.addChild(cooldownLabel)
         }
 
-        // Name and quantity/energy cost
+        // Name and quantity/energy cost - using PixelFont
         let nameText = action.name
         let energyCost = action.effects[.energy] ?? 0
         let costText = energyCost < 0 ? "⚡\(abs(energyCost))" : ""
 
         let nameLabel = SKLabelNode(text: nameText)
-        nameLabel.fontName = "Menlo-Bold"
-        nameLabel.fontSize = 10
+        nameLabel.fontName = PixelFont.name
+        nameLabel.fontSize = PixelFont.tiny
         nameLabel.fontColor = canPerform ? textColor : disabledColor
         nameLabel.position = CGPoint(x: 0, y: -size.height/2 + 28)
         nameLabel.zPosition = 2
@@ -219,7 +221,7 @@ class ActionSelectModal: SKNode {
 
         if !costText.isEmpty {
             let costLabel = SKLabelNode(text: costText)
-            costLabel.fontName = "Menlo"
+            costLabel.fontName = PixelFont.regularName
             costLabel.fontSize = 9
             costLabel.fontColor = canPerform ? textColor.withAlphaComponent(0.6) : disabledColor
             costLabel.position = CGPoint(x: 0, y: -size.height/2 + 14)
