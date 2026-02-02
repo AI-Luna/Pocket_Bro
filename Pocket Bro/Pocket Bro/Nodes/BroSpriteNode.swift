@@ -21,12 +21,16 @@ class BroSpriteNode: SKNode {
     // Eating/drinking sprite sheet layout: 5 columns x 4 rows
     private var eatingFrames: [[SKTexture]] = []
 
+    // Typing sprite sheet layout: 5 columns x 4 rows (7 frames used)
+    private var typingSheetFrames: [[SKTexture]] = []
+
     // Animation frame groups
     private var idleFrames: [SKTexture] = []
     private var walkFrames: [SKTexture] = []
     private var workFrames: [SKTexture] = []
     private var jumpFrame: SKTexture?
     private var eatDrinkFrames: [SKTexture] = []
+    private var typingFrames: [SKTexture] = []
 
     var archetype: Archetype = .bro {
         didSet { updateAppearance() }
@@ -40,6 +44,7 @@ class BroSpriteNode: SKNode {
         super.init()
         loadSpriteSheet()
         loadEatingDrinkingSpriteSheet()
+        loadTypingSpriteSheet()
         setupSprites()
     }
 
@@ -130,6 +135,39 @@ class BroSpriteNode: SKNode {
             eatingFrames[1][0], eatingFrames[1][1], eatingFrames[1][2], eatingFrames[1][3], eatingFrames[1][4],
             eatingFrames[2][0], eatingFrames[2][1], eatingFrames[2][2], eatingFrames[2][3], eatingFrames[2][4],
             eatingFrames[3][0], eatingFrames[3][1], eatingFrames[3][2], eatingFrames[3][3]
+        ]
+    }
+
+    private func loadTypingSpriteSheet() {
+        let sheetTexture = SKTexture(imageNamed: "TypingSpriteSheet")
+        sheetTexture.filteringMode = .nearest
+
+        let frameWidth = 1.0 / CGFloat(columns)
+        let frameHeight = 1.0 / CGFloat(rows)
+
+        // Inset each texture rect by half a pixel to prevent SpriteKit sampling bleed
+        let insetX = 0.5 / 400.0  // sheet is 400px wide
+        let insetY = 0.5 / 384.0  // sheet is 384px tall
+
+        for row in 0..<rows {
+            var rowFrames: [SKTexture] = []
+            for col in 0..<columns {
+                let x = CGFloat(col) * frameWidth + insetX
+                let y = CGFloat(rows - 1 - row) * frameHeight + insetY
+                let rect = CGRect(x: x, y: y, width: frameWidth - 2 * insetX, height: frameHeight - 2 * insetY)
+                let frame = SKTexture(rect: rect, in: sheetTexture)
+                frame.filteringMode = .nearest
+                rowFrames.append(frame)
+            }
+            typingSheetFrames.append(rowFrames)
+        }
+
+        // Build typing animation sequence from the sprite sheet
+        // Row 0: 4 typing frames (hands on keyboard poses)
+        // Row 1: 3 typing frames (leaning forward poses)
+        typingFrames = [
+            typingSheetFrames[0][0], typingSheetFrames[0][1], typingSheetFrames[0][2], typingSheetFrames[0][3],
+            typingSheetFrames[1][0], typingSheetFrames[1][1], typingSheetFrames[1][2]
         ]
     }
 
@@ -268,6 +306,31 @@ class BroSpriteNode: SKNode {
         let chewLoop = SKAction.animate(with: chewingFrames, timePerFrame: 0.12, resize: false, restore: false)
 
         let sequence = SKAction.sequence([fullCycle, chewLoop])
+
+        bodySprite.run(sequence) { [weak self] in
+            self?.startIdleAnimation()
+        }
+    }
+
+    func playTypingAnimation() {
+        guard !typingFrames.isEmpty else {
+            playActionAnimation()
+            return
+        }
+
+        stopAllAnimations()
+
+        // Play through all typing frames, then loop the main typing cycle
+        let fullCycle = SKAction.animate(with: typingFrames, timePerFrame: 0.18, resize: false, restore: false)
+
+        // Loop the hand-movement frames (row 0, indices 0-3) for sustained typing
+        let keystrokeFrames = Array(typingFrames[0...3])
+        let keystrokeLoop = SKAction.repeat(
+            SKAction.animate(with: keystrokeFrames, timePerFrame: 0.15, resize: false, restore: false),
+            count: 3
+        )
+
+        let sequence = SKAction.sequence([fullCycle, keystrokeLoop])
 
         bodySprite.run(sequence) { [weak self] in
             self?.startIdleAnimation()

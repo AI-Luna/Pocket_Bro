@@ -420,6 +420,15 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
                         self?.startWalkingPatrol()
                     }
                 ]))
+            } else if action.category == .work {
+                broSprite.playTypingAnimation()
+                // Resume patrol after typing animation finishes
+                run(SKAction.sequence([
+                    SKAction.wait(forDuration: 4.0),
+                    SKAction.run { [weak self] in
+                        self?.startWalkingPatrol()
+                    }
+                ]))
             } else {
                 broSprite.playActionAnimation()
             }
