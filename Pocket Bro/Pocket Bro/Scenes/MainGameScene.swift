@@ -30,10 +30,10 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     private var gameAreaHeight: CGFloat = 0
 
     override func setupScene() {
-        // Calculate layout
+        // Calculate layout with reduced stats area to prevent overlap
         let safeTop = safeAreaInsets().top
         let safeBottom = safeAreaInsets().bottom
-        statsAreaHeight = 120 + safeTop
+        statsAreaHeight = 100 + safeTop // Reduced from 120 to 100
         buttonAreaHeight = 100 + safeBottom
         gameAreaHeight = size.height - statsAreaHeight - buttonAreaHeight
 
@@ -159,15 +159,15 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     // MARK: - Stats Area
 
     private func setupStatsArea() {
-        // Settings button at very top right (separate from stats)
-        let settingsY = size.height - safeAreaInsets().top - 25
+        // Settings button moved down to avoid notch
+        let settingsY = size.height - safeAreaInsets().top - 40
         let settingsButton = createSettingsButton()
         settingsButton.position = CGPoint(x: size.width - 30, y: settingsY)
         settingsButton.name = "settingsButton"
         addChild(settingsButton)
 
-        // Stats below settings button
-        let statsY = size.height - safeAreaInsets().top - 70
+        // Stats positioned well below notch/camera
+        let statsY = size.height - safeAreaInsets().top - 90
         let stats: [(name: String, label: String)] = [
             ("energy", "ENERGY"),
             ("health", "HEALTH"),
