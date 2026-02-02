@@ -159,7 +159,17 @@ class ActionSelectModal: SKNode {
         // Action icon or emoji (large, centered in cell)
         if let iconIndex = action.foodIconIndex {
             // Use food sprite sheet icon - doubled size for better visibility
-            let iconSprite = createFoodIcon(index: iconIndex, size: 110)
+            let iconSprite = createIconFromSheet(sheetName: "FoodIcons", index: iconIndex, size: 110)
+            iconSprite.position = CGPoint(x: 0, y: 10) // Centered vertically in card
+            iconSprite.zPosition = 2 // Ensure icon is above background
+            // Only reduce opacity if can't perform, NOT for cooldown
+            if !canPerform {
+                iconSprite.alpha = 0.4
+            }
+            card.addChild(iconSprite)
+        } else if let iconIndex = action.socialIconIndex {
+            // Use social sprite sheet icon - same size as food icons
+            let iconSprite = createIconFromSheet(sheetName: "SocialIcons", index: iconIndex, size: 110)
             iconSprite.position = CGPoint(x: 0, y: 10) // Centered vertically in card
             iconSprite.zPosition = 2 // Ensure icon is above background
             // Only reduce opacity if can't perform, NOT for cooldown
@@ -225,11 +235,11 @@ class ActionSelectModal: SKNode {
         return card
     }
 
-    private func createFoodIcon(index: Int, size: CGFloat) -> SKSpriteNode {
-        // Food sprite sheet is 3 columns x 2 rows
-        // Top row (row 0): 0=energy drink, 1=protein shake, 2=ramen
-        // Bottom row (row 1): 3=doordash, 4=healthy meal, 5=team dinner
-        let texture = SKTexture(imageNamed: "FoodIcons")
+    private func createIconFromSheet(sheetName: String, index: Int, size: CGFloat) -> SKSpriteNode {
+        // Both food and social sprite sheets are 3 columns x 2 rows
+        // Food: 0=energy drink, 1=protein shake, 2=ramen, 3=doordash, 4=healthy meal, 5=team dinner
+        // Social: 0=phone, 1=coffee, 2=dinner plate, 3=heart, 4=party, 5=book/pipe
+        let texture = SKTexture(imageNamed: sheetName)
 
         // Calculate grid position
         let col = index % 3
