@@ -158,19 +158,30 @@ class OnboardingScene: SKScene {
         border.isHidden = true
         card.addChild(border)
 
-        // Character emoji
-        let emoji: String
-        switch archetype {
-        case .bro: emoji = "👨‍💻"
-        case .gal: emoji = "👩‍💻"
-        case .nonBinary: emoji = "🧑‍💻"
+        // Character icon
+        if archetype == .bro {
+            // Use actual image for Tech Bro
+            let texture = SKTexture(imageNamed: "TechBroIcon")
+            let iconSprite = SKSpriteNode(texture: texture)
+            let iconSize: CGFloat = 55
+            let scale = iconSize / max(texture.size().width, texture.size().height)
+            iconSprite.setScale(scale)
+            iconSprite.position = CGPoint(x: 0, y: 10)
+            card.addChild(iconSprite)
+        } else {
+            // Use emoji for others (for now)
+            let emoji: String
+            switch archetype {
+            case .bro: emoji = "👨‍💻"
+            case .gal: emoji = "👩‍💻"
+            case .nonBinary: emoji = "🧑‍💻"
+            }
+            let emojiLabel = SKLabelNode(text: emoji)
+            emojiLabel.fontSize = 50
+            emojiLabel.position = CGPoint(x: 0, y: 10)
+            emojiLabel.verticalAlignmentMode = .center
+            card.addChild(emojiLabel)
         }
-
-        let emojiLabel = SKLabelNode(text: emoji)
-        emojiLabel.fontSize = 50
-        emojiLabel.position = CGPoint(x: 0, y: 10)
-        emojiLabel.verticalAlignmentMode = .center
-        card.addChild(emojiLabel)
 
         // Name label
         let nameLabel = SKLabelNode(text: archetype.rawValue)
@@ -202,16 +213,27 @@ class OnboardingScene: SKScene {
         contentNode.addChild(titleLabel)
 
         // Character preview
-        let emoji: String
-        switch selectedArchetype {
-        case .bro: emoji = "👨‍💻"
-        case .gal: emoji = "👩‍💻"
-        case .nonBinary: emoji = "🧑‍💻"
+        let preview: SKNode
+        if selectedArchetype == .bro {
+            let texture = SKTexture(imageNamed: "TechBroIcon")
+            let iconSprite = SKSpriteNode(texture: texture)
+            let iconSize: CGFloat = 80
+            let scale = iconSize / max(texture.size().width, texture.size().height)
+            iconSprite.setScale(scale)
+            iconSprite.position = CGPoint(x: size.width / 2, y: size.height / 2 + 120)
+            preview = iconSprite
+        } else {
+            let emoji: String
+            switch selectedArchetype {
+            case .bro: emoji = "👨‍💻"
+            case .gal: emoji = "👩‍💻"
+            case .nonBinary: emoji = "🧑‍💻"
+            }
+            let emojiLabel = SKLabelNode(text: emoji)
+            emojiLabel.fontSize = 80
+            emojiLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 + 120)
+            preview = emojiLabel
         }
-
-        let preview = SKLabelNode(text: emoji)
-        preview.fontSize = 80
-        preview.position = CGPoint(x: size.width / 2, y: size.height / 2 + 120)
         contentNode.addChild(preview)
 
         // Bounce animation
