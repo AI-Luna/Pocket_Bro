@@ -421,6 +421,8 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
                     }
                 ]))
             } else if action.category == .work {
+                // Face right while typing
+                broSprite.xScale = abs(broSprite.xScale)
                 broSprite.playTypingAnimation()
                 // Resume patrol after typing animation finishes
                 run(SKAction.sequence([
