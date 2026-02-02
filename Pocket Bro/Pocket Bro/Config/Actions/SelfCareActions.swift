@@ -5,6 +5,10 @@
 
 import Foundation
 
+// Self-care icon indices in sprite sheet (3 cols x 2 rows):
+// 0: Sleep Mask  1: Lotus Flower  2: Mountain/Nature
+// 3: Dumbbells  4: Therapy Couch  5: Bed with Moon
+
 enum SelfCareActions {
     static let all: [GameAction] = [
         powerNap,
@@ -24,7 +28,8 @@ enum SelfCareActions {
         effects: [
             .energy: 25,
             .burnout: -5
-        ]
+        ],
+        selfCareIconIndex: 0
     )
 
     static let meditation = GameAction(
@@ -38,7 +43,8 @@ enum SelfCareActions {
             .happiness: 10,
             .health: 5
         ],
-        cooldownSeconds: 300
+        cooldownSeconds: 300,
+        selfCareIconIndex: 1
     )
 
     static let exercise = GameAction(
@@ -53,8 +59,8 @@ enum SelfCareActions {
             .happiness: 15,
             .burnout: -10
         ],
-        requirements: [.energy: 20],
-        cooldownSeconds: 600
+        cooldownSeconds: 600,
+        selfCareIconIndex: 3
     )
 
     static let therapySession = GameAction(
@@ -70,7 +76,7 @@ enum SelfCareActions {
             .runway: -1
         ],
         cooldownSeconds: 900,
-        minStage: .preSeed
+        selfCareIconIndex: 4
     )
 
     static let vacation = GameAction(
@@ -86,9 +92,8 @@ enum SelfCareActions {
             .burnout: -40,
             .runway: -5
         ],
-        requirements: [.burnout: 30],
         cooldownSeconds: 3600,
-        minStage: .seed
+        selfCareIconIndex: 2
     )
 
     static let sleepFull = GameAction(
@@ -103,6 +108,7 @@ enum SelfCareActions {
             .burnout: -20,
             .happiness: 10
         ],
-        cooldownSeconds: 600
+        cooldownSeconds: 600,
+        selfCareIconIndex: 5
     )
 }
