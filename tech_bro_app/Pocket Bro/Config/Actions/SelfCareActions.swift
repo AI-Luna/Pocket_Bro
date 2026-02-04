@@ -98,7 +98,7 @@ enum SelfCareActions {
 
     static let sleepFull = GameAction(
         id: "care_sleep",
-        name: "Full Night's Sleep",
+        name: "8-Hr Sleep",
         category: .selfCare,
         description: "8 hours of quality sleep. A luxury for founders.",
         emoji: "🌙",

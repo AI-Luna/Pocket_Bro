@@ -92,6 +92,13 @@ final class GameManager {
         persistence.delete()
     }
 
+    func resetAllData() {
+        stopGameLoop()
+        state = nil
+        persistence.delete()
+        persistence.clearOnboardingComplete()
+    }
+
     // MARK: - Actions
 
     func performAction(_ action: GameAction) -> ActionResult? {

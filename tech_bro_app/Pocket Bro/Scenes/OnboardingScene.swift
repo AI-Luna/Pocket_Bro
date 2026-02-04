@@ -432,6 +432,7 @@ class OnboardingScene: SKScene {
         fieldGlow.glowWidth = 15
         fieldGlow.position = CGPoint(x: size.width / 2, y: fieldY)
         fieldGlow.zPosition = -1
+        fieldGlow.name = "nameFieldGlow"
         contentNode.addChild(fieldGlow)
 
         // Field background - dark purple with pink border
@@ -790,7 +791,7 @@ class OnboardingScene: SKScene {
         if currentStep == .nameFounder {
             let fieldWidth = size.width - 60
             let fieldHeight: CGFloat = 65
-            let fieldY = size.height / 2 - 40
+            let fieldY = size.height / 2 - 60  // Same as setupNameFounderStep
             let fieldArea = CGRect(x: (size.width - fieldWidth) / 2, y: fieldY - fieldHeight / 2, width: fieldWidth, height: fieldHeight)
             if fieldArea.contains(location) {
                 promptForName()
@@ -837,10 +838,10 @@ class OnboardingScene: SKScene {
         // Remove existing text field if any
         nameTextField?.removeFromSuperview()
         
-        // Calculate position - convert SpriteKit coordinates to UIKit
+        // Calculate position - must match setupNameFounderStep() exactly
         let fieldWidth = size.width - 60
         let fieldHeight: CGFloat = 65
-        let fieldY = size.height / 2 - 40
+        let fieldY = size.height / 2 - 60  // Same as setupNameFounderStep
         
         // Convert from SpriteKit coordinates (origin at bottom-left) to UIKit (origin at top-left)
         let uiFieldY = size.height - fieldY - fieldHeight / 2
@@ -886,9 +887,15 @@ class OnboardingScene: SKScene {
         
         nameTextField = textField
         
-        // Hide the SpriteKit name display while editing
+        // Hide ALL SpriteKit name field elements while editing
         if let nameDisplay = contentNode.childNode(withName: "nameDisplay") {
             nameDisplay.isHidden = true
+        }
+        if let fieldBg = contentNode.childNode(withName: "nameFieldBg") {
+            fieldBg.isHidden = true
+        }
+        if let fieldGlow = contentNode.childNode(withName: "nameFieldGlow") {
+            fieldGlow.isHidden = true
         }
     }
     
@@ -905,9 +912,15 @@ class OnboardingScene: SKScene {
         textField.removeFromSuperview()
         nameTextField = nil
         
-        // Show and update the SpriteKit name display
+        // Show ALL SpriteKit name field elements
         if let nameDisplay = contentNode.childNode(withName: "nameDisplay") {
             nameDisplay.isHidden = false
+        }
+        if let fieldBg = contentNode.childNode(withName: "nameFieldBg") {
+            fieldBg.isHidden = false
+        }
+        if let fieldGlow = contentNode.childNode(withName: "nameFieldGlow") {
+            fieldGlow.isHidden = false
         }
         updateNameDisplay()
     }

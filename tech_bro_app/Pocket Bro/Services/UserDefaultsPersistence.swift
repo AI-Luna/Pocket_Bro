@@ -13,6 +13,7 @@ protocol PersistenceService {
     func loadLastBackgroundTime() -> Date?
     func saveActionCooldowns(_ cooldowns: [String: Date])
     func loadActionCooldowns() -> [String: Date]
+    func clearOnboardingComplete()
 }
 
 final class UserDefaultsPersistence: PersistenceService {
@@ -74,5 +75,14 @@ final class UserDefaultsPersistence: PersistenceService {
             print("Failed to load cooldowns: \(error)")
             return [:]
         }
+    }
+
+    func clearOnboardingComplete() {
+        // Clear any onboarding-related flags
+        // Currently the game uses the presence of saved state to determine onboarding status
+        // This method is here for future extensibility
+        defaults.removeObject(forKey: Keys.broState)
+        defaults.removeObject(forKey: Keys.lastBackgroundTime)
+        defaults.removeObject(forKey: Keys.actionCooldowns)
     }
 }

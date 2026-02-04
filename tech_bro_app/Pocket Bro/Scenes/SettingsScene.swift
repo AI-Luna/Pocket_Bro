@@ -1,20 +1,21 @@
 //
 //  SettingsScene.swift
 //  Pocket Bro
-//
 
 import SpriteKit
+import StoreKit
 
 class SettingsScene: SKScene {
     weak var sceneManager: SceneManager?
 
-    // Colors - LCD green theme to match app
-    private let backgroundColor_ = SKColor(red: 0.45, green: 0.55, blue: 0.45, alpha: 1.0)
-    private let cardColor = SKColor(red: 0.52, green: 0.62, blue: 0.52, alpha: 1.0)
-    private let textColor = SKColor(red: 0.15, green: 0.20, blue: 0.15, alpha: 1.0)
-    private let accentColor = SKColor(red: 0.7, green: 0.3, blue: 0.7, alpha: 1.0)
-    private let toggleOnColor = SKColor(red: 0.3, green: 0.7, blue: 0.4, alpha: 1.0)
-    private let toggleOffColor = SKColor(red: 0.35, green: 0.45, blue: 0.35, alpha: 1.0)
+    // Colors - Synthwave theme to match onboarding
+    private let backgroundColor_ = SKColor(red: 0.22, green: 0.12, blue: 0.38, alpha: 1.0) // Deep purple
+    private let cardColor = SKColor(red: 0.28, green: 0.18, blue: 0.45, alpha: 1.0)
+    private let textColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0) // Bright cyan
+    private let secondaryTextColor = SKColor(red: 0.7, green: 0.8, blue: 0.9, alpha: 1.0)
+    private let accentColor = SKColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0) // Hot pink
+    private let toggleOnColor = SKColor(red: 0.0, green: 0.85, blue: 0.85, alpha: 1.0) // Cyan
+    private let toggleOffColor = SKColor(red: 0.35, green: 0.25, blue: 0.50, alpha: 1.0)
 
     // State
     private var liveActivitiesEnabled = true
@@ -50,15 +51,15 @@ class SettingsScene: SKScene {
         // Title
         let title = SKLabelNode(text: "Settings")
         title.fontName = PixelFont.name
-        title.fontSize = PixelFont.huge
+        title.fontSize = 32
         title.fontColor = textColor
         title.horizontalAlignmentMode = .left
-        title.position = CGPoint(x: 25, y: size.height - safeTop - 45)
+        title.position = CGPoint(x: 25, y: size.height - safeTop - 50)
         addChild(title)
 
-        // Close button (pixelated X)
+        // Close button
         let closeButton = createCloseButton()
-        closeButton.position = CGPoint(x: size.width - 40, y: size.height - safeTop - 40)
+        closeButton.position = CGPoint(x: size.width - 45, y: size.height - safeTop - 45)
         closeButton.name = "closeButton"
         addChild(closeButton)
     }
@@ -66,52 +67,22 @@ class SettingsScene: SKScene {
     private func createCloseButton() -> SKNode {
         let button = SKNode()
 
-        let bg = SKShapeNode(rectOf: CGSize(width: 32, height: 32), cornerRadius: 4)
+        let bg = SKShapeNode(rectOf: CGSize(width: 40, height: 40), cornerRadius: 8)
         bg.fillColor = cardColor
         bg.strokeColor = textColor.withAlphaComponent(0.3)
         bg.lineWidth = 2
         button.addChild(bg)
 
-        // Pixel X
-        let xNode = drawPixelX()
-        button.addChild(xNode)
+        // X label
+        let xLabel = SKLabelNode(text: "✕")
+        xLabel.fontName = PixelFont.name
+        xLabel.fontSize = 20
+        xLabel.fontColor = textColor
+        xLabel.verticalAlignmentMode = .center
+        xLabel.horizontalAlignmentMode = .center
+        button.addChild(xLabel)
 
         return button
-    }
-
-    private func drawPixelX() -> SKNode {
-        let node = SKNode()
-        let pixelSize: CGFloat = 2
-        let color = textColor
-
-        let pattern: [[Int]] = [
-            [1,0,0,0,0,0,1],
-            [0,1,0,0,0,1,0],
-            [0,0,1,0,1,0,0],
-            [0,0,0,1,0,0,0],
-            [0,0,1,0,1,0,0],
-            [0,1,0,0,0,1,0],
-            [1,0,0,0,0,0,1]
-        ]
-
-        let rows = pattern.count
-        let cols = pattern[0].count
-        let totalW = CGFloat(cols) * pixelSize
-        let totalH = CGFloat(rows) * pixelSize
-
-        for (rowIdx, row) in pattern.enumerated() {
-            for (colIdx, pixel) in row.enumerated() {
-                if pixel == 1 {
-                    let px = SKSpriteNode(color: color, size: CGSize(width: pixelSize, height: pixelSize))
-                    let xPos = CGFloat(colIdx) * pixelSize - totalW / 2 + pixelSize / 2
-                    let yPos = CGFloat(rows - 1 - rowIdx) * pixelSize - totalH / 2 + pixelSize / 2
-                    px.position = CGPoint(x: xPos, y: yPos)
-                    node.addChild(px)
-                }
-            }
-        }
-
-        return node
     }
 
     // MARK: - Pro Banner
@@ -122,22 +93,30 @@ class SettingsScene: SKScene {
         let bannerHeight: CGFloat = 60
 
         let banner = SKNode()
-        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 105)
+        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 110)
         banner.name = "proBanner"
         addChild(banner)
 
-        // Background
-        let bg = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 10)
+        // Background with glow
+        let glowBg = SKShapeNode(rectOf: CGSize(width: bannerWidth + 8, height: bannerHeight + 8), cornerRadius: 16)
+        glowBg.fillColor = accentColor.withAlphaComponent(0.3)
+        glowBg.strokeColor = .clear
+        glowBg.glowWidth = 10
+        glowBg.zPosition = -1
+        banner.addChild(glowBg)
+
+        let bg = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 12)
         bg.fillColor = accentColor
         bg.strokeColor = .clear
         banner.addChild(bg)
 
-        // Emojis and text on same line
-        let text = SKLabelNode(text: "🥦 😊 💗  Get full access Now!")
+        // Text only - no emojis
+        let text = SKLabelNode(text: "Get Full Access Now!")
         text.fontName = PixelFont.name
-        text.fontSize = PixelFont.body
+        text.fontSize = 18
         text.fontColor = .white
         text.verticalAlignmentMode = .center
+        text.horizontalAlignmentMode = .center
         banner.addChild(text)
     }
 
@@ -145,8 +124,8 @@ class SettingsScene: SKScene {
 
     private func setupProfileSection() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 185
-        let rowHeight: CGFloat = 44
+        let sectionY = size.height - safeTop - 210
+        let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 50
 
         // Section background
@@ -161,7 +140,7 @@ class SettingsScene: SKScene {
         addChild(row1)
 
         // Divider
-        let divider = SKSpriteNode(color: textColor.withAlphaComponent(0.15), size: CGSize(width: sectionWidth - 24, height: 1))
+        let divider = SKSpriteNode(color: textColor.withAlphaComponent(0.2), size: CGSize(width: sectionWidth - 32, height: 1))
         divider.position = CGPoint(x: size.width / 2, y: sectionY)
         addChild(divider)
 
@@ -176,8 +155,8 @@ class SettingsScene: SKScene {
 
     private func setupPreferencesSection() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 305
-        let rowHeight: CGFloat = 44
+        let sectionY = size.height - safeTop - 330
+        let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 50
 
         // Section background
@@ -195,8 +174,8 @@ class SettingsScene: SKScene {
 
     private func setupLinksSection() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 450
-        let rowHeight: CGFloat = 44
+        let sectionY = size.height - safeTop - 490
+        let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 50
 
         let rows = ["Rate Us", "Share App", "Restore", "Privacy Policy", "Terms of Use"]
@@ -217,7 +196,7 @@ class SettingsScene: SKScene {
             addChild(row)
 
             if index < rows.count - 1 {
-                let divider = SKSpriteNode(color: textColor.withAlphaComponent(0.15), size: CGSize(width: sectionWidth - 24, height: 1))
+                let divider = SKSpriteNode(color: textColor.withAlphaComponent(0.2), size: CGSize(width: sectionWidth - 32, height: 1))
                 divider.position = CGPoint(x: size.width / 2, y: rowY - rowHeight / 2)
                 addChild(divider)
             }
@@ -227,11 +206,22 @@ class SettingsScene: SKScene {
     // MARK: - Version Label
 
     private func setupVersionLabel() {
-        let version = SKLabelNode(text: "1.0.0 Version")
+        let safeBottom = view?.safeAreaInsets.bottom ?? 20
+
+        // Reset onboarding button (faint, for dev use)
+        let resetButton = SKLabelNode(text: "Reset Onboarding")
+        resetButton.fontName = PixelFont.regularName
+        resetButton.fontSize = 12
+        resetButton.fontColor = textColor.withAlphaComponent(0.25)
+        resetButton.position = CGPoint(x: size.width / 2, y: safeBottom + 55)
+        resetButton.name = "resetOnboarding"
+        addChild(resetButton)
+
+        let version = SKLabelNode(text: "Version 1.0.0")
         version.fontName = PixelFont.regularName
-        version.fontSize = PixelFont.small
-        version.fontColor = textColor.withAlphaComponent(0.5)
-        version.position = CGPoint(x: size.width / 2, y: 35)
+        version.fontSize = 14
+        version.fontColor = textColor.withAlphaComponent(0.4)
+        version.position = CGPoint(x: size.width / 2, y: safeBottom + 25)
         addChild(version)
     }
 
@@ -239,9 +229,9 @@ class SettingsScene: SKScene {
 
     private func createSectionBackground(rows: Int, rowHeight: CGFloat, width: CGFloat) -> SKNode {
         let height = CGFloat(rows) * rowHeight
-        let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 10)
+        let bg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 14)
         bg.fillColor = cardColor
-        bg.strokeColor = textColor.withAlphaComponent(0.1)
+        bg.strokeColor = textColor.withAlphaComponent(0.15)
         bg.lineWidth = 1
         return bg
     }
@@ -252,29 +242,29 @@ class SettingsScene: SKScene {
 
         let titleLabel = SKLabelNode(text: title)
         titleLabel.fontName = PixelFont.name
-        titleLabel.fontSize = PixelFont.body
+        titleLabel.fontSize = 18
         titleLabel.fontColor = textColor
         titleLabel.horizontalAlignmentMode = .left
         titleLabel.verticalAlignmentMode = .center
-        titleLabel.position = CGPoint(x: -width / 2 + 16, y: 0)
+        titleLabel.position = CGPoint(x: -width / 2 + 20, y: 0)
         row.addChild(titleLabel)
 
         let valueLabel = SKLabelNode(text: value)
         valueLabel.fontName = PixelFont.regularName
-        valueLabel.fontSize = PixelFont.small
-        valueLabel.fontColor = textColor.withAlphaComponent(0.7)
+        valueLabel.fontSize = 16
+        valueLabel.fontColor = secondaryTextColor
         valueLabel.horizontalAlignmentMode = .right
         valueLabel.verticalAlignmentMode = .center
-        valueLabel.position = CGPoint(x: width / 2 - 35, y: 0)
+        valueLabel.position = CGPoint(x: width / 2 - 40, y: 0)
         row.addChild(valueLabel)
 
         let arrow = SKLabelNode(text: "›")
         arrow.fontName = PixelFont.name
-        arrow.fontSize = PixelFont.large
-        arrow.fontColor = textColor.withAlphaComponent(0.4)
+        arrow.fontSize = 24
+        arrow.fontColor = textColor.withAlphaComponent(0.5)
         arrow.horizontalAlignmentMode = .right
         arrow.verticalAlignmentMode = .center
-        arrow.position = CGPoint(x: width / 2 - 16, y: 0)
+        arrow.position = CGPoint(x: width / 2 - 18, y: 0)
         row.addChild(arrow)
 
         return row
@@ -286,15 +276,15 @@ class SettingsScene: SKScene {
 
         let titleLabel = SKLabelNode(text: title)
         titleLabel.fontName = PixelFont.name
-        titleLabel.fontSize = PixelFont.body
+        titleLabel.fontSize = 18
         titleLabel.fontColor = textColor
         titleLabel.horizontalAlignmentMode = .left
         titleLabel.verticalAlignmentMode = .center
-        titleLabel.position = CGPoint(x: -width / 2 + 16, y: 0)
+        titleLabel.position = CGPoint(x: -width / 2 + 20, y: 0)
         row.addChild(titleLabel)
 
         let toggle = createToggle(isOn: isOn)
-        toggle.position = CGPoint(x: width / 2 - 35, y: 0)
+        toggle.position = CGPoint(x: width / 2 - 40, y: 0)
         toggle.name = "toggle_\(id)"
         row.addChild(toggle)
 
@@ -307,20 +297,20 @@ class SettingsScene: SKScene {
 
         let titleLabel = SKLabelNode(text: title)
         titleLabel.fontName = PixelFont.name
-        titleLabel.fontSize = PixelFont.body
+        titleLabel.fontSize = 18
         titleLabel.fontColor = textColor
         titleLabel.horizontalAlignmentMode = .left
         titleLabel.verticalAlignmentMode = .center
-        titleLabel.position = CGPoint(x: -width / 2 + 16, y: 0)
+        titleLabel.position = CGPoint(x: -width / 2 + 20, y: 0)
         row.addChild(titleLabel)
 
         let arrow = SKLabelNode(text: "↗")
         arrow.fontName = PixelFont.name
-        arrow.fontSize = PixelFont.medium
-        arrow.fontColor = textColor.withAlphaComponent(0.4)
+        arrow.fontSize = 18
+        arrow.fontColor = textColor.withAlphaComponent(0.5)
         arrow.horizontalAlignmentMode = .right
         arrow.verticalAlignmentMode = .center
-        arrow.position = CGPoint(x: width / 2 - 16, y: 0)
+        arrow.position = CGPoint(x: width / 2 - 18, y: 0)
         row.addChild(arrow)
 
         return row
@@ -329,8 +319,8 @@ class SettingsScene: SKScene {
     private func createToggle(isOn: Bool) -> SKNode {
         let toggle = SKNode()
 
-        let width: CGFloat = 46
-        let height: CGFloat = 26
+        let width: CGFloat = 50
+        let height: CGFloat = 30
 
         let track = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: height / 2)
         track.fillColor = isOn ? toggleOnColor : toggleOffColor
@@ -371,12 +361,22 @@ class SettingsScene: SKScene {
             return
         }
 
+        // Reset onboarding button
+        if let resetButton = childNode(withName: "resetOnboarding") as? SKLabelNode {
+            let expandedFrame = resetButton.frame.insetBy(dx: -20, dy: -15)
+            if expandedFrame.contains(location) {
+                resetOnboarding()
+                return
+            }
+        }
+
         // Check rows
         for node in children {
             guard let name = node.name, name.hasPrefix("row_") else { continue }
 
             if node.contains(location) {
                 let id = String(name.dropFirst("row_".count))
+                animatePress(node)
                 handleRowTap(id: id, node: node)
                 return
             }
@@ -397,13 +397,110 @@ class SettingsScene: SKScene {
                 liveActivitiesEnabled.toggle()
             }
 
-        case "rate", "share", "restore", "privacy", "terms":
-            // Handle external links
-            break
+        case "rate":
+            requestAppReview()
+
+        case "share":
+            shareApp()
+
+        case "restore":
+            restorePurchases()
+
+        case "privacy":
+            openURL("https://example.com/privacy")
+
+        case "terms":
+            openURL("https://example.com/terms")
 
         default:
             break
         }
+    }
+
+    // MARK: - Actions
+
+    private func requestAppReview() {
+        if let windowScene = view?.window?.windowScene {
+            SKStoreReviewController.requestReview(in: windowScene)
+        }
+    }
+
+    private func shareApp() {
+        guard let viewController = self.view?.window?.rootViewController else { return }
+
+        let appURL = "https://apps.apple.com/app/idYOURAPPID" // Replace with actual App Store URL
+        let message = "Check out TechBro Tamagotchi! Raise your own startup founder! 🚀👨‍💻"
+
+        let activityVC = UIActivityViewController(
+            activityItems: [message, appURL],
+            applicationActivities: nil
+        )
+
+        // For iPad
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = viewController.view
+            popover.sourceRect = CGRect(x: viewController.view.bounds.midX, y: viewController.view.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
+
+        viewController.present(activityVC, animated: true, completion: nil)
+    }
+
+    private func restorePurchases() {
+        // Show loading indicator or feedback
+        guard let viewController = self.view?.window?.rootViewController else { return }
+
+        let alert = UIAlertController(
+            title: "Restoring Purchases",
+            message: "Please wait...",
+            preferredStyle: .alert
+        )
+
+        viewController.present(alert, animated: true) {
+            // In a real app, you would call your StoreKit restore logic here
+            // For now, simulate a delay then dismiss
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                alert.dismiss(animated: true) {
+                    let resultAlert = UIAlertController(
+                        title: "Restore Complete",
+                        message: "Your purchases have been restored.",
+                        preferredStyle: .alert
+                    )
+                    resultAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                    viewController.present(resultAlert, animated: true)
+                }
+            }
+        }
+    }
+
+    private func openURL(_ urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+        UIApplication.shared.open(url)
+    }
+
+    private func resetOnboarding() {
+        guard let viewController = self.view?.window?.rootViewController else { return }
+
+        let alert = UIAlertController(
+            title: "Reset Onboarding",
+            message: "This will clear all data and restart the onboarding process. Are you sure?",
+            preferredStyle: .alert
+        )
+
+        let confirmAction = UIAlertAction(title: "Reset", style: .destructive) { [weak self] _ in
+            // Clear all saved data
+            GameManager.shared.resetAllData()
+
+            // Navigate to onboarding
+            self?.sceneManager?.presentScene(.onboarding)
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+
+        alert.addAction(confirmAction)
+        alert.addAction(cancelAction)
+
+        viewController.present(alert, animated: true)
     }
 
     private func promptForName() {
@@ -458,6 +555,13 @@ class SettingsScene: SKScene {
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         alert.addAction(cancelAction)
 
+        // For iPad
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = viewController.view
+            popover.sourceRect = CGRect(x: viewController.view.bounds.midX, y: viewController.view.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
+
         viewController.present(alert, animated: true, completion: nil)
     }
 
@@ -469,8 +573,8 @@ class SettingsScene: SKScene {
         let newState = !isOn
         toggle.userData?["isOn"] = newState
 
-        let width: CGFloat = 46
-        let thumbSize: CGFloat = 22
+        let width: CGFloat = 50
+        let thumbSize: CGFloat = 26
         let newX = newState ? (width / 2 - thumbSize / 2 - 2) : (-width / 2 + thumbSize / 2 + 2)
 
         let moveThumb = SKAction.moveTo(x: newX, duration: 0.15)
@@ -478,7 +582,7 @@ class SettingsScene: SKScene {
         thumb.run(moveThumb)
 
         let newColor = newState ? toggleOnColor : toggleOffColor
-        track.run(SKAction.customAction(withDuration: 0.15) { node, time in
+        track.run(SKAction.customAction(withDuration: 0.15) { node, _ in
             guard let shape = node as? SKShapeNode else { return }
             shape.fillColor = newColor
         })

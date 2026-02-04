@@ -1,20 +1,20 @@
 //
 //  PaywallScene.swift
 //  Pocket Bro
-//
 
 import SpriteKit
+import StoreKit
 
 class PaywallScene: SKScene {
     weak var sceneManager: SceneManager?
 
-    // Colors
-    private let backgroundColor_ = SKColor.white
-    private let textColor = SKColor(red: 0.15, green: 0.15, blue: 0.15, alpha: 1.0)
-    private let secondaryTextColor = SKColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
-    private let accentColor = SKColor(red: 0.6, green: 0.35, blue: 0.75, alpha: 1.0)
-    private let cardColor = SKColor(red: 0.95, green: 0.95, blue: 0.93, alpha: 1.0)
-    private let selectedBorderColor = SKColor(red: 0.4, green: 0.4, blue: 0.45, alpha: 1.0)
+    // Colors - Synthwave theme
+    private let backgroundColor_ = SKColor(red: 0.22, green: 0.12, blue: 0.38, alpha: 1.0) // Deep purple
+    private let cardColor = SKColor(red: 0.28, green: 0.18, blue: 0.45, alpha: 1.0)
+    private let textColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0) // Bright cyan
+    private let secondaryTextColor = SKColor(red: 0.7, green: 0.8, blue: 0.9, alpha: 1.0)
+    private let accentColor = SKColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0) // Hot pink
+    private let featureCardColor = SKColor(red: 0.18, green: 0.10, blue: 0.30, alpha: 1.0)
 
     // State
     private var selectedPlan: PricingPlan = .yearly
@@ -22,6 +22,7 @@ class PaywallScene: SKScene {
     private enum PricingPlan {
         case weekly
         case yearly
+        case lifetime
     }
 
     private var planCards: [PricingPlan: SKNode] = [:]
@@ -53,19 +54,20 @@ class PaywallScene: SKScene {
     // MARK: - Header
 
     private func setupHeader() {
-        let headerY = size.height - 60
+        let safeTop = view?.safeAreaInsets.top ?? 50
+        let headerY = size.height - safeTop - 30
 
         // Close button
         let closeButton = createCloseButton()
-        closeButton.position = CGPoint(x: 35, y: headerY)
+        closeButton.position = CGPoint(x: 40, y: headerY)
         closeButton.name = "closeButton"
         addChild(closeButton)
 
         // Restore button
         let restoreLabel = SKLabelNode(text: "Restore")
-        restoreLabel.fontName = "Menlo-Bold"
+        restoreLabel.fontName = PixelFont.name
         restoreLabel.fontSize = 16
-        restoreLabel.fontColor = secondaryTextColor
+        restoreLabel.fontColor = textColor
         restoreLabel.horizontalAlignmentMode = .right
         restoreLabel.position = CGPoint(x: size.width - 25, y: headerY - 8)
         restoreLabel.name = "restoreButton"
@@ -75,16 +77,16 @@ class PaywallScene: SKScene {
     private func createCloseButton() -> SKNode {
         let button = SKNode()
 
-        let bg = SKShapeNode(rectOf: CGSize(width: 32, height: 32), cornerRadius: 4)
-        bg.fillColor = .clear
-        bg.strokeColor = secondaryTextColor.withAlphaComponent(0.5)
+        let bg = SKShapeNode(rectOf: CGSize(width: 36, height: 36), cornerRadius: 8)
+        bg.fillColor = cardColor
+        bg.strokeColor = textColor.withAlphaComponent(0.3)
         bg.lineWidth = 2
         button.addChild(bg)
 
         let x = SKLabelNode(text: "✕")
-        x.fontName = "Menlo-Bold"
-        x.fontSize = 16
-        x.fontColor = secondaryTextColor
+        x.fontName = PixelFont.name
+        x.fontSize = 18
+        x.fontColor = textColor
         x.verticalAlignmentMode = .center
         button.addChild(x)
 
@@ -94,151 +96,166 @@ class PaywallScene: SKScene {
     // MARK: - Hero Section
 
     private func setupHeroSection() {
-        let heroY = size.height - 220
+        let safeTop = view?.safeAreaInsets.top ?? 50
+        let heroY = size.height - safeTop - 140
 
-        // Sunburst/glow background
-        let glow = SKShapeNode(circleOfRadius: 100)
-        glow.fillColor = SKColor(red: 1.0, green: 0.95, blue: 0.8, alpha: 0.6)
+        // Glow background circle
+        let glow = SKShapeNode(circleOfRadius: 80)
+        glow.fillColor = accentColor.withAlphaComponent(0.15)
         glow.strokeColor = .clear
+        glow.glowWidth = 30
         glow.position = CGPoint(x: size.width / 2, y: heroY)
         glow.zPosition = -1
         addChild(glow)
 
-        // Sparkles
-        let sparklePositions: [(x: CGFloat, y: CGFloat)] = [
-            (-60, 60), (70, 50), (-40, -20), (80, -10), (0, 80)
+        // Inner glow
+        let innerGlow = SKShapeNode(circleOfRadius: 50)
+        innerGlow.fillColor = accentColor.withAlphaComponent(0.2)
+        innerGlow.strokeColor = .clear
+        innerGlow.position = CGPoint(x: size.width / 2, y: heroY)
+        innerGlow.zPosition = -1
+        addChild(innerGlow)
+
+        // Sparkles with cyan/pink colors
+        let sparklePositions: [(x: CGFloat, y: CGFloat, size: CGFloat)] = [
+            (-70, 50, 16), (75, 45, 14), (-50, -25, 12), (85, -15, 16), (0, 70, 18), (-90, 10, 10)
         ]
 
-        for pos in sparklePositions {
-            let sparkle = SKLabelNode(text: "✨")
-            sparkle.fontSize = 20
+        for (index, pos) in sparklePositions.enumerated() {
+            let sparkle = SKLabelNode(text: "✦")
+            sparkle.fontSize = pos.size
+            sparkle.fontColor = index % 2 == 0 ? textColor : accentColor
             sparkle.position = CGPoint(x: size.width / 2 + pos.x, y: heroY + pos.y)
 
-            // Twinkle animation
             let twinkle = SKAction.sequence([
-                SKAction.fadeAlpha(to: 0.3, duration: 0.5),
-                SKAction.fadeAlpha(to: 1.0, duration: 0.5)
+                SKAction.fadeAlpha(to: 0.3, duration: Double.random(in: 0.4...0.7)),
+                SKAction.fadeAlpha(to: 1.0, duration: Double.random(in: 0.4...0.7))
             ])
             sparkle.run(SKAction.repeatForever(twinkle))
             addChild(sparkle)
         }
 
-        // Characters
-        let leftChar = SKLabelNode(text: "👨‍💻")
-        leftChar.fontSize = 60
-        leftChar.position = CGPoint(x: size.width / 2 - 80, y: heroY - 20)
+        // Use actual character sprites - preserve original aspect ratios
+        let leftChar = SKSpriteNode(imageNamed: "TechBroIcon")
+        leftChar.texture?.filteringMode = .nearest  // Pixel art style
+        // Scale uniformly based on original texture size
+        let leftScale: CGFloat = 90 / max(leftChar.size.width, leftChar.size.height)
+        leftChar.setScale(leftScale)
+        leftChar.position = CGPoint(x: size.width / 2 - 70, y: heroY - 10)
         addChild(leftChar)
 
-        let rightChar = SKLabelNode(text: "👩‍💻")
-        rightChar.fontSize = 60
-        rightChar.position = CGPoint(x: size.width / 2 + 80, y: heroY - 10)
+        let rightChar = SKSpriteNode(imageNamed: "TechGalIcon")
+        rightChar.texture?.filteringMode = .nearest  // Pixel art style
+        // Scale uniformly based on original texture size
+        let rightScale: CGFloat = 90 / max(rightChar.size.width, rightChar.size.height)
+        rightChar.setScale(rightScale)
+        rightChar.position = CGPoint(x: size.width / 2 + 70, y: heroY - 10)
         addChild(rightChar)
 
-        // Bounce animation
-        let bounce = SKAction.sequence([
-            SKAction.moveBy(x: 0, y: 8, duration: 0.5),
-            SKAction.moveBy(x: 0, y: -8, duration: 0.5)
+        // Gentle float animation
+        let float = SKAction.sequence([
+            SKAction.moveBy(x: 0, y: 6, duration: 0.8),
+            SKAction.moveBy(x: 0, y: -6, duration: 0.8)
         ])
-        leftChar.run(SKAction.repeatForever(bounce))
+        float.timingMode = .easeInEaseOut
+        leftChar.run(SKAction.repeatForever(float))
 
-        let bounceDelayed = SKAction.sequence([
-            SKAction.wait(forDuration: 0.25),
-            SKAction.repeatForever(bounce)
+        let floatDelayed = SKAction.sequence([
+            SKAction.wait(forDuration: 0.4),
+            SKAction.repeatForever(float)
         ])
-        rightChar.run(bounceDelayed)
+        rightChar.run(floatDelayed)
     }
 
     // MARK: - Feature Widget
 
     private func setupFeatureWidget() {
-        let widgetY = size.height - 380
-        let widgetWidth: CGFloat = size.width - 80
-        let widgetHeight: CGFloat = 120
+        let safeTop = view?.safeAreaInsets.top ?? 50
+        let widgetY = size.height - safeTop - 280
+        let widgetWidth: CGFloat = size.width - 50
+        let widgetHeight: CGFloat = 110
 
         // Dark rounded container
-        let widget = SKShapeNode(rectOf: CGSize(width: widgetWidth, height: widgetHeight), cornerRadius: 20)
-        widget.fillColor = SKColor(red: 0.12, green: 0.12, blue: 0.14, alpha: 1.0)
-        widget.strokeColor = .clear
+        let widget = SKShapeNode(rectOf: CGSize(width: widgetWidth, height: widgetHeight), cornerRadius: 16)
+        widget.fillColor = featureCardColor
+        widget.strokeColor = textColor.withAlphaComponent(0.15)
+        widget.lineWidth = 1
         widget.position = CGPoint(x: size.width / 2, y: widgetY)
         addChild(widget)
 
         // Title
         let title = SKLabelNode(text: "Pro Features")
-        title.fontName = "Menlo-Bold"
+        title.fontName = PixelFont.name
         title.fontSize = 16
-        title.fontColor = .white
+        title.fontColor = textColor
         title.position = CGPoint(x: 0, y: 25)
         widget.addChild(title)
 
-        // Feature icons
+        // Feature icons with synthwave colors
         let features: [(emoji: String, color: SKColor)] = [
-            ("🚀", SKColor(red: 1.0, green: 0.85, blue: 0.3, alpha: 1.0)),  // Unlimited actions
-            ("🎮", SKColor(red: 0.3, green: 0.8, blue: 0.5, alpha: 1.0)),   // Minigames
-            ("💎", SKColor(red: 0.95, green: 0.5, blue: 0.7, alpha: 1.0)), // Premium characters
-            ("🌆", SKColor(red: 0.6, green: 0.5, blue: 0.9, alpha: 1.0))   // All cities
+            ("🚀", SKColor(red: 1.0, green: 0.7, blue: 0.2, alpha: 1.0)),
+            ("🎮", SKColor(red: 0.2, green: 0.85, blue: 0.7, alpha: 1.0)),
+            ("💎", accentColor),
+            ("🌆", SKColor(red: 0.5, green: 0.4, blue: 0.9, alpha: 1.0))
         ]
 
-        let iconSize: CGFloat = 50
-        let spacing: CGFloat = 15
+        let iconSize: CGFloat = 48
+        let spacing: CGFloat = 12
         let totalWidth = CGFloat(features.count) * iconSize + CGFloat(features.count - 1) * spacing
         let startX = -totalWidth / 2 + iconSize / 2
+        let iconsY: CGFloat = -22  // Vertical center for icons row
 
         for (index, feature) in features.enumerated() {
-            let iconBg = SKShapeNode(rectOf: CGSize(width: iconSize, height: iconSize), cornerRadius: 10)
+            let xPos = startX + CGFloat(index) * (iconSize + spacing)
+
+            let iconBg = SKShapeNode(rectOf: CGSize(width: iconSize, height: iconSize), cornerRadius: 12)
             iconBg.fillColor = feature.color
             iconBg.strokeColor = .clear
-            iconBg.position = CGPoint(x: startX + CGFloat(index) * (iconSize + spacing), y: -20)
+            iconBg.position = CGPoint(x: xPos, y: iconsY)
             widget.addChild(iconBg)
 
             let emoji = SKLabelNode(text: feature.emoji)
-            emoji.fontSize = 24
-            emoji.position = CGPoint(x: startX + CGFloat(index) * (iconSize + spacing), y: -20)
+            emoji.fontSize = 22
+            emoji.position = CGPoint(x: xPos, y: iconsY)  // Same position as background
             emoji.verticalAlignmentMode = .center
+            emoji.horizontalAlignmentMode = .center
             widget.addChild(emoji)
         }
-
-        // Character decorations on sides
-        let leftCat = SKLabelNode(text: "🧑‍💻")
-        leftCat.fontSize = 30
-        leftCat.position = CGPoint(x: -widgetWidth/2 + 30, y: 20)
-        widget.addChild(leftCat)
-
-        let rightCat = SKLabelNode(text: "💼")
-        rightCat.fontSize = 30
-        rightCat.position = CGPoint(x: widgetWidth/2 - 30, y: 20)
-        widget.addChild(rightCat)
     }
 
     // MARK: - Title
 
     private func setupTitle() {
-        let titleY = size.height - 480
+        let safeTop = view?.safeAreaInsets.top ?? 50
+        let titleY = size.height - safeTop - 365
 
         let title = SKLabelNode(text: "Unlock Pro with")
-        title.fontName = "Menlo-Bold"
-        title.fontSize = 24
-        title.fontColor = textColor
+        title.fontName = PixelFont.name
+        title.fontSize = 22
+        title.fontColor = .white
         title.position = CGPoint(x: size.width / 2, y: titleY)
         addChild(title)
 
         let subtitle = SKLabelNode(text: "Pocket Bro!")
-        subtitle.fontName = "Menlo-Bold"
-        subtitle.fontSize = 24
-        subtitle.fontColor = textColor
-        subtitle.position = CGPoint(x: size.width / 2, y: titleY - 32)
+        subtitle.fontName = PixelFont.name
+        subtitle.fontSize = 22
+        subtitle.fontColor = accentColor
+        subtitle.position = CGPoint(x: size.width / 2, y: titleY - 30)
         addChild(subtitle)
     }
 
     // MARK: - Pricing Options
 
     private func setupPricingOptions() {
-        let optionsY = size.height - 590
+        let safeTop = view?.safeAreaInsets.top ?? 50
+        let optionsY = size.height - safeTop - 450
 
         // Weekly option
         let weeklyCard = createPricingCard(
             plan: .weekly,
-            title: "Weekly $1.99",
-            price: "$1.99/wk",
+            title: "Weekly",
+            price: "$1.99",
+            subPrice: "$1.99/wk",
             isSelected: selectedPlan == .weekly
         )
         weeklyCard.position = CGPoint(x: size.width / 2, y: optionsY)
@@ -249,55 +266,66 @@ class PaywallScene: SKScene {
         // Yearly option
         let yearlyCard = createPricingCard(
             plan: .yearly,
-            title: "Yearly $12.99",
-            price: "$0.25/wk",
+            title: "Yearly",
+            price: "$12.99",
+            subPrice: "$0.25/wk",
             isSelected: selectedPlan == .yearly
         )
-        yearlyCard.position = CGPoint(x: size.width / 2, y: optionsY - 60)
+        yearlyCard.position = CGPoint(x: size.width / 2, y: optionsY - 65)
         yearlyCard.name = "plan_yearly"
         addChild(yearlyCard)
         planCards[.yearly] = yearlyCard
 
-        // Lifetime option (text link)
-        let lifetime = SKLabelNode(text: "Lifetime $17.99")
-        lifetime.fontName = "Menlo"
-        lifetime.fontSize = 14
-        lifetime.fontColor = secondaryTextColor
-
-        // Underline effect
-        let underline = SKSpriteNode(color: secondaryTextColor, size: CGSize(width: lifetime.frame.width, height: 1))
-        underline.position = CGPoint(x: 0, y: -10)
-        lifetime.addChild(underline)
-
-        lifetime.position = CGPoint(x: size.width / 2, y: optionsY - 115)
-        lifetime.name = "plan_lifetime"
-        addChild(lifetime)
+        // Lifetime option
+        let lifetimeCard = createPricingCard(
+            plan: .lifetime,
+            title: "Lifetime",
+            price: "$17.99",
+            subPrice: "One-time",
+            isSelected: selectedPlan == .lifetime
+        )
+        lifetimeCard.position = CGPoint(x: size.width / 2, y: optionsY - 130)
+        lifetimeCard.name = "plan_lifetime"
+        addChild(lifetimeCard)
+        planCards[.lifetime] = lifetimeCard
     }
 
-    private func createPricingCard(plan: PricingPlan, title: String, price: String, isSelected: Bool) -> SKNode {
+    private func createPricingCard(plan: PricingPlan, title: String, price: String, subPrice: String, isSelected: Bool) -> SKNode {
         let card = SKNode()
-        let cardWidth = size.width - 60
-        let cardHeight: CGFloat = 50
+        let cardWidth = size.width - 50
+        let cardHeight: CGFloat = 55
+
+        // Glow for selected
+        if isSelected {
+            let glow = SKShapeNode(rectOf: CGSize(width: cardWidth + 6, height: cardHeight + 6), cornerRadius: 16)
+            glow.fillColor = accentColor.withAlphaComponent(0.3)
+            glow.strokeColor = .clear
+            glow.glowWidth = 8
+            glow.name = "glow"
+            glow.zPosition = -1
+            card.addChild(glow)
+        }
 
         // Background
-        let bg = SKShapeNode(rectOf: CGSize(width: cardWidth, height: cardHeight), cornerRadius: 8)
+        let bg = SKShapeNode(rectOf: CGSize(width: cardWidth, height: cardHeight), cornerRadius: 14)
         bg.fillColor = cardColor
-        bg.strokeColor = isSelected ? selectedBorderColor : .clear
-        bg.lineWidth = isSelected ? 2 : 0
+        bg.strokeColor = isSelected ? accentColor : textColor.withAlphaComponent(0.2)
+        bg.lineWidth = isSelected ? 2 : 1
         bg.name = "cardBg"
         card.addChild(bg)
 
         // Radio button
-        let radioOuter = SKShapeNode(circleOfRadius: 10)
+        let radioOuter = SKShapeNode(circleOfRadius: 11)
         radioOuter.fillColor = .clear
-        radioOuter.strokeColor = isSelected ? selectedBorderColor : secondaryTextColor
+        radioOuter.strokeColor = isSelected ? accentColor : secondaryTextColor
         radioOuter.lineWidth = 2
         radioOuter.position = CGPoint(x: -cardWidth/2 + 30, y: 0)
+        radioOuter.name = "radioOuter"
         card.addChild(radioOuter)
 
         if isSelected {
-            let radioInner = SKShapeNode(circleOfRadius: 5)
-            radioInner.fillColor = selectedBorderColor
+            let radioInner = SKShapeNode(circleOfRadius: 6)
+            radioInner.fillColor = accentColor
             radioInner.strokeColor = .clear
             radioInner.position = CGPoint(x: -cardWidth/2 + 30, y: 0)
             radioInner.name = "radioInner"
@@ -306,21 +334,35 @@ class PaywallScene: SKScene {
 
         // Title
         let titleLabel = SKLabelNode(text: title)
-        titleLabel.fontName = "Menlo-Bold"
-        titleLabel.fontSize = 15
-        titleLabel.fontColor = textColor
+        titleLabel.fontName = PixelFont.name
+        titleLabel.fontSize = 16
+        titleLabel.fontColor = isSelected ? .white : secondaryTextColor
         titleLabel.horizontalAlignmentMode = .left
-        titleLabel.position = CGPoint(x: -cardWidth/2 + 55, y: -6)
+        titleLabel.verticalAlignmentMode = .center
+        titleLabel.position = CGPoint(x: -cardWidth/2 + 55, y: 0)
+        titleLabel.name = "titleLabel"
         card.addChild(titleLabel)
 
-        // Price per week
+        // Price
         let priceLabel = SKLabelNode(text: price)
-        priceLabel.fontName = "Menlo"
-        priceLabel.fontSize = 14
-        priceLabel.fontColor = secondaryTextColor
-        priceLabel.horizontalAlignmentMode = .right
-        priceLabel.position = CGPoint(x: cardWidth/2 - 20, y: -6)
+        priceLabel.fontName = PixelFont.name
+        priceLabel.fontSize = 16
+        priceLabel.fontColor = isSelected ? accentColor : secondaryTextColor
+        priceLabel.horizontalAlignmentMode = .left
+        priceLabel.verticalAlignmentMode = .center
+        priceLabel.position = CGPoint(x: -cardWidth/2 + 140, y: 0)
+        priceLabel.name = "priceLabel"
         card.addChild(priceLabel)
+
+        // Sub price (per week)
+        let subPriceLabel = SKLabelNode(text: subPrice)
+        subPriceLabel.fontName = PixelFont.regularName
+        subPriceLabel.fontSize = 14
+        subPriceLabel.fontColor = secondaryTextColor.withAlphaComponent(0.7)
+        subPriceLabel.horizontalAlignmentMode = .right
+        subPriceLabel.verticalAlignmentMode = .center
+        subPriceLabel.position = CGPoint(x: cardWidth/2 - 20, y: 0)
+        card.addChild(subPriceLabel)
 
         return card
     }
@@ -328,23 +370,50 @@ class PaywallScene: SKScene {
     private func updatePlanSelection() {
         for (plan, card) in planCards {
             let isSelected = plan == selectedPlan
+            let cardWidth = size.width - 50
 
-            if let bg = card.childNode(withName: "cardBg") as? SKShapeNode {
-                bg.strokeColor = isSelected ? selectedBorderColor : .clear
-                bg.lineWidth = isSelected ? 2 : 0
+            // Update glow
+            card.childNode(withName: "glow")?.removeFromParent()
+            if isSelected {
+                let glow = SKShapeNode(rectOf: CGSize(width: cardWidth + 6, height: 61), cornerRadius: 16)
+                glow.fillColor = accentColor.withAlphaComponent(0.3)
+                glow.strokeColor = .clear
+                glow.glowWidth = 8
+                glow.name = "glow"
+                glow.zPosition = -1
+                card.addChild(glow)
             }
 
-            // Update radio button
-            card.childNode(withName: "radioInner")?.removeFromParent()
+            // Update background
+            if let bg = card.childNode(withName: "cardBg") as? SKShapeNode {
+                bg.strokeColor = isSelected ? accentColor : textColor.withAlphaComponent(0.2)
+                bg.lineWidth = isSelected ? 2 : 1
+            }
 
+            // Update radio outer
+            if let radioOuter = card.childNode(withName: "radioOuter") as? SKShapeNode {
+                radioOuter.strokeColor = isSelected ? accentColor : secondaryTextColor
+            }
+
+            // Update radio inner
+            card.childNode(withName: "radioInner")?.removeFromParent()
             if isSelected {
-                let radioInner = SKShapeNode(circleOfRadius: 5)
-                radioInner.fillColor = selectedBorderColor
+                let radioInner = SKShapeNode(circleOfRadius: 6)
+                radioInner.fillColor = accentColor
                 radioInner.strokeColor = .clear
-                let cardWidth = size.width - 60
                 radioInner.position = CGPoint(x: -cardWidth/2 + 30, y: 0)
                 radioInner.name = "radioInner"
                 card.addChild(radioInner)
+            }
+
+            // Update title color
+            if let titleLabel = card.childNode(withName: "titleLabel") as? SKLabelNode {
+                titleLabel.fontColor = isSelected ? .white : secondaryTextColor
+            }
+
+            // Update price color
+            if let priceLabel = card.childNode(withName: "priceLabel") as? SKLabelNode {
+                priceLabel.fontColor = isSelected ? accentColor : secondaryTextColor
             }
         }
     }
@@ -352,8 +421,9 @@ class PaywallScene: SKScene {
     // MARK: - Continue Button
 
     private func setupContinueButton() {
-        let buttonY = size.height - 730
-        let buttonWidth: CGFloat = 220
+        let safeBottom = view?.safeAreaInsets.bottom ?? 20
+        let buttonY = safeBottom + 100
+        let buttonWidth: CGFloat = size.width - 100
         let buttonHeight: CGFloat = 55
 
         let button = SKNode()
@@ -361,40 +431,65 @@ class PaywallScene: SKScene {
         button.name = "continueButton"
         addChild(button)
 
-        // Shadow
-        let shadow = SKShapeNode(rectOf: CGSize(width: buttonWidth, height: buttonHeight), cornerRadius: 12)
-        shadow.fillColor = accentColor.withAlphaComponent(0.5)
-        shadow.strokeColor = .clear
-        shadow.position = CGPoint(x: 3, y: -3)
-        button.addChild(shadow)
+        // Glow
+        let glow = SKShapeNode(rectOf: CGSize(width: buttonWidth + 10, height: buttonHeight + 10), cornerRadius: 18)
+        glow.fillColor = accentColor.withAlphaComponent(0.4)
+        glow.strokeColor = .clear
+        glow.glowWidth = 15
+        glow.zPosition = -1
+        button.addChild(glow)
 
         // Main button
-        let bg = SKShapeNode(rectOf: CGSize(width: buttonWidth, height: buttonHeight), cornerRadius: 12)
+        let bg = SKShapeNode(rectOf: CGSize(width: buttonWidth, height: buttonHeight), cornerRadius: 14)
         bg.fillColor = accentColor
         bg.strokeColor = .clear
         button.addChild(bg)
 
         // Label
         let label = SKLabelNode(text: "Continue")
-        label.fontName = "Menlo-Bold"
+        label.fontName = PixelFont.name
         label.fontSize = 20
         label.fontColor = .white
         label.verticalAlignmentMode = .center
         button.addChild(label)
+
+        // Pulse animation
+        let pulse = SKAction.sequence([
+            SKAction.scale(to: 1.02, duration: 0.8),
+            SKAction.scale(to: 1.0, duration: 0.8)
+        ])
+        pulse.timingMode = .easeInEaseOut
+        button.run(SKAction.repeatForever(pulse))
     }
 
     // MARK: - Footer
 
     private func setupFooter() {
-        let footerY: CGFloat = 50
+        let safeBottom = view?.safeAreaInsets.bottom ?? 20
+        let footerY = safeBottom + 35
 
-        let terms = SKLabelNode(text: "Terms of Use | Privacy Policy")
-        terms.fontName = "Menlo"
-        terms.fontSize = 12
-        terms.fontColor = secondaryTextColor
-        terms.position = CGPoint(x: size.width / 2, y: footerY)
-        terms.name = "footer"
-        addChild(terms)
+        let termsButton = SKLabelNode(text: "Terms of Use")
+        termsButton.fontName = PixelFont.regularName
+        termsButton.fontSize = 12
+        termsButton.fontColor = secondaryTextColor.withAlphaComponent(0.6)
+        termsButton.position = CGPoint(x: size.width / 2 - 70, y: footerY)
+        termsButton.name = "termsButton"
+        addChild(termsButton)
+
+        let divider = SKLabelNode(text: "|")
+        divider.fontName = PixelFont.regularName
+        divider.fontSize = 12
+        divider.fontColor = secondaryTextColor.withAlphaComponent(0.4)
+        divider.position = CGPoint(x: size.width / 2, y: footerY)
+        addChild(divider)
+
+        let privacyButton = SKLabelNode(text: "Privacy Policy")
+        privacyButton.fontName = PixelFont.regularName
+        privacyButton.fontSize = 12
+        privacyButton.fontColor = secondaryTextColor.withAlphaComponent(0.6)
+        privacyButton.position = CGPoint(x: size.width / 2 + 70, y: footerY)
+        privacyButton.name = "privacyButton"
+        addChild(privacyButton)
     }
 
     // MARK: - Touch Handling
@@ -411,9 +506,12 @@ class PaywallScene: SKScene {
         }
 
         // Restore button
-        if let restore = childNode(withName: "restoreButton"), restore.contains(location) {
-            // Handle restore purchases
-            return
+        if let restore = childNode(withName: "restoreButton") as? SKLabelNode {
+            let expandedFrame = restore.frame.insetBy(dx: -20, dy: -15)
+            if expandedFrame.contains(location) {
+                restorePurchases()
+                return
+            }
         }
 
         // Plan selection
@@ -429,8 +527,9 @@ class PaywallScene: SKScene {
             return
         }
 
-        if let lifetime = childNode(withName: "plan_lifetime"), lifetime.contains(location) {
-            // Handle lifetime purchase
+        if let lifetimeCard = childNode(withName: "plan_lifetime"), lifetimeCard.contains(location) {
+            selectedPlan = .lifetime
+            updatePlanSelection()
             return
         }
 
@@ -439,6 +538,24 @@ class PaywallScene: SKScene {
             animatePress(continueButton)
             handlePurchase()
             return
+        }
+
+        // Terms button
+        if let termsButton = childNode(withName: "termsButton") as? SKLabelNode {
+            let expandedFrame = termsButton.frame.insetBy(dx: -15, dy: -10)
+            if expandedFrame.contains(location) {
+                openURL("https://example.com/terms")
+                return
+            }
+        }
+
+        // Privacy button
+        if let privacyButton = childNode(withName: "privacyButton") as? SKLabelNode {
+            let expandedFrame = privacyButton.frame.insetBy(dx: -15, dy: -10)
+            if expandedFrame.contains(location) {
+                openURL("https://example.com/privacy")
+                return
+            }
         }
     }
 
@@ -453,7 +570,55 @@ class PaywallScene: SKScene {
     private func handlePurchase() {
         // In a real app, this would trigger StoreKit purchase
         print("Purchase \(selectedPlan)")
-        dismiss()
+
+        // Show loading then dismiss
+        guard let viewController = self.view?.window?.rootViewController else {
+            dismiss()
+            return
+        }
+
+        let alert = UIAlertController(
+            title: "Processing...",
+            message: "Please wait",
+            preferredStyle: .alert
+        )
+
+        viewController.present(alert, animated: true) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                alert.dismiss(animated: true) {
+                    self.dismiss()
+                }
+            }
+        }
+    }
+
+    private func restorePurchases() {
+        guard let viewController = self.view?.window?.rootViewController else { return }
+
+        let alert = UIAlertController(
+            title: "Restoring Purchases",
+            message: "Please wait...",
+            preferredStyle: .alert
+        )
+
+        viewController.present(alert, animated: true) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                alert.dismiss(animated: true) {
+                    let resultAlert = UIAlertController(
+                        title: "Restore Complete",
+                        message: "Your purchases have been restored.",
+                        preferredStyle: .alert
+                    )
+                    resultAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                    viewController.present(resultAlert, animated: true)
+                }
+            }
+        }
+    }
+
+    private func openURL(_ urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+        UIApplication.shared.open(url)
     }
 
     private func dismiss() {
