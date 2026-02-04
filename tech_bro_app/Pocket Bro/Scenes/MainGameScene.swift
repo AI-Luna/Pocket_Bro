@@ -245,17 +245,17 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     private func createStatBar(name: String) -> SKNode {
         let node = SKNode()
 
-        // Label
+        // Label - larger font for better readability
         let label = SKLabelNode(text: name)
         label.fontName = PixelFont.name
-        label.fontSize = 10
+        label.fontSize = 14
         label.fontColor = lcdDarkColor
-        label.position = CGPoint(x: 0, y: 15)
+        label.position = CGPoint(x: 0, y: 18)
         node.addChild(label)
 
         // Bar background
         let barWidth: CGFloat = 70
-        let barHeight: CGFloat = 8
+        let barHeight: CGFloat = 10
 
         let barBg = SKSpriteNode(color: lcdDarkColor.withAlphaComponent(0.4),
                                   size: CGSize(width: barWidth, height: barHeight))

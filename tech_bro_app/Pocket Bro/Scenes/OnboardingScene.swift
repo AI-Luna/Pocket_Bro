@@ -193,7 +193,7 @@ class OnboardingScene: SKScene {
     // MARK: - Step 1: Choose Founder
 
     private func setupChooseFounderStep() {
-        // Main logo image - TechBro Tamagotchi
+        // Main logo image - TechBro Tamagotchi (moved down slightly)
         let logoTexture = SKTexture(imageNamed: "TechBroLogo")
         let logo = SKSpriteNode(texture: logoTexture)
         
@@ -201,7 +201,7 @@ class OnboardingScene: SKScene {
         let targetWidth = size.width * 0.85
         let scale = targetWidth / logoTexture.size().width
         logo.setScale(scale)
-        logo.position = CGPoint(x: size.width / 2, y: size.height - 120)
+        logo.position = CGPoint(x: size.width / 2, y: size.height - 160)
         logo.zPosition = 10
         
         // Add pink/magenta glow behind logo
@@ -222,18 +222,19 @@ class OnboardingScene: SKScene {
         
         contentNode.addChild(logo)
         
-        // Subtitle
+        // Subtitle - closer to cards
         titleLabel = createTitle("Choose your founder")
         titleLabel.fontSize = PixelFont.medium
-        titleLabel.position.y = size.height - 220
+        titleLabel.position.y = size.height - 260
         contentNode.addChild(titleLabel)
 
+        // Larger cards with bigger character icons
         let archetypes = Archetype.allCases
-        let cardSize = CGSize(width: 100, height: 120)
-        let spacing: CGFloat = 20
+        let cardSize = CGSize(width: 110, height: 140)
+        let spacing: CGFloat = 12
         let totalWidth = CGFloat(archetypes.count) * cardSize.width + CGFloat(archetypes.count - 1) * spacing
         let startX = (size.width - totalWidth) / 2 + cardSize.width / 2
-        let cardY = size.height / 2 + 30
+        let cardY = size.height / 2 - 20
 
         for (index, archetype) in archetypes.enumerated() {
             let card = createFounderCard(archetype: archetype, size: cardSize)
@@ -254,10 +255,10 @@ class OnboardingScene: SKScene {
     private func createFounderCard(archetype: Archetype, size: CGSize) -> SKNode {
         let card = SKNode()
 
-        // Card background - dark purple, clean look
+        // Card background - dark purple with faint cyan outline
         let bg = SKShapeNode(rectOf: size, cornerRadius: 14)
         bg.fillColor = SKColor(red: 0.28, green: 0.18, blue: 0.45, alpha: 1.0)
-        bg.strokeColor = SKColor(red: 0.35, green: 0.25, blue: 0.55, alpha: 0.8)
+        bg.strokeColor = accentColor.withAlphaComponent(0.3) // Faint cyan outline
         bg.lineWidth = 2
         bg.name = "cardBg"
         card.addChild(bg)
@@ -282,8 +283,8 @@ class OnboardingScene: SKScene {
         border.isHidden = true
         card.addChild(border)
 
-        // Character icon
-        let iconSize: CGFloat = 55
+        // Character icon - larger size
+        let iconSize: CGFloat = 75
         
         switch archetype {
         case .bro:
@@ -291,30 +292,37 @@ class OnboardingScene: SKScene {
             let iconSprite = SKSpriteNode(texture: texture)
             let scale = iconSize / max(texture.size().width, texture.size().height)
             iconSprite.setScale(scale)
-            iconSprite.position = CGPoint(x: 0, y: 10)
+            iconSprite.position = CGPoint(x: 0, y: 12)
             card.addChild(iconSprite)
         case .gal:
             let texture = SKTexture(imageNamed: "TechGalIcon")
             let iconSprite = SKSpriteNode(texture: texture)
             let scale = iconSize / max(texture.size().width, texture.size().height)
             iconSprite.setScale(scale)
-            iconSprite.position = CGPoint(x: 0, y: 10)
+            iconSprite.position = CGPoint(x: 0, y: 12)
             card.addChild(iconSprite)
         case .nonBinary:
             let texture = SKTexture(imageNamed: "VibeCoderIcon")
             let iconSprite = SKSpriteNode(texture: texture)
             let scale = iconSize / max(texture.size().width, texture.size().height)
             iconSprite.setScale(scale)
-            iconSprite.position = CGPoint(x: 0, y: 10)
+            iconSprite.position = CGPoint(x: 0, y: 12)
             card.addChild(iconSprite)
         }
 
-        // Name label
-        let nameLabel = SKLabelNode(text: archetype.rawValue)
+        // Name label - custom display names
+        let displayName: String
+        switch archetype {
+        case .bro: displayName = "Tech Bro"
+        case .gal: displayName = "Tech Babe"
+        case .nonBinary: displayName = "Vibe Coder"
+        }
+        
+        let nameLabel = SKLabelNode(text: displayName)
         nameLabel.fontName = PixelFont.name
         nameLabel.fontSize = PixelFont.tiny
         nameLabel.fontColor = textColor
-        nameLabel.position = CGPoint(x: 0, y: -size.height / 2 + 20)
+        nameLabel.position = CGPoint(x: 0, y: -size.height / 2 + 22)
         nameLabel.horizontalAlignmentMode = .center
         nameLabel.verticalAlignmentMode = .center
         card.addChild(nameLabel)
@@ -353,29 +361,33 @@ class OnboardingScene: SKScene {
         
         // Title - "Name Your TechBro" style
         titleLabel = createTitle("Name Your TechBro")
-        titleLabel.position.y = size.height - 160
+        let titleY = size.height - 160
+        titleLabel.position.y = titleY
         contentNode.addChild(titleLabel)
 
-        // Character preview with glow effect
-        let previewY = size.height / 2 + 100
+        // Input field position
+        let fieldY = size.height / 2 - 60
         
-        // Pink glow behind character (matching logo pink)
-        let glowNode = SKShapeNode(circleOfRadius: 60)
-        glowNode.fillColor = pinkAccent.withAlphaComponent(0.4)
+        // Character preview centered between title and input field
+        let previewY = (titleY + fieldY) / 2
+        
+        // Larger pink glow circle behind character
+        let glowNode = SKShapeNode(circleOfRadius: 85)
+        glowNode.fillColor = pinkAccent.withAlphaComponent(0.35)
         glowNode.strokeColor = .clear
         glowNode.position = CGPoint(x: size.width / 2, y: previewY)
-        glowNode.glowWidth = 25
+        glowNode.glowWidth = 30
         contentNode.addChild(glowNode)
         
         // Glow pulse animation
         let glowPulse = SKAction.sequence([
-            SKAction.fadeAlpha(to: 0.6, duration: 0.8),
-            SKAction.fadeAlpha(to: 0.3, duration: 0.8)
+            SKAction.fadeAlpha(to: 0.5, duration: 0.8),
+            SKAction.fadeAlpha(to: 0.25, duration: 0.8)
         ])
         glowNode.run(SKAction.repeatForever(glowPulse))
         
         let preview: SKNode
-        let iconSize: CGFloat = 100
+        let iconSize: CGFloat = 140 // Larger character
         
         switch selectedArchetype {
         case .bro:
@@ -412,7 +424,6 @@ class OnboardingScene: SKScene {
         // Large text input field - matching the design
         let fieldWidth: CGFloat = size.width - 60
         let fieldHeight: CGFloat = 65
-        let fieldY = size.height / 2 - 40
         
         // Glow behind field
         let fieldGlow = SKShapeNode(rectOf: CGSize(width: fieldWidth + 10, height: fieldHeight + 10), cornerRadius: 24)
@@ -462,21 +473,21 @@ class OnboardingScene: SKScene {
             label.text = "Next"
         }
         
-        // Title with name - centered
+        // Title with name - centered, moved down slightly
         let name = founderName.isEmpty ? "your founder" : founderName
         titleLabel = createTitle("Where will \(name)\nbuild their startup?")
         titleLabel.numberOfLines = 2
         titleLabel.horizontalAlignmentMode = .center
         titleLabel.verticalAlignmentMode = .center
         titleLabel.preferredMaxLayoutWidth = size.width - 40
-        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - 120)
+        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - 140)
         contentNode.addChild(titleLabel)
 
-        // Two city cards side by side
+        // Two city cards side by side - closer to title
         let cardWidth: CGFloat = (size.width - 60) / 2
         let cardHeight: CGFloat = 280
         let spacing: CGFloat = 20
-        let cardY = size.height / 2 + 20
+        let cardY = size.height / 2 - 10
 
         let cities = City.allCases
         let totalWidth = CGFloat(cities.count) * cardWidth + spacing
@@ -497,10 +508,10 @@ class OnboardingScene: SKScene {
     private func createCityCard(city: City, size: CGSize) -> SKNode {
         let card = SKNode()
 
-        // Card background - dark purple, matching design
+        // Card background - dark purple with faint cyan outline
         let bg = SKShapeNode(rectOf: size, cornerRadius: 16)
         bg.fillColor = SKColor(red: 0.28, green: 0.18, blue: 0.45, alpha: 1.0)
-        bg.strokeColor = SKColor(red: 0.35, green: 0.25, blue: 0.55, alpha: 0.8)
+        bg.strokeColor = accentColor.withAlphaComponent(0.3) // Faint cyan outline
         bg.lineWidth = 2
         bg.name = "cardBg"
         card.addChild(bg)
@@ -595,10 +606,11 @@ class OnboardingScene: SKScene {
     private func setupNotificationsStep() {
         let name = founderName.isEmpty ? "Your TechBro" : founderName
 
-        // iOS-style notification banner at top
+        // iOS-style notification banner - positioned below safe area
         let bannerWidth = size.width - 32
         let bannerHeight: CGFloat = 90
-        let bannerY = size.height - 80
+        let safeTop = safeAreaInsets().top
+        let bannerY = size.height - safeTop - 70 // Below dynamic island/notch
         
         // Banner background - iOS style with blur effect simulation
         let banner = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 20)
@@ -616,7 +628,7 @@ class OnboardingScene: SKScene {
         shadowBanner.zPosition = 9
         contentNode.addChild(shadowBanner)
 
-        // App icon - rounded square with app icon
+        // App icon - rounded square with actual app icon/character
         let iconSize: CGFloat = 44
         let iconX = -bannerWidth / 2 + 20 + iconSize / 2
         
@@ -626,13 +638,13 @@ class OnboardingScene: SKScene {
         iconBg.position = CGPoint(x: iconX, y: 0)
         banner.addChild(iconBg)
 
-        // Use tech bro icon or pixel character in app icon
-        let iconEmoji = SKLabelNode(text: "👔")
-        iconEmoji.fontSize = 24
-        iconEmoji.position = CGPoint(x: iconX, y: 0)
-        iconEmoji.verticalAlignmentMode = .center
-        iconEmoji.horizontalAlignmentMode = .center
-        banner.addChild(iconEmoji)
+        // Use the selected character's icon in the notification
+        let appIconTexture = SKTexture(imageNamed: "TechBroIcon")
+        let appIconSprite = SKSpriteNode(texture: appIconTexture)
+        let appIconScale: CGFloat = 32 / max(appIconTexture.size().width, appIconTexture.size().height)
+        appIconSprite.setScale(appIconScale)
+        appIconSprite.position = CGPoint(x: iconX, y: 0)
+        banner.addChild(appIconSprite)
 
         // Text content area
         let textX = iconX + iconSize / 2 + 14
@@ -727,6 +739,10 @@ class OnboardingScene: SKScene {
         label.verticalAlignmentMode = .center
         label.position = CGPoint(x: size.width / 2, y: size.height - 180)
         return label
+    }
+    
+    private func safeAreaInsets() -> UIEdgeInsets {
+        view?.safeAreaInsets ?? .zero
     }
 
     // MARK: - Touch Handling
