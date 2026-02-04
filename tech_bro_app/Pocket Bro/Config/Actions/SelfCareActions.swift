@@ -30,7 +30,7 @@ enum SelfCareActions {
             .burnout: -5
         ],
         selfCareIconIndex: 0,
-        isPremium: true
+        isPremium: false  // Free action
     )
 
     static let meditation = GameAction(

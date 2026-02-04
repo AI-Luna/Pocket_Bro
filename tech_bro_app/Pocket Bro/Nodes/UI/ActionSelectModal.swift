@@ -184,9 +184,15 @@ class ActionSelectModal: SKNode {
         let isOnCooldown = cooldown > 0
 
         // Card background - square with pixelated corners
+        // Use faint pink for premium cells
         let bg = SKShapeNode(rectOf: CGSize(width: size, height: size), cornerRadius: 6)
-        bg.fillColor = cardColor
-        bg.strokeColor = textColor.withAlphaComponent(0.2)
+        if action.isPremium {
+            bg.fillColor = SKColor(red: 0.45, green: 0.20, blue: 0.40, alpha: 1.0)  // Faint pink/purple tint
+            bg.strokeColor = accentColor.withAlphaComponent(0.3)  // Pink border for premium
+        } else {
+            bg.fillColor = cardColor
+            bg.strokeColor = textColor.withAlphaComponent(0.2)
+        }
         bg.lineWidth = 2
         bg.name = "cardBg"
         bg.zPosition = 0

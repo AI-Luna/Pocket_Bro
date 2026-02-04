@@ -34,7 +34,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         let safeTop = safeAreaInsets().top
         let safeBottom = safeAreaInsets().bottom
         statsAreaHeight = 100 + safeTop // Reduced from 120 to 100
-        buttonAreaHeight = 100 + safeBottom
+        buttonAreaHeight = 90 + safeBottom  // Adjusted for larger buttons
         gameAreaHeight = size.height - statsAreaHeight - buttonAreaHeight
 
         setupBackground()
@@ -369,23 +369,51 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     // MARK: - Bottom Buttons
 
     private func setupBottomButtons() {
-        let buttonY = buttonAreaHeight / 2 - safeAreaInsets().bottom / 2 + 10
+        let safeBottom = safeAreaInsets().bottom
+        let buttonY = safeBottom + 45  // Position buttons above safe area
 
         let categories: [ActionCategory] = [.feed, .work, .selfCare, .social]
 
-        let buttonSize: CGFloat = 60
-        let totalWidth = CGFloat(categories.count) * buttonSize + CGFloat(categories.count - 1) * 20
+        let buttonSize: CGFloat = 70  // Larger buttons
+        let spacing: CGFloat = 12  // Tighter spacing to fit
+        let totalWidth = CGFloat(categories.count) * buttonSize + CGFloat(categories.count - 1) * spacing
         let startX = (size.width - totalWidth) / 2 + buttonSize / 2
 
         for (index, category) in categories.enumerated() {
-            let x = startX + CGFloat(index) * (buttonSize + 20)
-            let icon = getIcon(for: category)
-            let buttonNode = createPixelButton(icon: icon, size: buttonSize)
+            let x = startX + CGFloat(index) * (buttonSize + spacing)
+            let buttonNode: SKNode
+
+            switch category {
+            case .feed:
+                buttonNode = createImageButton(imageName: "AppleIcon", size: buttonSize)
+            case .work:
+                buttonNode = createImageButton(imageName: "LaptopIcon", size: buttonSize)
+            case .selfCare:
+                buttonNode = createImageButton(imageName: "HeartIcon", size: buttonSize)
+            case .social:
+                buttonNode = createImageButton(imageName: "PhoneIcon", size: buttonSize)
+            }
+
             buttonNode.position = CGPoint(x: x, y: buttonY)
             buttonNode.name = "category_\(category.rawValue)"
             addChild(buttonNode)
             actionButtons.append(buttonNode)
         }
+    }
+
+    private func createImageButton(imageName: String, size: CGFloat) -> SKNode {
+        let button = SKNode()
+
+        // No background - just the icon
+        // Add image sprite
+        let sprite = SKSpriteNode(imageNamed: imageName)
+        sprite.texture?.filteringMode = .nearest  // Pixel art style
+        // Scale proportionally to fit within button size
+        let scale = size / max(sprite.size.width, sprite.size.height)
+        sprite.setScale(scale)
+        button.addChild(sprite)
+
+        return button
     }
 
     private func createPixelButton(icon: [[Int]], size: CGFloat) -> SKNode {

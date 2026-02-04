@@ -193,7 +193,7 @@ class OnboardingScene: SKScene {
     // MARK: - Step 1: Choose Founder
 
     private func setupChooseFounderStep() {
-        // Main logo image - TechBro Tamagotchi (moved down slightly)
+        // Main logo image - TechBro Tamagotchi
         let logoTexture = SKTexture(imageNamed: "TechBroLogo")
         let logo = SKSpriteNode(texture: logoTexture)
         
@@ -201,7 +201,7 @@ class OnboardingScene: SKScene {
         let targetWidth = size.width * 0.85
         let scale = targetWidth / logoTexture.size().width
         logo.setScale(scale)
-        logo.position = CGPoint(x: size.width / 2, y: size.height - 160)
+        logo.position = CGPoint(x: size.width / 2, y: size.height - 130)  // Moved up
         logo.zPosition = 10
         
         // Add pink/magenta glow behind logo
@@ -222,19 +222,19 @@ class OnboardingScene: SKScene {
         
         contentNode.addChild(logo)
         
-        // Subtitle - closer to cards
+        // Subtitle - closer to logo and cards
         titleLabel = createTitle("Choose your founder")
         titleLabel.fontSize = PixelFont.medium
-        titleLabel.position.y = size.height - 260
+        titleLabel.position.y = size.height - 220  // Moved up, closer to logo
         contentNode.addChild(titleLabel)
 
         // Larger cards with bigger character icons
         let archetypes = Archetype.allCases
-        let cardSize = CGSize(width: 110, height: 140)
+        let cardSize = CGSize(width: 110, height: 150)  // Taller cards to fit larger text
         let spacing: CGFloat = 12
         let totalWidth = CGFloat(archetypes.count) * cardSize.width + CGFloat(archetypes.count - 1) * spacing
         let startX = (size.width - totalWidth) / 2 + cardSize.width / 2
-        let cardY = size.height / 2 - 20
+        let cardY = size.height / 2 - 50  // Moved up, closer to title
 
         for (index, archetype) in archetypes.enumerated() {
             let card = createFounderCard(archetype: archetype, size: cardSize)
@@ -310,7 +310,7 @@ class OnboardingScene: SKScene {
             card.addChild(iconSprite)
         }
 
-        // Name label - custom display names
+        // Name label - custom display names with larger font
         let displayName: String
         switch archetype {
         case .bro: displayName = "Tech Bro"
@@ -320,9 +320,9 @@ class OnboardingScene: SKScene {
         
         let nameLabel = SKLabelNode(text: displayName)
         nameLabel.fontName = PixelFont.name
-        nameLabel.fontSize = PixelFont.tiny
+        nameLabel.fontSize = PixelFont.body  // Larger font for readability
         nameLabel.fontColor = textColor
-        nameLabel.position = CGPoint(x: 0, y: -size.height / 2 + 22)
+        nameLabel.position = CGPoint(x: 0, y: -size.height / 2 + 25)
         nameLabel.horizontalAlignmentMode = .center
         nameLabel.verticalAlignmentMode = .center
         card.addChild(nameLabel)
@@ -474,21 +474,21 @@ class OnboardingScene: SKScene {
             label.text = "Next"
         }
         
-        // Title with name - centered, moved down slightly
+        // Title with name - centered, positioned closer to city cards
         let name = founderName.isEmpty ? "your founder" : founderName
         titleLabel = createTitle("Where will \(name)\nbuild their startup?")
         titleLabel.numberOfLines = 2
         titleLabel.horizontalAlignmentMode = .center
         titleLabel.verticalAlignmentMode = .center
         titleLabel.preferredMaxLayoutWidth = size.width - 40
-        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - 140)
+        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - 100)  // Moved down closer to cards
         contentNode.addChild(titleLabel)
 
         // Two city cards side by side - closer to title
         let cardWidth: CGFloat = (size.width - 60) / 2
         let cardHeight: CGFloat = 280
         let spacing: CGFloat = 20
-        let cardY = size.height / 2 - 10
+        let cardY = size.height / 2 - 40  // Moved up closer to title
 
         let cities = City.allCases
         let totalWidth = CGFloat(cities.count) * cardWidth + spacing
