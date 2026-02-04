@@ -530,37 +530,90 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
     func actionSelectModal(_ modal: ActionSelectModal, didSelect action: GameAction) {
         if let result = GameManager.shared.performAction(action) {
-            showDialogue(result.dialogue, emoji: action.emoji)
+            let isSleepAction = action.id == "care_nap" || action.id == "care_sleep"
+            let isWorkAction = action.category == .work
+            let isFeedAction = action.category == .feed
+            if !isSleepAction && !isWorkAction && !isFeedAction {
+                showDialogue(result.dialogue, emoji: action.emoji)
+            }
 
             // Stop patrol while performing the action animation
             broSprite.removeAction(forKey: "patrol")
 
             if action.category == .feed {
                 broSprite.playEatingDrinkingAnimation()
-                // Resume patrol after eating animation finishes
+                // Show dialogue and resume patrol after eating animation finishes
                 run(SKAction.sequence([
                     SKAction.wait(forDuration: 4.5),
                     SKAction.run { [weak self] in
+                        self?.showDialogue(result.dialogue, emoji: action.emoji)
                         self?.startWalkingPatrol()
                     }
                 ]))
             } else if action.category == .work {
-                // Face right while typing
-                broSprite.xScale = abs(broSprite.xScale)
-                broSprite.playTypingAnimation()
-                // Resume patrol after typing animation finishes
-                run(SKAction.sequence([
+                // Walk to the desk position (right side of screen) before typing
+                let deskX: CGFloat = size.width - 100
+                let walkSpeed: CGFloat = 60
+                let distance = abs(broSprite.position.x - deskX)
+                let walkDuration = Double(distance) / Double(walkSpeed)
+
+                // Face toward desk
+                if deskX > broSprite.position.x {
+                    broSprite.xScale = abs(broSprite.xScale)
+                } else {
+                    broSprite.xScale = -abs(broSprite.xScale)
+                }
+
+                // Walk to desk, then sit and type
+                if distance > 1 {
+                    broSprite.startWalkAnimation()
+                }
+                let walkToDesk = SKAction.moveTo(x: deskX, duration: walkDuration)
+                let sitAndType = SKAction.run { [weak self] in
+                    guard let self = self else { return }
+                    self.broSprite.xScale = abs(self.broSprite.xScale)
+                    self.broSprite.playTypingAnimation()
+                }
+                let showDialogueAndResume = SKAction.run { [weak self] in
+                    self?.showDialogue(result.dialogue, emoji: action.emoji)
+                    self?.startWalkingPatrol()
+                }
+                broSprite.run(SKAction.sequence([
+                    walkToDesk,
+                    sitAndType,
                     SKAction.wait(forDuration: 4.0),
-                    SKAction.run { [weak self] in
-                        self?.startWalkingPatrol()
-                    }
+                    showDialogueAndResume
                 ]))
             } else if action.id == "care_nap" || action.id == "care_sleep" {
-                broSprite.playSleepingAnimation()
-                // Resume patrol after sleeping animation finishes
+                // Walk to the bed position (left side of screen) before sleeping
+                let bedX: CGFloat = 100
+                let walkSpeed: CGFloat = 60
+                let distance = abs(broSprite.position.x - bedX)
+                let walkDuration = Double(distance) / Double(walkSpeed)
+
+                // Face toward bed
+                if bedX > broSprite.position.x {
+                    broSprite.xScale = abs(broSprite.xScale)
+                } else {
+                    broSprite.xScale = -abs(broSprite.xScale)
+                }
+                broSprite.startWalkAnimation()
+
+                let bedY = broSprite.position.y + 40
+                let originalY = broSprite.position.y
+                let walkToBed = SKAction.move(to: CGPoint(x: bedX, y: bedY), duration: walkDuration)
+                let startSleeping = SKAction.run { [weak self] in
+                    self?.broSprite.playSleepingAnimation()
+                }
+                let returnToGround = SKAction.moveTo(y: originalY, duration: 0.0)
+
+                broSprite.run(SKAction.sequence([walkToBed, startSleeping, SKAction.wait(forDuration: 9.5), returnToGround]), withKey: "walkToBed")
+
+                // Show dialogue and resume patrol after walk + sleeping animation finishes
                 run(SKAction.sequence([
-                    SKAction.wait(forDuration: 9.5),
+                    SKAction.wait(forDuration: walkDuration + 9.5),
                     SKAction.run { [weak self] in
+                        self?.showDialogue(result.dialogue, emoji: action.emoji)
                         self?.startWalkingPatrol()
                     }
                 ]))
