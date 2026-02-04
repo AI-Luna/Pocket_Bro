@@ -24,13 +24,13 @@ class OnboardingScene: SKScene {
     private var selectedCity: City = .sanFrancisco
     private var founderName: String = ""
 
-    // UI Colors - Retro synthwave theme (purple/cyan)
+    // UI Colors - Retro synthwave theme (purple/cyan/pink)
     private let backgroundColor_ = SKColor(red: 0.15, green: 0.08, blue: 0.30, alpha: 1.0) // Deep purple
     private let cardColor = SKColor(red: 0.20, green: 0.12, blue: 0.35, alpha: 0.9) // Purple with slight transparency
     private let accentColor = SKColor(red: 0.0, green: 0.85, blue: 0.85, alpha: 1.0) // Bright cyan
     private let textColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0) // Bright cyan text
-    private let selectedBorderColor = SKColor(red: 0.0, green: 0.85, blue: 0.85, alpha: 1.0) // Cyan border
-    private let purpleAccent = SKColor(red: 0.6, green: 0.2, blue: 0.8, alpha: 1.0) // Bright purple
+    private let selectedBorderColor = SKColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0) // Hot pink for selection
+    private let pinkAccent = SKColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0) // Hot pink (matching logo)
 
     // UI Elements
     private var contentNode: SKNode!
@@ -193,36 +193,39 @@ class OnboardingScene: SKScene {
     // MARK: - Step 1: Choose Founder
 
     private func setupChooseFounderStep() {
-        // Main logo/title - styled like "TECHBRO TAMAGOTCHI"
-        let mainTitle = SKLabelNode(text: "TECHBRO\nTAMAGOTCHI")
-        mainTitle.fontName = PixelFont.name
-        mainTitle.fontSize = 40
-        mainTitle.fontColor = textColor
-        mainTitle.numberOfLines = 2
-        mainTitle.horizontalAlignmentMode = .center
-        mainTitle.verticalAlignmentMode = .center
-        mainTitle.position = CGPoint(x: size.width / 2, y: size.height - 140)
+        // Main logo image - TechBro Tamagotchi
+        let logoTexture = SKTexture(imageNamed: "TechBroLogo")
+        let logo = SKSpriteNode(texture: logoTexture)
         
-        // Add subtle glow effect to title
-        let titleGlow = mainTitle.copy() as! SKLabelNode
-        titleGlow.fontColor = SKColor(red: 0.0, green: 1.0, blue: 1.0, alpha: 0.3)
-        titleGlow.position = mainTitle.position
-        titleGlow.zPosition = -1
-        contentNode.addChild(titleGlow)
+        // Scale logo to fit nicely - about 80% of screen width
+        let targetWidth = size.width * 0.85
+        let scale = targetWidth / logoTexture.size().width
+        logo.setScale(scale)
+        logo.position = CGPoint(x: size.width / 2, y: size.height - 120)
+        logo.zPosition = 10
+        
+        // Add pink/magenta glow behind logo
+        let glowNode = SKShapeNode(rectOf: CGSize(width: logo.size.width * 0.9, height: logo.size.height * 0.8), cornerRadius: 20)
+        glowNode.fillColor = pinkAccent.withAlphaComponent(0.2)
+        glowNode.strokeColor = .clear
+        glowNode.position = logo.position
+        glowNode.zPosition = 9
+        glowNode.glowWidth = 30
+        contentNode.addChild(glowNode)
         
         // Animate glow
         let glowPulse = SKAction.sequence([
-            SKAction.scale(to: 1.05, duration: 1.0),
-            SKAction.scale(to: 1.0, duration: 1.0)
+            SKAction.fadeAlpha(to: 0.4, duration: 1.2),
+            SKAction.fadeAlpha(to: 0.2, duration: 1.2)
         ])
-        titleGlow.run(SKAction.repeatForever(glowPulse))
+        glowNode.run(SKAction.repeatForever(glowPulse))
         
-        contentNode.addChild(mainTitle)
+        contentNode.addChild(logo)
         
         // Subtitle
         titleLabel = createTitle("Choose your founder")
         titleLabel.fontSize = PixelFont.medium
-        titleLabel.position.y = size.height - 240
+        titleLabel.position.y = size.height - 220
         contentNode.addChild(titleLabel)
 
         let archetypes = Archetype.allCases
@@ -259,12 +262,22 @@ class OnboardingScene: SKScene {
         bg.name = "cardBg"
         card.addChild(bg)
 
-        // Selection border - cyan glow (hidden by default)
+        // Selection glow - pink halo effect (hidden by default)
+        let glowBg = SKShapeNode(rectOf: CGSize(width: size.width + 16, height: size.height + 16), cornerRadius: 20)
+        glowBg.fillColor = selectedBorderColor.withAlphaComponent(0.15)
+        glowBg.strokeColor = .clear
+        glowBg.glowWidth = 15
+        glowBg.name = "selectionGlow"
+        glowBg.isHidden = true
+        glowBg.zPosition = -2
+        card.addChild(glowBg)
+        
+        // Selection border - pink with glow (hidden by default)
         let border = SKShapeNode(rectOf: CGSize(width: size.width + 10, height: size.height + 10), cornerRadius: 18)
         border.fillColor = .clear
         border.strokeColor = selectedBorderColor
         border.lineWidth = 3
-        border.glowWidth = 8
+        border.glowWidth = 12
         border.name = "selectionBorder"
         border.isHidden = true
         card.addChild(border)
@@ -288,12 +301,12 @@ class OnboardingScene: SKScene {
             iconSprite.position = CGPoint(x: 0, y: 10)
             card.addChild(iconSprite)
         case .nonBinary:
-            // Use emoji for non-binary (for now)
-            let emojiLabel = SKLabelNode(text: "🧑‍💻")
-            emojiLabel.fontSize = 50
-            emojiLabel.position = CGPoint(x: 0, y: 10)
-            emojiLabel.verticalAlignmentMode = .center
-            card.addChild(emojiLabel)
+            let texture = SKTexture(imageNamed: "VibeCoderIcon")
+            let iconSprite = SKSpriteNode(texture: texture)
+            let scale = iconSize / max(texture.size().width, texture.size().height)
+            iconSprite.setScale(scale)
+            iconSprite.position = CGPoint(x: 0, y: 10)
+            card.addChild(iconSprite)
         }
 
         // Name label
@@ -315,6 +328,18 @@ class OnboardingScene: SKScene {
             if let border = card.childNode(withName: "selectionBorder") {
                 border.isHidden = !isSelected
             }
+            if let glow = card.childNode(withName: "selectionGlow") {
+                glow.isHidden = !isSelected
+                // Add pulsing animation when selected
+                if isSelected {
+                    glow.removeAllActions()
+                    let pulse = SKAction.sequence([
+                        SKAction.fadeAlpha(to: 0.3, duration: 0.8),
+                        SKAction.fadeAlpha(to: 0.15, duration: 0.8)
+                    ])
+                    glow.run(SKAction.repeatForever(pulse))
+                }
+            }
         }
     }
 
@@ -334,12 +359,12 @@ class OnboardingScene: SKScene {
         // Character preview with glow effect
         let previewY = size.height / 2 + 100
         
-        // Pink/magenta glow behind character
+        // Pink glow behind character (matching logo pink)
         let glowNode = SKShapeNode(circleOfRadius: 60)
-        glowNode.fillColor = SKColor(red: 0.8, green: 0.2, blue: 0.6, alpha: 0.4)
+        glowNode.fillColor = pinkAccent.withAlphaComponent(0.4)
         glowNode.strokeColor = .clear
         glowNode.position = CGPoint(x: size.width / 2, y: previewY)
-        glowNode.glowWidth = 20
+        glowNode.glowWidth = 25
         contentNode.addChild(glowNode)
         
         // Glow pulse animation
@@ -368,10 +393,12 @@ class OnboardingScene: SKScene {
             iconSprite.position = CGPoint(x: size.width / 2, y: previewY)
             preview = iconSprite
         case .nonBinary:
-            let emojiLabel = SKLabelNode(text: "🧑‍💻")
-            emojiLabel.fontSize = 100
-            emojiLabel.position = CGPoint(x: size.width / 2, y: previewY)
-            preview = emojiLabel
+            let texture = SKTexture(imageNamed: "VibeCoderIcon")
+            let iconSprite = SKSpriteNode(texture: texture)
+            let scale = iconSize / max(texture.size().width, texture.size().height)
+            iconSprite.setScale(scale)
+            iconSprite.position = CGPoint(x: size.width / 2, y: previewY)
+            preview = iconSprite
         }
         contentNode.addChild(preview)
 
@@ -386,11 +413,20 @@ class OnboardingScene: SKScene {
         let fieldWidth: CGFloat = size.width - 60
         let fieldHeight: CGFloat = 65
         let fieldY = size.height / 2 - 40
+        
+        // Glow behind field
+        let fieldGlow = SKShapeNode(rectOf: CGSize(width: fieldWidth + 10, height: fieldHeight + 10), cornerRadius: 24)
+        fieldGlow.fillColor = pinkAccent.withAlphaComponent(0.15)
+        fieldGlow.strokeColor = .clear
+        fieldGlow.glowWidth = 15
+        fieldGlow.position = CGPoint(x: size.width / 2, y: fieldY)
+        fieldGlow.zPosition = -1
+        contentNode.addChild(fieldGlow)
 
-        // Field background - dark purple with pink/magenta border
+        // Field background - dark purple with pink border
         let fieldBg = SKShapeNode(rectOf: CGSize(width: fieldWidth, height: fieldHeight), cornerRadius: 20)
         fieldBg.fillColor = SKColor(red: 0.35, green: 0.15, blue: 0.45, alpha: 0.9)
-        fieldBg.strokeColor = SKColor(red: 0.8, green: 0.2, blue: 0.6, alpha: 0.8)
+        fieldBg.strokeColor = pinkAccent
         fieldBg.lineWidth = 3
         fieldBg.position = CGPoint(x: size.width / 2, y: fieldY)
         fieldBg.name = "nameFieldBg"
@@ -469,13 +505,24 @@ class OnboardingScene: SKScene {
         bg.name = "cardBg"
         card.addChild(bg)
 
-        // Selection border - bright cyan glow
+        // Selection glow - pink halo effect (hidden by default)
+        let glowSize = CGSize(width: size.width + 20, height: size.height + 20)
+        let glowBg = SKShapeNode(rectOf: glowSize, cornerRadius: 24)
+        glowBg.fillColor = selectedBorderColor.withAlphaComponent(0.15)
+        glowBg.strokeColor = .clear
+        glowBg.glowWidth = 20
+        glowBg.name = "selectionGlow"
+        glowBg.isHidden = true
+        glowBg.zPosition = -2
+        card.addChild(glowBg)
+        
+        // Selection border - pink with glow
         let borderSize = CGSize(width: size.width + 12, height: size.height + 12)
         let border = SKShapeNode(rectOf: borderSize, cornerRadius: 20)
         border.fillColor = .clear
         border.strokeColor = selectedBorderColor
         border.lineWidth = 4
-        border.glowWidth = 8
+        border.glowWidth = 12
         border.name = "selectionBorder"
         border.isHidden = true
         card.addChild(border)
@@ -527,6 +574,18 @@ class OnboardingScene: SKScene {
             let isSelected = card.name == "city_\(selectedCity.rawValue)"
             if let border = card.childNode(withName: "selectionBorder") {
                 border.isHidden = !isSelected
+            }
+            if let glow = card.childNode(withName: "selectionGlow") {
+                glow.isHidden = !isSelected
+                // Add pulsing animation when selected
+                if isSelected {
+                    glow.removeAllActions()
+                    let pulse = SKAction.sequence([
+                        SKAction.fadeAlpha(to: 0.3, duration: 0.8),
+                        SKAction.fadeAlpha(to: 0.15, duration: 0.8)
+                    ])
+                    glow.run(SKAction.repeatForever(pulse))
+                }
             }
         }
     }
@@ -779,11 +838,11 @@ class OnboardingScene: SKScene {
             height: fieldHeight
         ))
         
-        // Style the text field to match the game aesthetic
+        // Style the text field to match the game aesthetic (pink theme)
         textField.backgroundColor = UIColor(red: 0.35, green: 0.15, blue: 0.45, alpha: 0.95)
         textField.layer.cornerRadius = 20
         textField.layer.borderWidth = 3
-        textField.layer.borderColor = UIColor(red: 0.8, green: 0.2, blue: 0.6, alpha: 0.8).cgColor
+        textField.layer.borderColor = UIColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0).cgColor // Hot pink
         textField.textColor = .white
         textField.font = UIFont(name: PixelFont.name, size: PixelFont.large) ?? UIFont.systemFont(ofSize: 22, weight: .bold)
         textField.textAlignment = .center
@@ -795,7 +854,7 @@ class OnboardingScene: SKScene {
             attributes: [.foregroundColor: UIColor(white: 0.7, alpha: 0.8)]
         )
         textField.text = founderName.isEmpty ? "" : founderName
-        textField.tintColor = UIColor(red: 0.0, green: 0.85, blue: 0.85, alpha: 1.0)
+        textField.tintColor = UIColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0) // Pink cursor
         
         // Add padding
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: fieldHeight))
