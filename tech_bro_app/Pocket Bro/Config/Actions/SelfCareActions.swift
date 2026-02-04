@@ -29,7 +29,6 @@ enum SelfCareActions {
             .energy: 25,
             .burnout: -5
         ],
-        selfCareIconIndex: 0,
         isPremium: false  // Free action
     )
 
@@ -45,7 +44,6 @@ enum SelfCareActions {
             .health: 5
         ],
         cooldownSeconds: 300,
-        selfCareIconIndex: 1,
         isPremium: true
     )
 
@@ -62,7 +60,6 @@ enum SelfCareActions {
             .burnout: -10
         ],
         cooldownSeconds: 600,
-        selfCareIconIndex: 3,
         isPremium: true
     )
 
@@ -79,7 +76,6 @@ enum SelfCareActions {
             .runway: -1
         ],
         cooldownSeconds: 900,
-        selfCareIconIndex: 4,
         isPremium: true
     )
 
@@ -97,7 +93,6 @@ enum SelfCareActions {
             .runway: -5
         ],
         cooldownSeconds: 3600,
-        selfCareIconIndex: 2,
         isPremium: true
     )
 
@@ -114,7 +109,6 @@ enum SelfCareActions {
             .happiness: 10
         ],
         cooldownSeconds: 600,
-        selfCareIconIndex: 5,
         isPremium: true
     )
 }

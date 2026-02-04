@@ -249,8 +249,8 @@ class ActionSelectModal: SKNode {
             card.addChild(emojiLabel)
         }
 
-        // Premium crown indicator
-        if action.isPremium {
+        // Premium crown indicator (skip for self-care/recharge)
+        if action.isPremium && category != .selfCare {
             let crown = SKLabelNode(text: "👑")
             crown.fontSize = 18
             crown.position = CGPoint(x: 0, y: 0)  // Centered in cell
