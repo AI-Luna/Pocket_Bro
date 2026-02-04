@@ -418,11 +418,11 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         innerHighlight.lineWidth = 1
         button.addChild(innerHighlight)
 
-        // Add image sprite - centered and fitting nicely within the box
+        // Add image sprite - centered and filling most of the box
         let sprite = SKSpriteNode(imageNamed: imageName)
         sprite.texture?.filteringMode = .nearest  // Pixel art style
-        // Scale proportionally to fit within the box with small padding
-        let iconSize = size * 0.85  // Larger icon but still fits within box
+        // Scale proportionally to fill the box (larger icons for visibility)
+        let iconSize = size * 1.25  // Larger icons for better visibility
         let scale = iconSize / max(sprite.size.width, sprite.size.height)
         sprite.setScale(scale)
         sprite.position = CGPoint(x: 0, y: 0)  // Centered in button
