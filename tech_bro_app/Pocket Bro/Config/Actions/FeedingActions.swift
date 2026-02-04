@@ -49,10 +49,10 @@ enum FeedingActions {
 
     static let ramen = GameAction(
         id: "feed_ramen",
-        name: "Instant Ramen",
+        name: "Uncrustable",
         category: .feed,
         description: "Classic startup fuel. Cheap and filling.",
-        emoji: "🍜",
+        emoji: "🥪",
         effects: [
             .energy: 15,
             .happiness: 5,
