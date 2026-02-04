@@ -531,7 +531,8 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     func actionSelectModal(_ modal: ActionSelectModal, didSelect action: GameAction) {
         if let result = GameManager.shared.performAction(action) {
             let isSleepAction = action.id == "care_nap" || action.id == "care_sleep"
-            if !isSleepAction {
+            let isWorkAction = action.category == .work
+            if !isSleepAction && !isWorkAction {
                 showDialogue(result.dialogue, emoji: action.emoji)
             }
 
@@ -571,14 +572,15 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
                     self.broSprite.xScale = abs(self.broSprite.xScale)
                     self.broSprite.playTypingAnimation()
                 }
-                let resumePatrol = SKAction.run { [weak self] in
+                let showDialogueAndResume = SKAction.run { [weak self] in
+                    self?.showDialogue(result.dialogue, emoji: action.emoji)
                     self?.startWalkingPatrol()
                 }
                 broSprite.run(SKAction.sequence([
                     walkToDesk,
                     sitAndType,
                     SKAction.wait(forDuration: 4.0),
-                    resumePatrol
+                    showDialogueAndResume
                 ]))
             } else if action.id == "care_nap" || action.id == "care_sleep" {
                 // Walk to the bed position (left side of screen) before sleeping
