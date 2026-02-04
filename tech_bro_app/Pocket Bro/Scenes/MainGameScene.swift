@@ -34,7 +34,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         let safeTop = safeAreaInsets().top
         let safeBottom = safeAreaInsets().bottom
         statsAreaHeight = 100 + safeTop // Reduced from 120 to 100
-        buttonAreaHeight = 90 + safeBottom  // Adjusted for larger buttons
+        buttonAreaHeight = 100 + safeBottom  // Adjusted for button size
         gameAreaHeight = size.height - statsAreaHeight - buttonAreaHeight
 
         setupBackground()
@@ -370,12 +370,12 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
     private func setupBottomButtons() {
         let safeBottom = safeAreaInsets().bottom
-        let buttonY = safeBottom + 45  // Position buttons above safe area
+        let buttonY = safeBottom + 50  // Position buttons above safe area
 
         let categories: [ActionCategory] = [.feed, .work, .selfCare, .social]
 
-        let buttonSize: CGFloat = 70  // Larger buttons
-        let spacing: CGFloat = 12  // Tighter spacing to fit
+        let buttonSize: CGFloat = 70  // Slightly smaller box
+        let spacing: CGFloat = 12  // Spacing between buttons
         let totalWidth = CGFloat(categories.count) * buttonSize + CGFloat(categories.count - 1) * spacing
         let startX = (size.width - totalWidth) / 2 + buttonSize / 2
 
@@ -404,13 +404,30 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     private func createImageButton(imageName: String, size: CGFloat) -> SKNode {
         let button = SKNode()
 
-        // No background - just the icon
-        // Add image sprite
+        // Pixelated box background
+        let bg = SKShapeNode(rectOf: CGSize(width: size, height: size), cornerRadius: 4)
+        bg.fillColor = lcdDarkColor.withAlphaComponent(0.25)
+        bg.strokeColor = lcdDarkColor.withAlphaComponent(0.6)
+        bg.lineWidth = 2
+        button.addChild(bg)
+        
+        // Inner highlight for pixelated effect
+        let innerHighlight = SKShapeNode(rectOf: CGSize(width: size - 6, height: size - 6), cornerRadius: 2)
+        innerHighlight.fillColor = .clear
+        innerHighlight.strokeColor = lcdLightColor.withAlphaComponent(0.3)
+        innerHighlight.lineWidth = 1
+        button.addChild(innerHighlight)
+
+        // Add image sprite - centered and fitting nicely within the box
         let sprite = SKSpriteNode(imageNamed: imageName)
         sprite.texture?.filteringMode = .nearest  // Pixel art style
-        // Scale proportionally to fit within button size
-        let scale = size / max(sprite.size.width, sprite.size.height)
+        // Scale proportionally to fit within the box with small padding
+        let iconSize = size * 0.85  // Larger icon but still fits within box
+        let scale = iconSize / max(sprite.size.width, sprite.size.height)
         sprite.setScale(scale)
+        sprite.position = CGPoint(x: 0, y: 0)  // Centered in button
+        sprite.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        sprite.zPosition = 1
         button.addChild(sprite)
 
         return button
