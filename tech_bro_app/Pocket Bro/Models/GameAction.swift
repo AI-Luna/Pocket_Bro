@@ -20,6 +20,7 @@ struct GameAction: Identifiable, Equatable {
     let socialIconIndex: Int? // Index in social sprite sheet (0-5), nil if using emoji
     let workIconIndex: Int? // Index in work sprite sheet (0-5), nil if using emoji
     let selfCareIconIndex: Int? // Index in self-care sprite sheet (0-5), nil if using emoji
+    let isPremium: Bool // Whether this action requires premium/pro access
 
     init(
         id: String,
@@ -35,7 +36,8 @@ struct GameAction: Identifiable, Equatable {
         foodIconIndex: Int? = nil,
         socialIconIndex: Int? = nil,
         workIconIndex: Int? = nil,
-        selfCareIconIndex: Int? = nil
+        selfCareIconIndex: Int? = nil,
+        isPremium: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -51,6 +53,7 @@ struct GameAction: Identifiable, Equatable {
         self.socialIconIndex = socialIconIndex
         self.workIconIndex = workIconIndex
         self.selfCareIconIndex = selfCareIconIndex
+        self.isPremium = isPremium
     }
 
     static func == (lhs: GameAction, rhs: GameAction) -> Bool {

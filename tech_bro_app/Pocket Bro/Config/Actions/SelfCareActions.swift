@@ -29,7 +29,8 @@ enum SelfCareActions {
             .energy: 25,
             .burnout: -5
         ],
-        selfCareIconIndex: 0
+        selfCareIconIndex: 0,
+        isPremium: true
     )
 
     static let meditation = GameAction(
@@ -44,7 +45,8 @@ enum SelfCareActions {
             .health: 5
         ],
         cooldownSeconds: 300,
-        selfCareIconIndex: 1
+        selfCareIconIndex: 1,
+        isPremium: true
     )
 
     static let exercise = GameAction(
@@ -60,7 +62,8 @@ enum SelfCareActions {
             .burnout: -10
         ],
         cooldownSeconds: 600,
-        selfCareIconIndex: 3
+        selfCareIconIndex: 3,
+        isPremium: true
     )
 
     static let therapySession = GameAction(
@@ -76,7 +79,8 @@ enum SelfCareActions {
             .runway: -1
         ],
         cooldownSeconds: 900,
-        selfCareIconIndex: 4
+        selfCareIconIndex: 4,
+        isPremium: true
     )
 
     static let vacation = GameAction(
@@ -93,7 +97,8 @@ enum SelfCareActions {
             .runway: -5
         ],
         cooldownSeconds: 3600,
-        selfCareIconIndex: 2
+        selfCareIconIndex: 2,
+        isPremium: true
     )
 
     static let sleepFull = GameAction(
@@ -109,6 +114,7 @@ enum SelfCareActions {
             .happiness: 10
         ],
         cooldownSeconds: 600,
-        selfCareIconIndex: 5
+        selfCareIconIndex: 5,
+        isPremium: true
     )
 }

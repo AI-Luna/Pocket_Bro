@@ -637,6 +637,11 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         activeModal = nil
     }
 
+    func actionSelectModalDidSelectPremium(_ modal: ActionSelectModal) {
+        activeModal = nil
+        sceneManager?.presentScene(.paywall)
+    }
+
     private func animateButtonPress(_ button: SKNode) {
         let press = SKAction.sequence([
             SKAction.scale(to: 0.85, duration: 0.05),

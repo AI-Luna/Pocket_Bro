@@ -7,6 +7,7 @@ import SpriteKit
 protocol ActionSelectModalDelegate: AnyObject {
     func actionSelectModal(_ modal: ActionSelectModal, didSelect action: GameAction)
     func actionSelectModalDidClose(_ modal: ActionSelectModal)
+    func actionSelectModalDidSelectPremium(_ modal: ActionSelectModal)
 }
 
 class ActionSelectModal: SKNode {
@@ -192,27 +193,29 @@ class ActionSelectModal: SKNode {
         card.addChild(bg)
 
         // Icon - centered in the card, preserving aspect ratio
-        let iconSize = size * 0.85  // Larger icons for better visibility
+        let iconTargetSize = size * 0.75  // Target size for scaling
         var iconSprite: SKSpriteNode?
         var iconYOffset: CGFloat = 0  // Offset to correct for uncentered sprites
 
         if let iconIndex = action.foodIconIndex {
-            iconSprite = createIconFromSheet(sheetName: "FoodIcons", index: iconIndex, targetSize: iconSize)
+            iconSprite = createIconFromSheet(sheetName: "FoodIcons", index: iconIndex, targetSize: iconTargetSize)
         } else if let iconIndex = action.socialIconIndex {
-            iconSprite = createIconFromSheet(sheetName: "SocialIcons", index: iconIndex, targetSize: iconSize)
+            iconSprite = createIconFromSheet(sheetName: "SocialIcons", index: iconIndex, targetSize: iconTargetSize)
         } else if let iconIndex = action.workIconIndex {
-            iconSprite = createIconFromSheet(sheetName: "WorkIcons", index: iconIndex, targetSize: iconSize)
+            iconSprite = createIconFromSheet(sheetName: "WorkIcons", index: iconIndex, targetSize: iconTargetSize)
+            // Work sprite sheet - icons sit slightly high, move them down
+            iconYOffset = -5
         } else if let iconIndex = action.selfCareIconIndex {
-            iconSprite = createIconFromSheet(sheetName: "SelfCareIcons", index: iconIndex, targetSize: iconSize)
+            iconSprite = createIconFromSheet(sheetName: "SelfCareIcons", index: iconIndex, targetSize: iconTargetSize)
             // SelfCare sprite sheet has uneven icon positioning - apply corrections
             // Index: 0=sleep mask, 1=lotus, 2=mountain, 3=dumbbell, 4=couch, 5=bed
             let selfCareOffsets: [Int: CGFloat] = [
-                0: -8,   // Sleep mask - move down
-                1: -5,   // Lotus - move down slightly
-                2: -5,   // Mountain - move down slightly
-                3: 5,    // Dumbbell - move up
-                4: -8,   // Couch/therapy - move down
-                5: 0     // Bed - centered
+                0: -5,   // Sleep mask - move down
+                1: -3,   // Lotus - move down slightly
+                2: -3,   // Mountain - move down slightly
+                3: 0,    // Dumbbell - centered
+                4: -5,   // Couch/therapy - move down
+                5: -3    // Bed - move down slightly
             ]
             iconYOffset = selfCareOffsets[iconIndex] ?? 0
         }
@@ -229,7 +232,7 @@ class ActionSelectModal: SKNode {
         } else {
             // Fallback to emoji
             let emojiLabel = SKLabelNode(text: action.emoji)
-            emojiLabel.fontSize = iconSize * 0.7
+            emojiLabel.fontSize = iconTargetSize * 0.6
             emojiLabel.position = CGPoint(x: 0, y: 0)
             emojiLabel.verticalAlignmentMode = .center
             emojiLabel.horizontalAlignmentMode = .center
@@ -238,6 +241,17 @@ class ActionSelectModal: SKNode {
                 emojiLabel.alpha = 0.4
             }
             card.addChild(emojiLabel)
+        }
+
+        // Premium crown indicator
+        if action.isPremium {
+            let crown = SKLabelNode(text: "👑")
+            crown.fontSize = 18
+            crown.position = CGPoint(x: 0, y: 0)  // Centered in cell
+            crown.verticalAlignmentMode = .center
+            crown.horizontalAlignmentMode = .center
+            crown.zPosition = 5
+            card.addChild(crown)
         }
 
         // Cooldown overlay
@@ -309,8 +323,14 @@ class ActionSelectModal: SKNode {
 
         let sprite = SKSpriteNode(texture: croppedTexture)
 
-        // Use uniform size for all icons - scale to fit within targetSize
-        sprite.size = CGSize(width: targetSize, height: targetSize)
+        // Scale proportionally - fit within targetSize while preserving aspect ratio
+        let originalWidth = texture.size().width * iconWidth
+        let originalHeight = texture.size().height * iconHeight
+        
+        // Calculate scale factor to fit within targetSize
+        let scale = targetSize / max(originalWidth, originalHeight)
+        
+        sprite.size = CGSize(width: originalWidth * scale, height: originalHeight * scale)
 
         return sprite
     }
@@ -353,6 +373,19 @@ class ActionSelectModal: SKNode {
     }
 
     private func handleActionTap(_ action: GameAction, card: SKNode) {
+        // Check if premium action - open paywall instead
+        if action.isPremium {
+            animatePress(card)
+            delegate?.actionSelectModalDidSelectPremium(self)
+            run(SKAction.sequence([
+                SKAction.wait(forDuration: 0.2),
+                SKAction.run { [weak self] in
+                    self?.dismiss()
+                }
+            ]))
+            return
+        }
+
         let canPerform = GameManager.shared.canPerformAction(action)
 
         guard canPerform else {
