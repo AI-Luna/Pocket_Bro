@@ -381,7 +381,7 @@ class BroSpriteNode: SKNode {
 
         // Cycle through the 3 sleeping frames (Zzz poses) in a loop,
         // play a few cycles then return to idle
-        let sleepCycle = SKAction.animate(with: sleepingFrames, timePerFrame: 0.6, resize: true, restore: false)
+        let sleepCycle = SKAction.animate(with: sleepingFrames, timePerFrame: 0.6, resize: false, restore: false)
         let sleepLoop = SKAction.repeat(sleepCycle, count: 5)
 
         let sequence = SKAction.sequence([shrink, sleepLoop])
