@@ -532,7 +532,8 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         if let result = GameManager.shared.performAction(action) {
             let isSleepAction = action.id == "care_nap" || action.id == "care_sleep"
             let isWorkAction = action.category == .work
-            if !isSleepAction && !isWorkAction {
+            let isFeedAction = action.category == .feed
+            if !isSleepAction && !isWorkAction && !isFeedAction {
                 showDialogue(result.dialogue, emoji: action.emoji)
             }
 
@@ -541,10 +542,11 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
             if action.category == .feed {
                 broSprite.playEatingDrinkingAnimation()
-                // Resume patrol after eating animation finishes
+                // Show dialogue and resume patrol after eating animation finishes
                 run(SKAction.sequence([
                     SKAction.wait(forDuration: 4.5),
                     SKAction.run { [weak self] in
+                        self?.showDialogue(result.dialogue, emoji: action.emoji)
                         self?.startWalkingPatrol()
                     }
                 ]))
