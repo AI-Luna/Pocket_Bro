@@ -530,7 +530,10 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
     func actionSelectModal(_ modal: ActionSelectModal, didSelect action: GameAction) {
         if let result = GameManager.shared.performAction(action) {
-            showDialogue(result.dialogue, emoji: action.emoji)
+            let isSleepAction = action.id == "care_nap" || action.id == "care_sleep"
+            if !isSleepAction {
+                showDialogue(result.dialogue, emoji: action.emoji)
+            }
 
             // Stop patrol while performing the action animation
             broSprite.removeAction(forKey: "patrol")
@@ -602,10 +605,11 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
                 broSprite.run(SKAction.sequence([walkToBed, startSleeping, SKAction.wait(forDuration: 9.5), returnToGround]), withKey: "walkToBed")
 
-                // Resume patrol after walk + sleeping animation finishes
+                // Show dialogue and resume patrol after walk + sleeping animation finishes
                 run(SKAction.sequence([
                     SKAction.wait(forDuration: walkDuration + 9.5),
                     SKAction.run { [weak self] in
+                        self?.showDialogue(result.dialogue, emoji: action.emoji)
                         self?.startWalkingPatrol()
                     }
                 ]))
