@@ -556,10 +556,33 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
                     }
                 ]))
             } else if action.id == "care_nap" || action.id == "care_sleep" {
-                broSprite.playSleepingAnimation()
-                // Resume patrol after sleeping animation finishes
+                // Walk to the bed position (left side of screen) before sleeping
+                let bedX: CGFloat = 100
+                let walkSpeed: CGFloat = 60
+                let distance = abs(broSprite.position.x - bedX)
+                let walkDuration = Double(distance) / Double(walkSpeed)
+
+                // Face toward bed
+                if bedX > broSprite.position.x {
+                    broSprite.xScale = abs(broSprite.xScale)
+                } else {
+                    broSprite.xScale = -abs(broSprite.xScale)
+                }
+                broSprite.startWalkAnimation()
+
+                let bedY = broSprite.position.y + 40
+                let originalY = broSprite.position.y
+                let walkToBed = SKAction.move(to: CGPoint(x: bedX, y: bedY), duration: walkDuration)
+                let startSleeping = SKAction.run { [weak self] in
+                    self?.broSprite.playSleepingAnimation()
+                }
+                let returnToGround = SKAction.moveTo(y: originalY, duration: 0.0)
+
+                broSprite.run(SKAction.sequence([walkToBed, startSleeping, SKAction.wait(forDuration: 9.5), returnToGround]), withKey: "walkToBed")
+
+                // Resume patrol after walk + sleeping animation finishes
                 run(SKAction.sequence([
-                    SKAction.wait(forDuration: 9.5),
+                    SKAction.wait(forDuration: walkDuration + 9.5),
                     SKAction.run { [weak self] in
                         self?.startWalkingPatrol()
                     }
