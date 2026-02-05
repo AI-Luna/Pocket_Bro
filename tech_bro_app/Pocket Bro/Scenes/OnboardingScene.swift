@@ -201,7 +201,7 @@ class OnboardingScene: SKScene {
         let targetWidth = size.width * 0.85
         let scale = targetWidth / logoTexture.size().width
         logo.setScale(scale)
-        logo.position = CGPoint(x: size.width / 2, y: size.height - 130)  // Moved up
+        logo.position = CGPoint(x: size.width / 2, y: size.height - 180)  // Moved down closer to text
         logo.zPosition = 10
         
         // Add pink/magenta glow behind logo
@@ -222,10 +222,10 @@ class OnboardingScene: SKScene {
         
         contentNode.addChild(logo)
         
-        // Subtitle - closer to logo and cards
+        // Subtitle - positioned closer to cards below
         titleLabel = createTitle("Choose your founder")
         titleLabel.fontSize = PixelFont.medium
-        titleLabel.position.y = size.height - 220  // Moved up, closer to logo
+        titleLabel.position.y = size.height - 280  // Moved down, closer to character cards
         contentNode.addChild(titleLabel)
 
         // Larger cards with bigger character icons
@@ -474,21 +474,21 @@ class OnboardingScene: SKScene {
             label.text = "Next"
         }
         
-        // Title with name - centered, positioned closer to city cards
+        // Title with name - centered at top
         let name = founderName.isEmpty ? "your founder" : founderName
         titleLabel = createTitle("Where will \(name)\nbuild their startup?")
         titleLabel.numberOfLines = 2
         titleLabel.horizontalAlignmentMode = .center
         titleLabel.verticalAlignmentMode = .center
         titleLabel.preferredMaxLayoutWidth = size.width - 40
-        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - 100)  // Moved down closer to cards
+        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - 100)
         contentNode.addChild(titleLabel)
 
-        // Two city cards side by side - closer to title
+        // Two city cards side by side - centered on screen
         let cardWidth: CGFloat = (size.width - 60) / 2
         let cardHeight: CGFloat = 280
         let spacing: CGFloat = 20
-        let cardY = size.height / 2 - 40  // Moved up closer to title
+        let cardY = size.height / 2 + 20  // Moved up to be more centered
 
         let cities = City.allCases
         let totalWidth = CGFloat(cities.count) * cardWidth + spacing
