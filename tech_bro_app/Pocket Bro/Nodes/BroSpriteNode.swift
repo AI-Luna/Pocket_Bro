@@ -14,6 +14,11 @@ struct SpriteSheetConfig {
     let sheetPixelWidth: CGFloat
     let sheetPixelHeight: CGFloat
 
+    /// Per-row Y pixel offsets for non-uniform grids. When nil, rows are evenly spaced.
+    let rowYOffsets: [Int]?
+    /// Explicit frame height in pixels (required when rowYOffsets is set).
+    let framePixelHeight: Int?
+
     // Frame index mappings as (row, col) tuples
     let idleFrameSequence: [(row: Int, col: Int)]
     let walkFrameIndices: [(row: Int, col: Int)]
@@ -26,6 +31,8 @@ struct SpriteSheetConfig {
         rows: 4,
         sheetPixelWidth: 400,
         sheetPixelHeight: 384,
+        rowYOffsets: nil,
+        framePixelHeight: nil,
         idleFrameSequence: [
             (0, 0), (0, 1), (0, 2), (0, 1), (0, 0),
             (3, 0), (3, 1), (3, 2), (3, 3), (3, 2), (3, 1), (3, 0)
@@ -38,12 +45,16 @@ struct SpriteSheetConfig {
         jumpFrameIndex: (1, 4)
     )
 
+    // Babe sprite sheet was rebuilt with uniform 80x92 grid (400x552).
+    // Each sprite is centered in its cell with transparent padding.
     static let galConfig = SpriteSheetConfig(
         sheetName: "BabeSpriteSheet",
         columns: 5,
         rows: 6,
-        sheetPixelWidth: 440,
-        sheetPixelHeight: 566,
+        sheetPixelWidth: 400,
+        sheetPixelHeight: 552,
+        rowYOffsets: nil,
+        framePixelHeight: nil,
         idleFrameSequence: [
             (0, 0), (0, 1), (0, 2), (0, 1), (0, 0),
             (3, 0), (3, 1), (3, 2), (3, 3), (3, 2), (3, 1), (3, 0)
@@ -52,7 +63,7 @@ struct SpriteSheetConfig {
             (1, 0), (1, 1), (1, 2), (1, 3),
             (2, 0), (2, 1), (2, 2), (2, 3)
         ],
-        workFrameIndices: [(2, 4), (3, 4)],
+        workFrameIndices: [(2, 4), (3, 3)],
         jumpFrameIndex: (1, 4)
     )
 }
@@ -115,6 +126,18 @@ class BroSpriteNode: SKNode {
 
     // MARK: - Sprite Sheet Loading
 
+    /// Crop a single frame from a CGImage sprite sheet into its own standalone SKTexture.
+    /// This eliminates atlas-based bleed entirely since each texture is independent.
+    private static func cropFrame(from cgImage: CGImage, x: Int, y: Int, w: Int, h: Int) -> SKTexture {
+        let cropRect = CGRect(x: x, y: y, width: w, height: h)
+        guard let cropped = cgImage.cropping(to: cropRect) else {
+            return SKTexture()
+        }
+        let tex = SKTexture(cgImage: cropped)
+        tex.filteringMode = .nearest
+        return tex
+    }
+
     private func loadSpriteSheet() {
         let config = currentConfig
 
@@ -123,23 +146,21 @@ class BroSpriteNode: SKNode {
 
         allFrames = []
 
-        let sheetTexture = SKTexture(imageNamed: config.sheetName)
-        sheetTexture.filteringMode = .nearest
+        // Load the sheet as a CGImage so we can crop individual frames.
+        // Standalone textures eliminate SpriteKit sub-texture bleed completely.
+        guard let uiImage = UIImage(named: config.sheetName),
+              let cgImage = uiImage.cgImage else { return }
 
-        let frameWidth = 1.0 / CGFloat(config.columns)
-        let frameHeight = 1.0 / CGFloat(config.rows)
+        let frameW = Int(config.sheetPixelWidth) / config.columns
+        let frameH = config.framePixelHeight ?? (Int(config.sheetPixelHeight) / config.rows)
 
-        // Slice the sheet into a 2D array of textures
-        // SKTexture rect origin is bottom-left, so row 0 in the image (top) = row index (rows-1) in texture coords
         for row in 0..<config.rows {
             var rowFrames: [SKTexture] = []
+            let py = config.rowYOffsets?[row] ?? (row * frameH)
             for col in 0..<config.columns {
-                let x = CGFloat(col) * frameWidth
-                let y = CGFloat(config.rows - 1 - row) * frameHeight
-                let rect = CGRect(x: x, y: y, width: frameWidth, height: frameHeight)
-                let frame = SKTexture(rect: rect, in: sheetTexture)
-                frame.filteringMode = .nearest
-                rowFrames.append(frame)
+                let px = col * frameW
+                let tex = Self.cropFrame(from: cgImage, x: px, y: py, w: frameW, h: frameH)
+                rowFrames.append(tex)
             }
             allFrames.append(rowFrames)
         }
