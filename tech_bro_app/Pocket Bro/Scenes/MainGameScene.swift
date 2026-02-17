@@ -109,23 +109,16 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         cityBackgroundSprite = citySprite
 
         // Plushie on the bed (left side near pillow)
-        // Positioned in screen-space at the game's bed level so it stays
-        // consistent with the character's sleeping position across devices.
+        // Positioned in the city sprite's local coordinate space so it
+        // tracks the bed position regardless of device screen size.
         let plushieTexture = SKTexture(imageNamed: "Plushie")
         plushieTexture.filteringMode = .nearest
         let plushieSprite = SKSpriteNode(texture: plushieTexture)
         plushieSprite.name = "plushie"
-        let plushieScale: CGFloat = 0.187
-        plushieSprite.setScale(plushieScale)
-        // bedLevel matches the bro's sleeping Y (buttonAreaHeight + gameAreaHeight/2 - 40)
-        let bedLevel = buttonAreaHeight + gameAreaHeight / 2 - 40
-        let plushieHeight = plushieSprite.size.height * plushieScale
-        plushieSprite.position = CGPoint(
-            x: 60,
-            y: bedLevel + plushieHeight / 2 - 35
-        )
+        plushieSprite.setScale(0.187)
+        plushieSprite.position = CGPoint(x: -290, y: -160)
         plushieSprite.zPosition = 5
-        cropNode.addChild(plushieSprite)
+        citySprite.addChild(plushieSprite)
 
         // Start checking for day/night changes
         startDayNightCheck()
