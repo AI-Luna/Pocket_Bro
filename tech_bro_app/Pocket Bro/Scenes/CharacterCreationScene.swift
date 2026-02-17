@@ -77,7 +77,6 @@ class CharacterCreationScene: BaseGameScene {
             switch archetype {
             case .bro: emoji = "👨‍💻"
             case .gal: emoji = "👩‍💻"
-            case .nonBinary: emoji = "🧑‍💻"
             }
 
             let button = PixelButtonNode(text: archetype.rawValue, icon: emoji,

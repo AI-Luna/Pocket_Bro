@@ -301,13 +301,6 @@ class OnboardingScene: SKScene {
             iconSprite.setScale(scale)
             iconSprite.position = CGPoint(x: 0, y: 12)
             card.addChild(iconSprite)
-        case .nonBinary:
-            let texture = SKTexture(imageNamed: "VibeCoderIcon")
-            let iconSprite = SKSpriteNode(texture: texture)
-            let scale = iconSize / max(texture.size().width, texture.size().height)
-            iconSprite.setScale(scale)
-            iconSprite.position = CGPoint(x: 0, y: 12)
-            card.addChild(iconSprite)
         }
 
         // Name label - custom display names with larger font
@@ -315,7 +308,6 @@ class OnboardingScene: SKScene {
         switch archetype {
         case .bro: displayName = "Tech Bro"
         case .gal: displayName = "Tech Babe"
-        case .nonBinary: displayName = "Vibe Coder"
         }
         
         let nameLabel = SKLabelNode(text: displayName)
@@ -399,13 +391,6 @@ class OnboardingScene: SKScene {
             preview = iconSprite
         case .gal:
             let texture = SKTexture(imageNamed: "TechGalIcon")
-            let iconSprite = SKSpriteNode(texture: texture)
-            let scale = iconSize / max(texture.size().width, texture.size().height)
-            iconSprite.setScale(scale)
-            iconSprite.position = CGPoint(x: size.width / 2, y: previewY)
-            preview = iconSprite
-        case .nonBinary:
-            let texture = SKTexture(imageNamed: "VibeCoderIcon")
             let iconSprite = SKSpriteNode(texture: texture)
             let scale = iconSize / max(texture.size().width, texture.size().height)
             iconSprite.setScale(scale)

@@ -230,9 +230,6 @@ class BroSpriteNode: SKNode {
         case .gal:
             blendColor = SKColor(red: 0.85, green: 0.3, blue: 0.55, alpha: 1.0)
             blendFactor = 0.2
-        case .nonBinary:
-            blendColor = SKColor(red: 0.6, green: 0.35, blue: 0.85, alpha: 1.0)
-            blendFactor = 0.2
         }
 
         bodySprite.color = blendColor

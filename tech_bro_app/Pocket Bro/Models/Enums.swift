@@ -10,13 +10,11 @@ import Foundation
 enum Archetype: String, Codable, CaseIterable {
     case bro = "Tech Bro"
     case gal = "Tech Gal"
-    case nonBinary = "Vibe Coder"
 
     var pronoun: String {
         switch self {
         case .bro: return "he"
         case .gal: return "she"
-        case .nonBinary: return "they"
         }
     }
 
@@ -24,7 +22,6 @@ enum Archetype: String, Codable, CaseIterable {
         switch self {
         case .bro: return "his"
         case .gal: return "her"
-        case .nonBinary: return "their"
         }
     }
 }
