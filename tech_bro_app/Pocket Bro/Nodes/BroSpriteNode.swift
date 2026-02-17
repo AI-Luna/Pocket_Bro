@@ -5,18 +5,69 @@
 
 import SpriteKit
 
+// MARK: - Sprite Sheet Config
+
+struct SpriteSheetConfig {
+    let sheetName: String
+    let columns: Int
+    let rows: Int
+    let sheetPixelWidth: CGFloat
+    let sheetPixelHeight: CGFloat
+
+    // Frame index mappings as (row, col) tuples
+    let idleFrameSequence: [(row: Int, col: Int)]
+    let walkFrameIndices: [(row: Int, col: Int)]
+    let workFrameIndices: [(row: Int, col: Int)]
+    let jumpFrameIndex: (row: Int, col: Int)
+
+    static let broConfig = SpriteSheetConfig(
+        sheetName: "BroSpriteSheet",
+        columns: 5,
+        rows: 4,
+        sheetPixelWidth: 400,
+        sheetPixelHeight: 384,
+        idleFrameSequence: [
+            (0, 0), (0, 1), (0, 2), (0, 1), (0, 0),
+            (3, 0), (3, 1), (3, 2), (3, 3), (3, 2), (3, 1), (3, 0)
+        ],
+        walkFrameIndices: [
+            (1, 0), (1, 1), (1, 2), (1, 3),
+            (2, 0), (2, 1), (2, 2), (2, 3)
+        ],
+        workFrameIndices: [(2, 4), (3, 4)],
+        jumpFrameIndex: (1, 4)
+    )
+
+    static let galConfig = SpriteSheetConfig(
+        sheetName: "BabeSpriteSheet",
+        columns: 5,
+        rows: 6,
+        sheetPixelWidth: 440,
+        sheetPixelHeight: 566,
+        idleFrameSequence: [
+            (0, 0), (0, 1), (0, 2), (0, 1), (0, 0),
+            (3, 0), (3, 1), (3, 2), (3, 3), (3, 2), (3, 1), (3, 0)
+        ],
+        walkFrameIndices: [
+            (1, 0), (1, 1), (1, 2), (1, 3),
+            (2, 0), (2, 1), (2, 2), (2, 3)
+        ],
+        workFrameIndices: [(2, 4), (3, 4)],
+        jumpFrameIndex: (1, 4)
+    )
+}
+
+// MARK: - BroSpriteNode
+
 class BroSpriteNode: SKNode {
     private var bodySprite: SKSpriteNode!
     private var accessorySprite: SKSpriteNode?
 
     private let pixelScale: CGFloat = 3.4
 
-    // Sprite sheet layout: 5 columns x 4 rows
-    private let columns = 5
-    private let rows = 4
-
-    // Frame textures sliced from the sprite sheet
+    // Frame textures sliced from the main sprite sheet
     private var allFrames: [[SKTexture]] = []
+    private var loadedSheetName: String?
 
     // Eating/drinking sprite sheet layout: 5 columns x 4 rows
     private var eatingFrames: [[SKTexture]] = []
@@ -44,8 +95,13 @@ class BroSpriteNode: SKNode {
         didSet { }
     }
 
-    override init() {
+    private var currentConfig: SpriteSheetConfig {
+        archetype == .gal ? .galConfig : .broConfig
+    }
+
+    init(archetype: Archetype = .bro) {
         super.init()
+        self.archetype = archetype
         loadSpriteSheet()
         loadEatingDrinkingSpriteSheet()
         loadTypingSpriteSheet()
@@ -60,19 +116,26 @@ class BroSpriteNode: SKNode {
     // MARK: - Sprite Sheet Loading
 
     private func loadSpriteSheet() {
-        let sheetTexture = SKTexture(imageNamed: "BroSpriteSheet")
+        let config = currentConfig
+
+        // Skip reload if already loaded this sheet
+        guard loadedSheetName != config.sheetName else { return }
+
+        allFrames = []
+
+        let sheetTexture = SKTexture(imageNamed: config.sheetName)
         sheetTexture.filteringMode = .nearest
 
-        let frameWidth = 1.0 / CGFloat(columns)
-        let frameHeight = 1.0 / CGFloat(rows)
+        let frameWidth = 1.0 / CGFloat(config.columns)
+        let frameHeight = 1.0 / CGFloat(config.rows)
 
         // Slice the sheet into a 2D array of textures
         // SKTexture rect origin is bottom-left, so row 0 in the image (top) = row index (rows-1) in texture coords
-        for row in 0..<rows {
+        for row in 0..<config.rows {
             var rowFrames: [SKTexture] = []
-            for col in 0..<columns {
+            for col in 0..<config.columns {
                 let x = CGFloat(col) * frameWidth
-                let y = CGFloat(rows - 1 - row) * frameHeight
+                let y = CGFloat(config.rows - 1 - row) * frameHeight
                 let rect = CGRect(x: x, y: y, width: frameWidth, height: frameHeight)
                 let frame = SKTexture(rect: rect, in: sheetTexture)
                 frame.filteringMode = .nearest
@@ -81,32 +144,20 @@ class BroSpriteNode: SKNode {
             allFrames.append(rowFrames)
         }
 
-        // Assign animation groups based on the sprite sheet layout:
-        // Row 0: idle/standing (0-2), walk start (3), run (4)
-        // Row 1: walk cycle (0-3), jump/excited (4)
-        // Row 2: walk variants (0-3), sitting at desk (4)
-        // Row 3: idle variations (0-3), sitting at desk typing (4)
+        // Map animation groups from config indices
+        idleFrames = config.idleFrameSequence.map { allFrames[$0.row][$0.col] }
+        walkFrames = config.walkFrameIndices.map { allFrames[$0.row][$0.col] }
+        workFrames = config.workFrameIndices.map { allFrames[$0.row][$0.col] }
+        jumpFrame = allFrames[config.jumpFrameIndex.row][config.jumpFrameIndex.col]
 
-        idleFrames = [
-            allFrames[0][0], allFrames[0][1], allFrames[0][2],
-            allFrames[0][1], allFrames[0][0],
-            allFrames[3][0], allFrames[3][1], allFrames[3][2], allFrames[3][3],
-            allFrames[3][2], allFrames[3][1], allFrames[3][0]
-        ]
-
-        walkFrames = [
-            allFrames[1][0], allFrames[1][1], allFrames[1][2], allFrames[1][3],
-            allFrames[2][0], allFrames[2][1], allFrames[2][2], allFrames[2][3]
-        ]
-
-        workFrames = [
-            allFrames[2][4], allFrames[3][4]
-        ]
-
-        jumpFrame = allFrames[1][4]
+        loadedSheetName = config.sheetName
     }
 
     private func loadEatingDrinkingSpriteSheet() {
+        // Eating/drinking always uses the bro-format sheet (5x4, 400x384)
+        let columns = 5
+        let rows = 4
+
         let sheetTexture = SKTexture(imageNamed: "EatingDrinkingSpriteSheet")
         sheetTexture.filteringMode = .nearest
 
@@ -144,6 +195,10 @@ class BroSpriteNode: SKNode {
     }
 
     private func loadTypingSpriteSheet() {
+        // Typing always uses the bro-format sheet (5x4, 400x384)
+        let columns = 5
+        let rows = 4
+
         let sheetTexture = SKTexture(imageNamed: "TypingSpriteSheet")
         sheetTexture.filteringMode = .nearest
 
@@ -217,23 +272,24 @@ class BroSpriteNode: SKNode {
     // MARK: - Appearance
 
     private func updateAppearance() {
-        // The sprite sheet has a single character design;
-        // archetype could tint or swap sheets in the future.
-        // For now, apply a subtle color blend to differentiate archetypes.
-        let blendColor: SKColor
-        let blendFactor: CGFloat
+        let config = currentConfig
 
-        switch archetype {
-        case .bro:
-            blendColor = .clear
-            blendFactor = 0.0
-        case .gal:
-            blendColor = SKColor(red: 0.85, green: 0.3, blue: 0.55, alpha: 1.0)
-            blendFactor = 0.2
+        // Only reload if the archetype's sheet actually changed
+        guard loadedSheetName != config.sheetName else { return }
+
+        loadSpriteSheet()
+
+        // Remove any legacy color blend
+        bodySprite.color = .clear
+        bodySprite.colorBlendFactor = 0.0
+
+        // Update texture to first idle frame and restart animation
+        if !idleFrames.isEmpty {
+            bodySprite.texture = idleFrames[0]
+            bodySprite.texture?.filteringMode = .nearest
         }
 
-        bodySprite.color = blendColor
-        bodySprite.colorBlendFactor = blendFactor
+        startIdleAnimation()
     }
 
     // MARK: - Animations
