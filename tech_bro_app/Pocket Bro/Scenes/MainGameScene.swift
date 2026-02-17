@@ -567,10 +567,6 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             }
         }
 
-        // Tap on character
-        if broSprite.contains(location) {
-            broSprite.playHappyAnimation()
-        }
     }
 
     private func showActionModal(for category: ActionCategory) {
