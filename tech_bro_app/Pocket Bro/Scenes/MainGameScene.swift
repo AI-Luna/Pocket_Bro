@@ -319,18 +319,10 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             return Double(abs(endX - startX)) / Double(walkSpeed)
         }
 
-        // Walk to right edge first (from center)
-        let initialFaceRight = SKAction.run { [weak self] in
-            guard let self = self else { return }
-            self.broSprite.xScale = abs(self.broSprite.xScale)
-            self.broSprite.startWalkAnimation()
-        }
-        let initialMoveRight = SKAction.moveTo(x: rightEdge, duration: duration(from: size.width / 2, to: rightEdge))
-        let initialPause = SKAction.run { [weak self] in
-            self?.broSprite.startIdleAnimation()
-        }
+        let currentX = broSprite.position.x
+        let midPoint = (leftEdge + rightEdge) / 2
 
-        // Repeating patrol: right edge -> left edge -> right edge
+        // Repeating patrol legs
         let faceLeft = SKAction.run { [weak self] in
             guard let self = self else { return }
             self.broSprite.xScale = -abs(self.broSprite.xScale)
@@ -351,20 +343,58 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             self?.broSprite.startIdleAnimation()
         }
 
-        let loopPatrol = SKAction.repeatForever(SKAction.sequence([
-            faceLeft, moveLeft,
-            pauseLeft, SKAction.wait(forDuration: pauseDuration),
-            faceRight, moveRight,
-            pauseRight, SKAction.wait(forDuration: pauseDuration)
-        ]))
+        // Choose initial direction based on current position:
+        // If closer to right side, walk left first; otherwise walk right first.
+        let initialSequence: [SKAction]
+        if currentX >= midPoint {
+            // Start by walking left
+            let initialFaceLeft = SKAction.run { [weak self] in
+                guard let self = self else { return }
+                self.broSprite.xScale = -abs(self.broSprite.xScale)
+                self.broSprite.startWalkAnimation()
+            }
+            let initialMoveLeft = SKAction.moveTo(x: leftEdge, duration: duration(from: currentX, to: leftEdge))
+            let initialPause = SKAction.run { [weak self] in
+                self?.broSprite.startIdleAnimation()
+            }
+            // After reaching left edge, loop: right -> left -> right -> ...
+            let loopPatrol = SKAction.repeatForever(SKAction.sequence([
+                faceRight, moveRight,
+                pauseRight, SKAction.wait(forDuration: pauseDuration),
+                faceLeft, moveLeft,
+                pauseLeft, SKAction.wait(forDuration: pauseDuration)
+            ]))
+            initialSequence = [
+                initialFaceLeft, initialMoveLeft,
+                initialPause, SKAction.wait(forDuration: pauseDuration),
+                loopPatrol
+            ]
+        } else {
+            // Start by walking right
+            let initialFaceRight = SKAction.run { [weak self] in
+                guard let self = self else { return }
+                self.broSprite.xScale = abs(self.broSprite.xScale)
+                self.broSprite.startWalkAnimation()
+            }
+            let initialMoveRight = SKAction.moveTo(x: rightEdge, duration: duration(from: currentX, to: rightEdge))
+            let initialPause = SKAction.run { [weak self] in
+                self?.broSprite.startIdleAnimation()
+            }
+            // After reaching right edge, loop: left -> right -> left -> ...
+            let loopPatrol = SKAction.repeatForever(SKAction.sequence([
+                faceLeft, moveLeft,
+                pauseLeft, SKAction.wait(forDuration: pauseDuration),
+                faceRight, moveRight,
+                pauseRight, SKAction.wait(forDuration: pauseDuration)
+            ]))
+            initialSequence = [
+                initialFaceRight, initialMoveRight,
+                initialPause, SKAction.wait(forDuration: pauseDuration),
+                loopPatrol
+            ]
+        }
 
-        let fullPatrol = SKAction.sequence([
-            initialFaceRight, initialMoveRight,
-            initialPause, SKAction.wait(forDuration: pauseDuration),
-            loopPatrol
-        ])
-
-        broSprite.run(fullPatrol, withKey: "patrol")
+        broSprite.run(SKAction.sequence(initialSequence), withKey: "patrol")
     }
 
     // MARK: - Bottom Buttons
