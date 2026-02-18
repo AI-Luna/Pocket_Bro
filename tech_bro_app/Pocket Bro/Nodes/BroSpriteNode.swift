@@ -486,7 +486,7 @@ class BroSpriteNode: SKNode {
             // the same on-screen width, and use resize:false to avoid artefacts.
             let originalScale = bodySprite.xScale
             let originalSize = bodySprite.size
-            let typingScale = originalScale * (originalSize.width / 90.0) * 0.55
+            let typingScale = originalScale * (originalSize.width / 90.0) * 0.45
 
             bodySprite.size = CGSize(width: 90, height: 144)
             bodySprite.setScale(typingScale)
