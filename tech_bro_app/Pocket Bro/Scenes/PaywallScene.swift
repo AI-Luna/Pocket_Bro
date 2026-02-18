@@ -143,13 +143,13 @@ class PaywallScene: SKScene {
         rightChar.run(SKAction.sequence([SKAction.wait(forDuration: 0.4), float]))
     }
 
-    // MARK: - Feature Widget
+    // MARK: - Feature Bullets
 
     private func setupFeatureWidget() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let widgetY = size.height - safeTop - 260
+        let widgetY = size.height - safeTop - 258
         let widgetWidth: CGFloat = size.width - 50
-        let widgetHeight: CGFloat = 100
+        let widgetHeight: CGFloat = 152
 
         let widget = SKShapeNode(rectOf: CGSize(width: widgetWidth, height: widgetHeight), cornerRadius: 16)
         widget.fillColor = featureCardColor
@@ -158,63 +158,74 @@ class PaywallScene: SKScene {
         widget.position = CGPoint(x: size.width / 2, y: widgetY)
         addChild(widget)
 
-        let title = SKLabelNode(text: "TechBro Pro Features")
-        title.fontName = PixelFont.name
-        title.fontSize = 15
-        title.fontColor = accentColor
-        title.position = CGPoint(x: 0, y: 22)
-        widget.addChild(title)
+        // Header
+        let header = SKLabelNode(text: "TechBro Pro Features")
+        header.fontName = PixelFont.name
+        header.fontSize = 14
+        header.fontColor = accentColor
+        header.horizontalAlignmentMode = .left
+        header.verticalAlignmentMode = .center
+        header.position = CGPoint(x: -widgetWidth / 2 + 20, y: 56)
+        widget.addChild(header)
 
-        let features: [(String, SKColor)] = [
-            ("MiniVacationIcon", SKColor(red: 1.0, green: 0.7, blue: 0.2, alpha: 1.0)),
-            ("GymIcon",          SKColor(red: 0.2, green: 0.85, blue: 0.7, alpha: 1.0)),
-            ("TherapyIcon",      accentColor),
-            ("BedIcon",          SKColor(red: 0.5, green: 0.4, blue: 0.9, alpha: 1.0))
+        // 4 bullet points
+        let bullets: [(String, String)] = [
+            ("🧘", "Meditation, Gym, Therapy & more"),
+            ("💪", "Exclusive Grind & Fuel boosts"),
+            ("🚀", "All future premium content"),
+            ("❤️", "Support indie development")
         ]
 
-        let iconSize: CGFloat = 44
-        let spacing: CGFloat = 12
-        let totalWidth = CGFloat(features.count) * iconSize + CGFloat(features.count - 1) * spacing
-        let startX = -totalWidth / 2 + iconSize / 2
+        let bulletSpacing: CGFloat = 26
+        let firstBulletY: CGFloat = 26
 
-        for (index, feature) in features.enumerated() {
-            let xPos = startX + CGFloat(index) * (iconSize + spacing)
+        for (index, bullet) in bullets.enumerated() {
+            let y = firstBulletY - CGFloat(index) * bulletSpacing
 
-            let iconBg = SKShapeNode(rectOf: CGSize(width: iconSize, height: iconSize), cornerRadius: 10)
-            iconBg.fillColor = feature.1
-            iconBg.strokeColor = .clear
-            iconBg.position = CGPoint(x: xPos, y: -14)
-            widget.addChild(iconBg)
+            let emoji = SKLabelNode(text: bullet.0)
+            emoji.fontSize = 14
+            emoji.horizontalAlignmentMode = .center
+            emoji.verticalAlignmentMode = .center
+            emoji.position = CGPoint(x: -widgetWidth / 2 + 30, y: y)
+            widget.addChild(emoji)
 
-            let texture = SKTexture(imageNamed: feature.0)
-            texture.filteringMode = .nearest
-            let sprite = SKSpriteNode(texture: texture)
-            let orig = texture.size()
-            let scale = (iconSize * 0.65) / max(orig.width, orig.height)
-            sprite.size = CGSize(width: orig.width * scale, height: orig.height * scale)
-            sprite.position = CGPoint(x: xPos, y: -14)
-            widget.addChild(sprite)
+            let text = SKLabelNode(text: bullet.1)
+            text.fontName = PixelFont.name
+            text.fontSize = 13
+            text.fontColor = secondaryTextColor
+            text.horizontalAlignmentMode = .left
+            text.verticalAlignmentMode = .center
+            text.position = CGPoint(x: -widgetWidth / 2 + 50, y: y)
+            widget.addChild(text)
         }
     }
 
-    // MARK: - Title
+    // MARK: - Title (anchored just above the annual pricing card)
 
     private func setupTitle() {
-        let safeTop = view?.safeAreaInsets.top ?? 50
-        let titleY = size.height - safeTop - 340
+        let safeBottom = view?.safeAreaInsets.bottom ?? 20
+        let continueButtonY = safeBottom + 100
+        let cardHeight: CGFloat = 60
+        let cardGap: CGFloat = 12
+        let monthlyY = continueButtonY + cardHeight + cardGap + 10
+        let annualY = monthlyY + cardHeight + cardGap
+        let annualTopEdge = annualY + cardHeight / 2
+
+        let line2Y = annualTopEdge + 24
+        let line1Y = line2Y + 32
 
         let line1 = SKLabelNode(text: "Unlock")
         line1.fontName = PixelFont.name
         line1.fontSize = 22
         line1.fontColor = .white
-        line1.position = CGPoint(x: size.width / 2, y: titleY)
+        line1.position = CGPoint(x: size.width / 2, y: line1Y)
         addChild(line1)
 
         let line2 = SKLabelNode(text: "TechBro Pro")
         line2.fontName = PixelFont.name
         line2.fontSize = 24
         line2.fontColor = accentColor
-        line2.position = CGPoint(x: size.width / 2, y: titleY - 32)
+        line2.position = CGPoint(x: size.width / 2, y: line2Y)
         addChild(line2)
     }
 
