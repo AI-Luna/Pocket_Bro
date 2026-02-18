@@ -767,9 +767,8 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         dialogueBubble?.removeFromParent()
 
         let bubble = DialogueBubbleNode(maxWidth: 280)
-        let bubbleHalfWidth: CGFloat = 150
-        let clampedX = min(max(broSprite.position.x, bubbleHalfWidth + 10), size.width - bubbleHalfWidth - 10)
-        bubble.position = CGPoint(x: clampedX, y: broSprite.position.y + 100)
+        let eventY = size.height * 0.65
+        bubble.position = CGPoint(x: size.width / 2, y: eventY)
         bubble.zPosition = 200
         addChild(bubble)
         bubble.showEvent(event)
