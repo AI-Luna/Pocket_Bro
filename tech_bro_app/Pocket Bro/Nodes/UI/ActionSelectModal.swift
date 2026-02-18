@@ -237,7 +237,14 @@ class ActionSelectModal: SKNode {
                 let texture = SKTexture(imageNamed: imageName)
                 texture.filteringMode = .nearest
                 let sprite = SKSpriteNode(texture: texture)
-                let imageSizeMultiplier: CGFloat = (category == .selfCare || category == .work || category == .social || category == .feed) ? 1.2 : 0.6
+                let imageSizeMultiplier: CGFloat
+                if category == .feed || category == .social {
+                    imageSizeMultiplier = 1.6
+                } else if category == .selfCare || category == .work {
+                    imageSizeMultiplier = 1.2
+                } else {
+                    imageSizeMultiplier = 0.6
+                }
                 let targetSize = iconTargetSize * imageSizeMultiplier
                 let originalSize = texture.size()
                 let scale = targetSize / max(originalSize.width, originalSize.height)
