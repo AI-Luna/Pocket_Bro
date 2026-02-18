@@ -8,8 +8,6 @@ import SpriteKit
 class DialogueBubbleNode: SKNode {
     private var bubble: SKSpriteNode!
     private var label: SKLabelNode!
-    private var emojiLabel: SKLabelNode?
-
     private let padding: CGFloat = 16
     private let maxWidth: CGFloat
 
@@ -22,7 +20,7 @@ class DialogueBubbleNode: SKNode {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func show(text: String, emoji: String? = nil, duration: TimeInterval = 2.5) {
+    func show(text: String, duration: TimeInterval = 2.5) {
         removeAllChildren()
 
         // Create label first to measure
@@ -52,14 +50,6 @@ class DialogueBubbleNode: SKNode {
         // Position label
         label.position = .zero
         addChild(label)
-
-        // Add emoji if provided
-        if let emoji = emoji {
-            emojiLabel = SKLabelNode(text: emoji)
-            emojiLabel?.fontSize = 20
-            emojiLabel?.position = CGPoint(x: 0, y: bubbleHeight / 2 + 16)
-            addChild(emojiLabel!)
-        }
 
         // Animate in
         self.alpha = 0
