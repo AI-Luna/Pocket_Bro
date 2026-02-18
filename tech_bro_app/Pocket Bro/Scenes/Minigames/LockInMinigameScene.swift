@@ -21,13 +21,13 @@ class LockInMinigameScene: BaseGameScene {
     private var isGameOver = false
 
     private let distractions: [(emoji: String, damage: CGFloat)] = [
-        ("📱", 0.15),  // Phone notification
-        ("🐦", 0.1),   // Twitter
-        ("📧", 0.12),  // Email
-        ("☕", 0.08),  // Coffee break temptation
-        ("🛋️", 0.1),  // Couch calling
-        ("🎮", 0.15),  // Gaming urge
-        ("💬", 0.1),   // Slack message
+        ("📱", 0.18),  // Phone notification
+        ("🐦", 0.12),  // Twitter
+        ("📧", 0.14),  // Email
+        ("☕", 0.10),  // Coffee break temptation
+        ("🛋️", 0.12),  // Couch calling
+        ("🎮", 0.18),  // Gaming urge
+        ("💬", 0.12),  // Slack message
     ]
 
     override func setupScene() {
@@ -93,7 +93,7 @@ class LockInMinigameScene: BaseGameScene {
             self?.gameLoop()
         }
 
-        distractionTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
+        distractionTimer = Timer.scheduledTimer(withTimeInterval: 1.1, repeats: true) { [weak self] _ in
             self?.spawnDistraction()
         }
     }
@@ -115,7 +115,7 @@ class LockInMinigameScene: BaseGameScene {
         }
 
         // Passive focus drain from existing distractions
-        let distractionPenalty = CGFloat(distractionNodes.count) * 0.02
+        let distractionPenalty = CGFloat(distractionNodes.count) * 0.03
         focusLevel = max(0, focusLevel - distractionPenalty)
         updateFocusMeter()
 
@@ -163,7 +163,7 @@ class LockInMinigameScene: BaseGameScene {
 
         // Auto-damage if not dismissed
         run(SKAction.sequence([
-            SKAction.wait(forDuration: 3.0),
+            SKAction.wait(forDuration: 2.0),
             SKAction.run { [weak self, weak node] in
                 if let node = node, node.parent != nil {
                     self?.applyDistraction(node)
@@ -224,7 +224,7 @@ class LockInMinigameScene: BaseGameScene {
         node.run(SKAction.sequence([dismiss, SKAction.removeFromParent()]))
 
         // Small focus recovery
-        focusLevel = min(1.0, focusLevel + 0.05)
+        focusLevel = min(1.0, focusLevel + 0.03)
         updateFocusMeter()
 
         // Bonus productivity for quick dismiss
@@ -245,7 +245,7 @@ class LockInMinigameScene: BaseGameScene {
         }
         distractionNodes.removeAll()
 
-        let success = focusLevel > 0 && productivityGained >= 50
+        let success = focusLevel > 0 && productivityGained >= 70
 
         // Result display
         let resultBg = SKSpriteNode(color: SKColor(white: 0, alpha: 0.8), size: size)
