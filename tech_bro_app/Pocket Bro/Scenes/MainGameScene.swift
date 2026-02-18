@@ -695,6 +695,13 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
                 ]))
             } else {
                 broSprite.playActionAnimation()
+                // Restart patrol after jump animation completes (~0.3s)
+                run(SKAction.sequence([
+                    SKAction.wait(forDuration: 0.4),
+                    SKAction.run { [weak self] in
+                        self?.startWalkingPatrol()
+                    }
+                ]))
             }
 
             // Check for minigame
