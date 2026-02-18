@@ -330,7 +330,7 @@ class ActionSelectModal: SKNode {
         let nameLabel = SKLabelNode(text: action.name)
         nameLabel.fontName = PixelFont.name
         nameLabel.fontSize = 12
-        nameLabel.fontColor = canPerform ? textColor : disabledColor
+        nameLabel.fontColor = canPerform ? secondaryTextColor : disabledColor
         nameLabel.horizontalAlignmentMode = .center
         nameLabel.verticalAlignmentMode = .top
         nameLabel.position = CGPoint(x: 0, y: 0)

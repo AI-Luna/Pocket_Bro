@@ -96,7 +96,7 @@ enum SocialActions {
             .runway: -5
         ],
         cooldownSeconds: 1800,
-        socialIconIndex: 4
+        iconImageName: "LaunchParty"
     )
 
     static let mentorMeeting = GameAction(

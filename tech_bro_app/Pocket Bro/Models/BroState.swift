@@ -156,6 +156,7 @@ struct BroState: Codable, Equatable {
     var name: String
     var archetype: Archetype
     var city: City
+    var startupType: StartupType?
     var stats: BroStats
     var startup: StartupState
     var createdAt: Date
@@ -163,12 +164,13 @@ struct BroState: Codable, Equatable {
     var totalActionsPerformed: Int
     var eventsExperienced: [String]
 
-    static func new(name: String, archetype: Archetype, city: City = .sanFrancisco) -> BroState {
+    static func new(name: String, archetype: Archetype, city: City = .sanFrancisco, startupType: StartupType? = nil) -> BroState {
         let now = Date()
         return BroState(
             name: name,
             archetype: archetype,
             city: city,
+            startupType: startupType,
             stats: .initial,
             startup: .initial,
             createdAt: now,

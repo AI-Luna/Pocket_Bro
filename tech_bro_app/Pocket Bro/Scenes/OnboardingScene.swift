@@ -8,9 +8,10 @@ import UserNotifications
 
 enum OnboardingStep: Int, CaseIterable {
     case chooseFounder = 0
-    case nameFounder = 1
-    case chooseLocation = 2
-    case notifications = 3
+    case chooseStartupType = 1
+    case nameFounder = 2
+    case chooseLocation = 3
+    case notifications = 4
 }
 
 // Using City enum from BroState.swift
@@ -39,7 +40,9 @@ class OnboardingScene: SKScene {
 
     // Selection tracking
     private var founderCards: [SKNode] = []
+    private var startupTypeCards: [SKNode] = []
     private var cityCards: [SKNode] = []
+    private var selectedStartupType: StartupType = .ai
     
     // Text input
     private var nameTextField: UITextField?
@@ -176,11 +179,14 @@ class OnboardingScene: SKScene {
         addChild(contentNode)
 
         founderCards.removeAll()
+        startupTypeCards.removeAll()
         cityCards.removeAll()
 
         switch step {
         case .chooseFounder:
             setupChooseFounderStep()
+        case .chooseStartupType:
+            setupChooseStartupTypeStep()
         case .nameFounder:
             setupNameFounderStep()
         case .chooseLocation:
@@ -343,7 +349,116 @@ class OnboardingScene: SKScene {
         }
     }
 
-    // MARK: - Step 2: Name Founder
+    // MARK: - Step 2: Choose Startup Type
+
+    private func setupChooseStartupTypeStep() {
+        if let label = nextButton.children.compactMap({ $0 as? SKLabelNode }).first {
+            label.text = "Next"
+        }
+
+        titleLabel = createTitle("What are you building?")
+        titleLabel.fontSize = PixelFont.medium
+        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - 120)
+        contentNode.addChild(titleLabel)
+
+        let types = StartupType.allCases
+        let cols = 3
+        let cardW: CGFloat = (size.width - 50) / CGFloat(cols)
+        let cardH: CGFloat = cardW * 0.95
+        let spacingX: CGFloat = 10
+        let spacingY: CGFloat = 14
+        let labelH: CGFloat = 30
+
+        let totalW = CGFloat(cols) * cardW + CGFloat(cols - 1) * spacingX
+        let startX = (size.width - totalW) / 2 + cardW / 2
+        let startY = size.height / 2 + cardH / 2 + spacingY + labelH
+
+        for (index, type) in types.enumerated() {
+            let row = index / cols
+            let col = index % cols
+            let x = startX + CGFloat(col) * (cardW + spacingX)
+            let y = startY - CGFloat(row) * (cardH + spacingY + labelH)
+
+            let card = createStartupTypeCard(type: type, size: CGSize(width: cardW, height: cardH))
+            card.position = CGPoint(x: x, y: y)
+            card.name = "startup_\(type.rawValue)"
+            contentNode.addChild(card)
+            startupTypeCards.append(card)
+        }
+
+        updateStartupTypeSelection()
+    }
+
+    private func createStartupTypeCard(type: StartupType, size: CGSize) -> SKNode {
+        let card = SKNode()
+
+        let bg = SKShapeNode(rectOf: size, cornerRadius: 14)
+        bg.fillColor = SKColor(red: 0.28, green: 0.18, blue: 0.45, alpha: 1.0)
+        bg.strokeColor = accentColor.withAlphaComponent(0.3)
+        bg.lineWidth = 2
+        bg.name = "cardBg"
+        card.addChild(bg)
+
+        let glowBg = SKShapeNode(rectOf: CGSize(width: size.width + 16, height: size.height + 16), cornerRadius: 20)
+        glowBg.fillColor = selectedBorderColor.withAlphaComponent(0.15)
+        glowBg.strokeColor = .clear
+        glowBg.glowWidth = 15
+        glowBg.name = "selectionGlow"
+        glowBg.isHidden = true
+        glowBg.zPosition = -2
+        card.addChild(glowBg)
+
+        let border = SKShapeNode(rectOf: CGSize(width: size.width + 10, height: size.height + 10), cornerRadius: 18)
+        border.fillColor = .clear
+        border.strokeColor = selectedBorderColor
+        border.lineWidth = 3
+        border.glowWidth = 12
+        border.name = "selectionBorder"
+        border.isHidden = true
+        card.addChild(border)
+
+        // Large emoji centered in card
+        let emojiLabel = SKLabelNode(text: type.emoji)
+        emojiLabel.fontSize = size.height * 0.48
+        emojiLabel.verticalAlignmentMode = .center
+        emojiLabel.horizontalAlignmentMode = .center
+        emojiLabel.position = CGPoint(x: 0, y: 8)
+        card.addChild(emojiLabel)
+
+        // Name label below card
+        let nameLabel = SKLabelNode(text: type.rawValue)
+        nameLabel.fontName = PixelFont.name
+        nameLabel.fontSize = PixelFont.small
+        nameLabel.fontColor = textColor
+        nameLabel.horizontalAlignmentMode = .center
+        nameLabel.verticalAlignmentMode = .center
+        nameLabel.position = CGPoint(x: 0, y: -size.height / 2 - 14)
+        card.addChild(nameLabel)
+
+        return card
+    }
+
+    private func updateStartupTypeSelection() {
+        for card in startupTypeCards {
+            let isSelected = card.name == "startup_\(selectedStartupType.rawValue)"
+            if let border = card.childNode(withName: "selectionBorder") {
+                border.isHidden = !isSelected
+            }
+            if let glow = card.childNode(withName: "selectionGlow") {
+                glow.isHidden = !isSelected
+                if isSelected {
+                    glow.removeAllActions()
+                    let pulse = SKAction.sequence([
+                        SKAction.fadeAlpha(to: 0.3, duration: 0.8),
+                        SKAction.fadeAlpha(to: 0.15, duration: 0.8)
+                    ])
+                    glow.run(SKAction.repeatForever(pulse))
+                }
+            }
+        }
+    }
+
+    // MARK: - Step 3: Name Founder
 
     private func setupNameFounderStep() {
         // Update button text
@@ -765,6 +880,21 @@ class OnboardingScene: SKScene {
             }
         }
 
+        // Check startup type cards
+        for card in startupTypeCards {
+            if card.contains(touch.location(in: contentNode)) {
+                if let name = card.name, name.hasPrefix("startup_") {
+                    let typeName = String(name.dropFirst("startup_".count))
+                    if let type = StartupType.allCases.first(where: { $0.rawValue == typeName }) {
+                        Haptics.selection()
+                        selectedStartupType = type
+                        updateStartupTypeSelection()
+                    }
+                }
+                return
+            }
+        }
+
         // Check city cards
         for card in cityCards {
             if card.contains(touch.location(in: contentNode)) {
@@ -804,12 +934,15 @@ class OnboardingScene: SKScene {
     private func handleNextButton() {
         switch currentStep {
         case .chooseFounder:
+            currentStep = .chooseStartupType
+            showStep(currentStep)
+
+        case .chooseStartupType:
             currentStep = .nameFounder
             showStep(currentStep)
 
         case .nameFounder:
             if founderName.isEmpty {
-                // Auto-generate a name if empty
                 let names = ["Alex", "Jordan", "Sam", "Casey", "Riley", "Morgan", "Taylor", "Quinn"]
                 founderName = names.randomElement() ?? "Founder"
             }
@@ -939,7 +1072,7 @@ class OnboardingScene: SKScene {
     }
 
     private func startGame() {
-        GameManager.shared.newGame(name: founderName, archetype: selectedArchetype, city: selectedCity)
+        GameManager.shared.newGame(name: founderName, archetype: selectedArchetype, city: selectedCity, startupType: selectedStartupType)
 
         // Fade out and transition
         let fadeOut = SKAction.fadeOut(withDuration: 0.4)

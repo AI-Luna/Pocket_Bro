@@ -5,6 +5,39 @@
 
 import Foundation
 
+// MARK: - Startup Type
+
+enum StartupType: String, Codable, CaseIterable {
+    case ai = "AI / ML"
+    case saas = "SaaS"
+    case fintech = "Fintech"
+    case healthTech = "HealthTech"
+    case consumerApp = "Consumer App"
+    case eCommerce = "E-Commerce"
+
+    var emoji: String {
+        switch self {
+        case .ai: return "🤖"
+        case .saas: return "💻"
+        case .fintech: return "💸"
+        case .healthTech: return "🏥"
+        case .consumerApp: return "📱"
+        case .eCommerce: return "🛒"
+        }
+    }
+
+    var tagline: String {
+        switch self {
+        case .ai: return "Building the future"
+        case .saas: return "MRR or bust"
+        case .fintech: return "Disrupting banks"
+        case .healthTech: return "Save lives & scale"
+        case .consumerApp: return "Virality first"
+        case .eCommerce: return "Ship it fast"
+        }
+    }
+}
+
 // MARK: - Character Archetypes
 
 enum Archetype: String, Codable, CaseIterable {

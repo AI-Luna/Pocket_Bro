@@ -51,8 +51,8 @@ final class GameManager {
         return true
     }
 
-    func newGame(name: String, archetype: Archetype, city: City = .sanFrancisco) {
-        state = BroState.new(name: name, archetype: archetype, city: city)
+    func newGame(name: String, archetype: Archetype, city: City = .sanFrancisco, startupType: StartupType? = nil) {
+        state = BroState.new(name: name, archetype: archetype, city: city, startupType: startupType)
         saveGame()
         StatNotificationManager.shared.scheduleDailyNotifications(name: name)
         startGameLoop()
