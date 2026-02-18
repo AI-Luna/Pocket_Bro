@@ -619,7 +619,7 @@ class BroSpriteNode: SKNode {
 
             bodySprite.size = CGSize(width: 90, height: 144)
             bodySprite.setScale(typingScale)
-            bodySprite.position = CGPoint(x: 0, y: 120)
+            bodySprite.position = CGPoint(x: 0, y: 30)
 
             let fullCycle = SKAction.animate(with: frames, timePerFrame: 0.18, resize: false, restore: false)
 
