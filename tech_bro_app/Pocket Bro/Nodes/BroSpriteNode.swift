@@ -490,6 +490,7 @@ class BroSpriteNode: SKNode {
 
             bodySprite.size = CGSize(width: 90, height: 144)
             bodySprite.setScale(typingScale)
+            bodySprite.position = CGPoint(x: 0, y: 120)
 
             let fullCycle = SKAction.animate(with: frames, timePerFrame: 0.18, resize: false, restore: false)
 
@@ -506,6 +507,7 @@ class BroSpriteNode: SKNode {
                 guard let self = self else { return }
                 self.bodySprite.size = originalSize
                 self.bodySprite.setScale(originalScale)
+                self.bodySprite.position = .zero
                 self.startIdleAnimation()
             }
         } else {
