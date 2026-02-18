@@ -640,7 +640,12 @@ class BroSpriteNode: SKNode {
                 self.startIdleAnimation()
             }
         } else {
-            // Bro typing: frame size matches general frames, no resize needed
+            // Bro typing: scale down so he looks smaller at the desk
+            let originalScale = bodySprite.xScale
+            let typingScale = originalScale * 0.75
+
+            bodySprite.setScale(typingScale)
+
             let fullCycle = SKAction.animate(with: frames, timePerFrame: 0.18, resize: false, restore: false)
 
             let keystrokeFrames = Array(frames[0...3])
@@ -652,7 +657,9 @@ class BroSpriteNode: SKNode {
             let sequence = SKAction.sequence([fullCycle, keystrokeLoop])
 
             bodySprite.run(sequence) { [weak self] in
-                self?.startIdleAnimation()
+                guard let self = self else { return }
+                self.bodySprite.setScale(originalScale)
+                self.startIdleAnimation()
             }
         }
     }
