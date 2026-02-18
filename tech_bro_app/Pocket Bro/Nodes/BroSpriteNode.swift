@@ -98,6 +98,7 @@ class BroSpriteNode: SKNode {
     private var typingFrames: [SKTexture] = []
     private var babeTypingFrames: [SKTexture] = []
     private var sleepingFrames: [SKTexture] = []
+    private var normalBodySize: CGSize = .zero
 
     var archetype: Archetype = .bro {
         didSet { updateAppearance() }
@@ -339,6 +340,7 @@ class BroSpriteNode: SKNode {
         bodySprite.texture?.filteringMode = .nearest
         bodySprite.setScale(pixelScale)
         bodySprite.position = .zero
+        normalBodySize = bodySprite.size
         addChild(bodySprite)
 
         startIdleAnimation()
@@ -424,6 +426,8 @@ class BroSpriteNode: SKNode {
 
     func stopAllAnimations() {
         bodySprite.removeAllActions()
+        bodySprite.size = normalBodySize
+        bodySprite.setScale(pixelScale)
         bodySprite.position = .zero
     }
 
