@@ -296,7 +296,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     // MARK: - Character
 
     private func setupCharacter() {
-        let characterY = buttonAreaHeight + gameAreaHeight / 2 - 80
+        let characterY = buttonAreaHeight + gameAreaHeight / 2 - 140
 
         let currentArchetype = GameManager.shared.state?.archetype ?? .bro
         broSprite = BroSpriteNode(archetype: currentArchetype)
