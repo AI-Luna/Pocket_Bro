@@ -642,9 +642,11 @@ class BroSpriteNode: SKNode {
         } else {
             // Bro typing: scale down so he looks smaller at the desk
             let originalScale = bodySprite.xScale
+            let originalPosition = bodySprite.position
             let typingScale = originalScale * 0.75
 
             bodySprite.setScale(typingScale)
+            bodySprite.position = CGPoint(x: originalPosition.x, y: originalPosition.y + 60)
 
             let fullCycle = SKAction.animate(with: frames, timePerFrame: 0.18, resize: false, restore: false)
 
@@ -659,6 +661,7 @@ class BroSpriteNode: SKNode {
             bodySprite.run(sequence) { [weak self] in
                 guard let self = self else { return }
                 self.bodySprite.setScale(originalScale)
+                self.bodySprite.position = originalPosition
                 self.startIdleAnimation()
             }
         }
