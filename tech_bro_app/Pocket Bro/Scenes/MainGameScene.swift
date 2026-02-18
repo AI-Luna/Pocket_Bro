@@ -677,7 +677,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
                 }
                 broSprite.startWalkAnimation()
 
-                let bedY = broSprite.position.y + 40
+                let bedY = broSprite.position.y + 80
                 let originalY = broSprite.position.y
                 let walkToBed = SKAction.move(to: CGPoint(x: bedX, y: bedY), duration: walkDuration)
                 let startSleeping = SKAction.run { [weak self] in
