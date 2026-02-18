@@ -10,6 +10,8 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     // MARK: - UI Elements
     private var broSprite: BroSpriteNode!
     private var dialogueBubble: DialogueBubbleNode?
+    private var dialogueBubbleYOffset: CGFloat = 100
+    private var dialogueBubbleTracksCharacter: Bool = true
     private var activeModal: SKNode?
 
     // Stats bars
@@ -747,15 +749,30 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         updateUI()
     }
 
+    // MARK: - Update Loop
+
+    override func update(_ currentTime: TimeInterval) {
+        super.update(currentTime)
+
+        // Keep dialogue bubble tracking the character (not event bubbles)
+        if let bubble = dialogueBubble, bubble.parent != nil, dialogueBubbleTracksCharacter {
+            let bubbleHalfWidth: CGFloat = 140
+            let clampedX = min(max(broSprite.position.x, bubbleHalfWidth + 10), size.width - bubbleHalfWidth - 10)
+            bubble.position = CGPoint(x: clampedX, y: broSprite.position.y + dialogueBubbleYOffset)
+        }
+    }
+
     // MARK: - Dialogue
 
     func showDialogue(_ text: String, emoji: String? = nil) {
         dialogueBubble?.removeFromParent()
 
         let bubble = DialogueBubbleNode(maxWidth: 260)
+        dialogueBubbleTracksCharacter = true
+        dialogueBubbleYOffset = 100
         let bubbleHalfWidth: CGFloat = 140
         let clampedX = min(max(broSprite.position.x, bubbleHalfWidth + 10), size.width - bubbleHalfWidth - 10)
-        bubble.position = CGPoint(x: clampedX, y: broSprite.position.y + 100)
+        bubble.position = CGPoint(x: clampedX, y: broSprite.position.y + dialogueBubbleYOffset)
         bubble.zPosition = 200
         addChild(bubble)
         bubble.show(text: text, emoji: emoji)
@@ -767,7 +784,8 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         dialogueBubble?.removeFromParent()
 
         let bubble = DialogueBubbleNode(maxWidth: 280)
-        let eventY = size.height * 0.65
+        dialogueBubbleTracksCharacter = false
+        let eventY = size.height * 0.60
         bubble.position = CGPoint(x: size.width / 2, y: eventY)
         bubble.zPosition = 200
         addChild(bubble)
