@@ -97,6 +97,7 @@ class BroSpriteNode: SKNode {
     private var eatDrinkFrames: [SKTexture] = []
     private var typingFrames: [SKTexture] = []
     private var babeTypingFrames: [SKTexture] = []
+    private var babeSleepingFrames: [SKTexture] = []
     private var sleepingFrames: [SKTexture] = []
     private var normalBodySize: CGSize = .zero
 
@@ -120,6 +121,7 @@ class BroSpriteNode: SKNode {
         loadTypingSpriteSheet()
         loadBabeTypingSpriteSheet()
         loadSleepingSpriteSheet()
+        loadBabeSleepingSpriteSheet()
         setupSprites()
     }
 
@@ -331,6 +333,38 @@ class BroSpriteNode: SKNode {
         sleepingFrames = sleepingSheetFrames
     }
 
+    private func loadBabeSleepingSpriteSheet() {
+        guard let uiImage = UIImage(named: "BabeSleepingSpriteSheet"),
+              let cgImage = uiImage.cgImage else { return }
+
+        let columns = 3
+        let colWidth = cgImage.width / columns
+        let frameHeight = cgImage.height
+
+        var frames: [SKTexture] = []
+        for col in 0..<columns {
+            let ox = col * colWidth
+            let cropRect = CGRect(x: ox, y: 0, width: colWidth, height: frameHeight)
+            guard let cropped = cgImage.cropping(to: cropRect) else { continue }
+
+            guard let ctx = CGContext(
+                data: nil, width: colWidth, height: frameHeight,
+                bitsPerComponent: 8, bytesPerRow: 0,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ) else { continue }
+            ctx.interpolationQuality = .none
+            ctx.draw(cropped, in: CGRect(x: 0, y: 0, width: colWidth, height: frameHeight))
+
+            guard let freshImage = ctx.makeImage() else { continue }
+            let tex = SKTexture(cgImage: freshImage)
+            tex.filteringMode = .nearest
+            frames.append(tex)
+        }
+
+        babeSleepingFrames = frames
+    }
+
     // MARK: - Setup
 
     private func setupSprites() {
@@ -533,29 +567,53 @@ class BroSpriteNode: SKNode {
     }
 
     func playSleepingAnimation() {
-        guard !sleepingFrames.isEmpty else {
+        let isBabe = archetype == .gal && !babeSleepingFrames.isEmpty
+        let frames = isBabe ? babeSleepingFrames : sleepingFrames
+
+        guard !frames.isEmpty else {
             playActionAnimation()
             return
         }
 
         stopAllAnimations()
 
-        // Scale down to 75% for the sleeping pose
         let originalScale = bodySprite.xScale
-        let sleepScale = originalScale * 0.60
-        let shrink = SKAction.scale(to: sleepScale, duration: 0.2)
+        let originalSize = bodySprite.size
 
-        // Cycle through the 3 sleeping frames (Zzz poses) in a loop,
-        // play a few cycles then return to idle
-        let sleepCycle = SKAction.animate(with: sleepingFrames, timePerFrame: 0.6, resize: false, restore: false)
-        let sleepLoop = SKAction.repeat(sleepCycle, count: 5)
+        if isBabe {
+            // Babe sleeping frames are wider (440/3 × 566) with transparent padding.
+            // Scale to match the on-screen width of the bro sleeping pose.
+            let frameW: CGFloat = 440.0 / 3.0
+            let frameH: CGFloat = 566.0
+            let sleepScale = originalScale * (originalSize.width / frameW) * 0.60
 
-        let sequence = SKAction.sequence([shrink, sleepLoop])
+            bodySprite.size = CGSize(width: frameW, height: frameH)
+            bodySprite.setScale(sleepScale)
 
-        bodySprite.run(sequence) { [weak self] in
-            guard let self = self else { return }
-            self.bodySprite.setScale(originalScale)
-            self.startIdleAnimation()
+            let sleepCycle = SKAction.animate(with: frames, timePerFrame: 0.6, resize: false, restore: false)
+            let sleepLoop = SKAction.repeat(sleepCycle, count: 5)
+
+            bodySprite.run(sleepLoop) { [weak self] in
+                guard let self = self else { return }
+                self.bodySprite.size = originalSize
+                self.bodySprite.setScale(originalScale)
+                self.startIdleAnimation()
+            }
+        } else {
+            // Scale down to 60% for the bro sleeping pose
+            let sleepScale = originalScale * 0.60
+            let shrink = SKAction.scale(to: sleepScale, duration: 0.2)
+
+            let sleepCycle = SKAction.animate(with: frames, timePerFrame: 0.6, resize: false, restore: false)
+            let sleepLoop = SKAction.repeat(sleepCycle, count: 5)
+
+            let sequence = SKAction.sequence([shrink, sleepLoop])
+
+            bodySprite.run(sequence) { [weak self] in
+                guard let self = self else { return }
+                self.bodySprite.setScale(originalScale)
+                self.startIdleAnimation()
+            }
         }
     }
 
