@@ -625,15 +625,10 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             broSprite.removeAction(forKey: "patrol")
 
             if action.category == .feed {
-                broSprite.playEatingDrinkingAnimation()
-                // Show dialogue and resume patrol after eating animation finishes
-                run(SKAction.sequence([
-                    SKAction.wait(forDuration: 4.5),
-                    SKAction.run { [weak self] in
-                        self?.showDialogue(result.dialogue, emoji: action.emoji)
-                        self?.startWalkingPatrol()
-                    }
-                ]))
+                broSprite.playEatingDrinkingAnimation { [weak self] in
+                    self?.showDialogue(result.dialogue, emoji: action.emoji)
+                    self?.startWalkingPatrol()
+                }
             } else if action.category == .work {
                 // Walk to the desk position (right side of screen) before typing
                 let deskX: CGFloat = size.width - 100

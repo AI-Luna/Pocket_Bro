@@ -97,6 +97,7 @@ class BroSpriteNode: SKNode {
     private var eatDrinkFrames: [SKTexture] = []
     private var typingFrames: [SKTexture] = []
     private var babeTypingFrames: [SKTexture] = []
+    private var babeEatingDrinkingFrames: [SKTexture] = []
     private var babeSleepingFrames: [SKTexture] = []
     private var sleepingFrames: [SKTexture] = []
     private var normalBodySize: CGSize = .zero
@@ -120,6 +121,7 @@ class BroSpriteNode: SKNode {
         loadEatingDrinkingSpriteSheet()
         loadTypingSpriteSheet()
         loadBabeTypingSpriteSheet()
+        loadBabeEatingDrinkingSpriteSheet()
         loadSleepingSpriteSheet()
         loadBabeSleepingSpriteSheet()
         setupSprites()
@@ -309,6 +311,38 @@ class BroSpriteNode: SKNode {
         babeTypingFrames = frames
     }
 
+    private func loadBabeEatingDrinkingSpriteSheet() {
+        guard let uiImage = UIImage(named: "BabeEatingDrinkingSpriteSheet"),
+              let cgImage = uiImage.cgImage else { return }
+
+        let columns = 5
+        let colWidth = cgImage.width / columns
+        let frameHeight = cgImage.height
+
+        var frames: [SKTexture] = []
+        for col in 0..<columns {
+            let ox = col * colWidth
+            let cropRect = CGRect(x: ox, y: 0, width: colWidth, height: frameHeight)
+            guard let cropped = cgImage.cropping(to: cropRect) else { continue }
+
+            guard let ctx = CGContext(
+                data: nil, width: colWidth, height: frameHeight,
+                bitsPerComponent: 8, bytesPerRow: 0,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ) else { continue }
+            ctx.interpolationQuality = .none
+            ctx.draw(cropped, in: CGRect(x: 0, y: 0, width: colWidth, height: frameHeight))
+
+            guard let freshImage = ctx.makeImage() else { continue }
+            let tex = SKTexture(cgImage: freshImage)
+            tex.filteringMode = .nearest
+            frames.append(tex)
+        }
+
+        babeEatingDrinkingFrames = frames
+    }
+
     private func loadSleepingSpriteSheet() {
         let sheetTexture = SKTexture(imageNamed: "SleepingSpriteSheet")
         sheetTexture.filteringMode = .nearest
@@ -484,26 +518,72 @@ class BroSpriteNode: SKNode {
         }
     }
 
-    func playEatingDrinkingAnimation() {
-        guard !eatDrinkFrames.isEmpty else {
-            playActionAnimation()
-            return
-        }
+    func playEatingDrinkingAnimation(completion: (() -> Void)? = nil) {
+        let isBabe = archetype == .gal && !babeEatingDrinkingFrames.isEmpty
 
-        stopAllAnimations()
+        if isBabe {
+            guard !babeEatingDrinkingFrames.isEmpty else {
+                playActionAnimation()
+                completion?()
+                return
+            }
 
-        // Play through all eating/drinking frames once, then loop the middle
-        // section a couple times to show sustained eating, then return to idle
-        let fullCycle = SKAction.animate(with: eatDrinkFrames, timePerFrame: 0.15, resize: false, restore: false)
+            stopAllAnimations()
 
-        // Loop the chewing/drinking frames (rows 1-2, indices 5-14) for a second pass
-        let chewingFrames = Array(eatDrinkFrames[5...14])
-        let chewLoop = SKAction.animate(with: chewingFrames, timePerFrame: 0.12, resize: false, restore: false)
+            // Babe eating frames are 88×566 (440/5 × 566) with transparent padding.
+            // Scale to keep the same on-screen width as the normal sprite.
+            let frameW: CGFloat = 440.0 / 5.0
+            let frameH: CGFloat = 566.0
+            let eatScale = pixelScale * (normalBodySize.width / frameW)
 
-        let sequence = SKAction.sequence([fullCycle, chewLoop])
+            bodySprite.size = CGSize(width: frameW, height: frameH)
+            bodySprite.setScale(eatScale)
 
-        bodySprite.run(sequence) { [weak self] in
-            self?.startIdleAnimation()
+            // Full cycle through all 5 frames, then loop middle frames for sustained eating
+            let fullCycle = SKAction.animate(with: babeEatingDrinkingFrames, timePerFrame: 0.3, resize: false, restore: false)
+            let middleFrames = Array(babeEatingDrinkingFrames[1...3])
+            let eatLoop = SKAction.repeat(
+                SKAction.animate(with: middleFrames, timePerFrame: 0.25, resize: false, restore: false),
+                count: 3
+            )
+
+            let sequence = SKAction.sequence([fullCycle, eatLoop])
+
+            bodySprite.run(sequence) { [weak self] in
+                guard let self = self else { return }
+                // Swap to an idle texture before resizing so the tall eating
+                // frame is never rendered squished into the normal-size box.
+                if let firstIdle = self.idleFrames.first {
+                    self.bodySprite.texture = firstIdle
+                    self.bodySprite.texture?.filteringMode = .nearest
+                }
+                self.stopAllAnimations()
+                self.startIdleAnimation()
+                completion?()
+            }
+        } else {
+            guard !eatDrinkFrames.isEmpty else {
+                playActionAnimation()
+                completion?()
+                return
+            }
+
+            stopAllAnimations()
+
+            // Play through all eating/drinking frames once, then loop the middle
+            // section a couple times to show sustained eating, then return to idle
+            let fullCycle = SKAction.animate(with: eatDrinkFrames, timePerFrame: 0.15, resize: false, restore: false)
+
+            // Loop the chewing/drinking frames (rows 1-2, indices 5-14) for a second pass
+            let chewingFrames = Array(eatDrinkFrames[5...14])
+            let chewLoop = SKAction.animate(with: chewingFrames, timePerFrame: 0.12, resize: false, restore: false)
+
+            let sequence = SKAction.sequence([fullCycle, chewLoop])
+
+            bodySprite.run(sequence) { [weak self] in
+                self?.startIdleAnimation()
+                completion?()
+            }
         }
     }
 
