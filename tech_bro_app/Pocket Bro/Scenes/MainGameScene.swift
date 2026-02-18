@@ -615,7 +615,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             let isWorkAction = action.category == .work
             let isFeedAction = action.category == .feed
             if !isSleepAction && !isWorkAction && !isFeedAction {
-                showDialogue(result.dialogue, emoji: action.emoji)
+                showDialogue(result.dialogue)
             }
 
             // Stop patrol while performing the action animation
@@ -623,7 +623,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
             if action.category == .feed {
                 broSprite.playEatingDrinkingAnimation { [weak self] in
-                    self?.showDialogue(result.dialogue, emoji: action.emoji)
+                    self?.showDialogue(result.dialogue)
                     self?.startWalkingPatrol()
                 }
             } else if action.category == .work {
@@ -651,7 +651,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
                     self.broSprite.playTypingAnimation()
                 }
                 let showDialogueAndResume = SKAction.run { [weak self] in
-                    self?.showDialogue(result.dialogue, emoji: action.emoji)
+                    self?.showDialogue(result.dialogue)
                     self?.startWalkingPatrol()
                 }
                 broSprite.run(SKAction.sequence([
@@ -689,7 +689,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
                 run(SKAction.sequence([
                     SKAction.wait(forDuration: walkDuration + 9.5),
                     SKAction.run { [weak self] in
-                        self?.showDialogue(result.dialogue, emoji: action.emoji)
+                        self?.showDialogue(result.dialogue)
                         self?.startWalkingPatrol()
                     }
                 ]))
@@ -766,7 +766,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
     // MARK: - Dialogue
 
-    func showDialogue(_ text: String, emoji: String? = nil) {
+    func showDialogue(_ text: String) {
         dialogueBubble?.removeFromParent()
 
         let bubble = DialogueBubbleNode(maxWidth: 260)
@@ -777,7 +777,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         bubble.position = CGPoint(x: clampedX, y: broSprite.position.y + dialogueBubbleYOffset)
         bubble.zPosition = 200
         addChild(bubble)
-        bubble.show(text: text, emoji: emoji)
+        bubble.show(text: text)
 
         dialogueBubble = bubble
     }
