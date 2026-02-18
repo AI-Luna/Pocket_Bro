@@ -4,6 +4,7 @@
 
 import SpriteKit
 import StoreKit
+import RevenueCat
 
 class PaywallScene: SKScene {
     weak var sceneManager: SceneManager?
@@ -26,6 +27,7 @@ class PaywallScene: SKScene {
     }
 
     private var planCards: [PricingPlan: SKNode] = [:]
+    private var packages: [PricingPlan: Package] = [:]
 
     init(size: CGSize, sceneManager: SceneManager) {
         self.sceneManager = sceneManager
@@ -39,6 +41,7 @@ class PaywallScene: SKScene {
     override func didMove(to view: SKView) {
         backgroundColor = backgroundColor_
         setupUI()
+        fetchOfferings()
     }
 
     private func setupUI() {
@@ -569,53 +572,96 @@ class PaywallScene: SKScene {
         node.run(press)
     }
 
-    private func handlePurchase() {
-        // In a real app, this would trigger StoreKit purchase
-        print("Purchase \(selectedPlan)")
+    // MARK: - RevenueCat
 
-        // Show loading then dismiss
-        guard let viewController = self.view?.window?.rootViewController else {
-            dismiss()
+    private func fetchOfferings() {
+        PurchaseManager.shared.fetchOfferings { [weak self] offerings in
+            guard let self, let offering = offerings?.current else { return }
+
+            // Map RevenueCat packages to plan types
+            for package in offering.availablePackages {
+                switch package.packageType {
+                case .weekly:
+                    self.packages[.weekly] = package
+                    self.updatePriceLabel(for: .weekly, price: package.localizedPriceString, subPrice: "\(package.localizedPriceString)/wk")
+                case .annual:
+                    self.packages[.yearly] = package
+                    // Calculate weekly equivalent
+                    let weeklyEquiv = package.storeProduct.price / 52 as NSDecimalNumber
+                    let fmt = NumberFormatter()
+                    fmt.numberStyle = .currency
+                    fmt.locale = package.storeProduct.priceLocale
+                    let weeklyStr = fmt.string(from: weeklyEquiv) ?? ""
+                    self.updatePriceLabel(for: .yearly, price: package.localizedPriceString, subPrice: "\(weeklyStr)/wk")
+                case .lifetime:
+                    self.packages[.lifetime] = package
+                    self.updatePriceLabel(for: .lifetime, price: package.localizedPriceString, subPrice: "One-time")
+                default:
+                    break
+                }
+            }
+        }
+    }
+
+    private func updatePriceLabel(for plan: PricingPlan, price: String, subPrice: String) {
+        guard let card = planCards[plan] else { return }
+        if let priceLabel = card.childNode(withName: "priceLabel") as? SKLabelNode {
+            priceLabel.text = price
+        }
+        // Sub price is not named but is the last label child — update via index if needed
+    }
+
+    private func handlePurchase() {
+        guard let package = packages[selectedPlan] else {
+            // No offering loaded yet — show a brief error
+            showAlert(title: "Not Available", message: "Please check your connection and try again.")
             return
         }
 
-        let alert = UIAlertController(
-            title: "Processing...",
-            message: "Please wait",
-            preferredStyle: .alert
-        )
-
-        viewController.present(alert, animated: true) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        showLoadingAlert(title: "Processing...") { [weak self] alert, vc in
+            PurchaseManager.shared.purchase(package: package) { isPro, error in
                 alert.dismiss(animated: true) {
-                    self.dismiss()
+                    guard let self else { return }
+                    if let error {
+                        self.showAlert(title: "Purchase Failed", message: error.localizedDescription)
+                    } else if isPro {
+                        self.dismiss()
+                    }
+                    // If !isPro and no error, user cancelled — do nothing
                 }
             }
         }
     }
 
     private func restorePurchases() {
-        guard let viewController = self.view?.window?.rootViewController else { return }
-
-        let alert = UIAlertController(
-            title: "Restoring Purchases",
-            message: "Please wait...",
-            preferredStyle: .alert
-        )
-
-        viewController.present(alert, animated: true) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+        showLoadingAlert(title: "Restoring Purchases...") { [weak self] alert, vc in
+            PurchaseManager.shared.restorePurchases { isPro, error in
                 alert.dismiss(animated: true) {
-                    let resultAlert = UIAlertController(
-                        title: "Restore Complete",
-                        message: "Your purchases have been restored.",
-                        preferredStyle: .alert
-                    )
-                    resultAlert.addAction(UIAlertAction(title: "OK", style: .default))
-                    viewController.present(resultAlert, animated: true)
+                    guard let self else { return }
+                    if let error {
+                        self.showAlert(title: "Restore Failed", message: error.localizedDescription)
+                    } else {
+                        let msg = isPro ? "Your Pro access has been restored!" : "No active purchases found."
+                        self.showAlert(title: "Restore Complete", message: msg) { [weak self] in
+                            if isPro { self?.dismiss() }
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private func showLoadingAlert(title: String, then work: @escaping (UIAlertController, UIViewController) -> Void) {
+        guard let vc = self.view?.window?.rootViewController else { return }
+        let alert = UIAlertController(title: title, message: "Please wait...", preferredStyle: .alert)
+        vc.present(alert, animated: true) { work(alert, vc) }
+    }
+
+    private func showAlert(title: String, message: String, completion: (() -> Void)? = nil) {
+        guard let vc = self.view?.window?.rootViewController else { return }
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in completion?() })
+        vc.present(alert, animated: true)
     }
 
     private func openURL(_ urlString: String) {

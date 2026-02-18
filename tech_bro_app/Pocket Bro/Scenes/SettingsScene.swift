@@ -493,27 +493,22 @@ class SettingsScene: SKScene {
     }
 
     private func restorePurchases() {
-        // Show loading indicator or feedback
         guard let viewController = self.view?.window?.rootViewController else { return }
 
-        let alert = UIAlertController(
-            title: "Restoring Purchases",
-            message: "Please wait...",
-            preferredStyle: .alert
-        )
-
-        viewController.present(alert, animated: true) {
-            // In a real app, you would call your StoreKit restore logic here
-            // For now, simulate a delay then dismiss
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                alert.dismiss(animated: true) {
-                    let resultAlert = UIAlertController(
-                        title: "Restore Complete",
-                        message: "Your purchases have been restored.",
-                        preferredStyle: .alert
-                    )
-                    resultAlert.addAction(UIAlertAction(title: "OK", style: .default))
-                    viewController.present(resultAlert, animated: true)
+        let loading = UIAlertController(title: "Restoring Purchases", message: "Please wait...", preferredStyle: .alert)
+        viewController.present(loading, animated: true) {
+            PurchaseManager.shared.restorePurchases { isPro, error in
+                loading.dismiss(animated: true) {
+                    let title = error != nil ? "Restore Failed" : "Restore Complete"
+                    let message: String
+                    if let error {
+                        message = error.localizedDescription
+                    } else {
+                        message = isPro ? "Your Pro access has been restored!" : "No active purchases found."
+                    }
+                    let result = UIAlertController(title: title, message: message, preferredStyle: .alert)
+                    result.addAction(UIAlertAction(title: "OK", style: .default))
+                    viewController.present(result, animated: true)
                 }
             }
         }

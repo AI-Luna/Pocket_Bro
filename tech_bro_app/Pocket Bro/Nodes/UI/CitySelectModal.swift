@@ -335,7 +335,7 @@ class CitySelectModal: SKNode {
             return
         }
 
-        guard !city.isPremium else {
+        guard !city.isPremium || PurchaseManager.shared.isProActive else {
             // Show premium required
             shakeCard(card)
             return

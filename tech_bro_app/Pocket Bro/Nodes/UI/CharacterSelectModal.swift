@@ -8,6 +8,7 @@ import SpriteKit
 protocol CharacterSelectModalDelegate: AnyObject {
     func characterSelectModal(_ modal: CharacterSelectModal, didSelect archetype: Archetype)
     func characterSelectModalDidClose(_ modal: CharacterSelectModal)
+    func characterSelectModalDidSelectPremium(_ modal: CharacterSelectModal)
 }
 
 class CharacterSelectModal: SKNode {
@@ -265,8 +266,8 @@ class CharacterSelectModal: SKNode {
             return
         }
 
-        guard !character.isPremium else {
-            // Show premium required (for now just shake)
+        guard !character.isPremium || PurchaseManager.shared.isProActive else {
+            // Show premium required — shake and surface paywall
             let shake = SKAction.sequence([
                 SKAction.moveBy(x: -5, y: 0, duration: 0.05),
                 SKAction.moveBy(x: 10, y: 0, duration: 0.05),
@@ -274,6 +275,7 @@ class CharacterSelectModal: SKNode {
                 SKAction.moveBy(x: 5, y: 0, duration: 0.05)
             ])
             card.run(shake)
+            delegate?.characterSelectModalDidSelectPremium(self)
             return
         }
 

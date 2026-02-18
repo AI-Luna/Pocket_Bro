@@ -276,8 +276,8 @@ class ActionSelectModal: SKNode {
             card.addChild(emojiLabel)
         }
 
-        // Premium crown indicator (skip for self-care/recharge)
-        if action.isPremium && category != .selfCare {
+        // Premium crown indicator (skip if user has pro, or for self-care/recharge)
+        if action.isPremium && !PurchaseManager.shared.isProActive && category != .selfCare {
             let crown = SKLabelNode(text: "👑")
             crown.fontSize = 18
             crown.position = CGPoint(x: 0, y: 0)  // Centered in cell
@@ -418,8 +418,8 @@ class ActionSelectModal: SKNode {
     }
 
     private func handleActionTap(_ action: GameAction, card: SKNode) {
-        // Check if premium action - open paywall instead
-        if action.isPremium {
+        // Check if premium action and user doesn't have pro - open paywall
+        if action.isPremium && !PurchaseManager.shared.isProActive {
             Haptics.selection()
             animatePress(card)
             delegate?.actionSelectModalDidSelectPremium(self)

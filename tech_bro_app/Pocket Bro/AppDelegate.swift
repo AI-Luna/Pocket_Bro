@@ -37,5 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Resume game loop
         GameManager.shared.appDidEnterForeground()
+        // Refresh pro entitlement status
+        PurchaseManager.shared.refresh()
     }
 }
