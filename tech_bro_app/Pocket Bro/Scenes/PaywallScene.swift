@@ -221,8 +221,14 @@ class PaywallScene: SKScene {
     // MARK: - Pricing Options
 
     private func setupPricingOptions() {
-        let safeTop = view?.safeAreaInsets.top ?? 50
-        let optionsY = size.height - safeTop - 430
+        let safeBottom = view?.safeAreaInsets.bottom ?? 20
+        // Anchor cards just above the continue button so nothing floats too high
+        let continueButtonY = safeBottom + 100
+        let cardHeight: CGFloat = 60
+        let cardGap: CGFloat = 12
+
+        let annualY = continueButtonY + cardHeight + cardGap + 10  // sits just above continue
+        let monthlyY = annualY + cardHeight + cardGap               // sits just above annual
 
         // Monthly card — placeholder prices, updated when offerings load
         let monthlyCard = createPricingCard(
@@ -233,12 +239,12 @@ class PaywallScene: SKScene {
             badge: nil,
             isSelected: selectedPlan == .monthly
         )
-        monthlyCard.position = CGPoint(x: size.width / 2, y: optionsY)
+        monthlyCard.position = CGPoint(x: size.width / 2, y: monthlyY)
         monthlyCard.name = "plan_monthly"
         addChild(monthlyCard)
         planCards[.monthly] = monthlyCard
 
-        // Annual card — selected by default + best value badge
+        // Annual card — selected by default + "Best Value" badge (may become "Free Trial")
         let annualCard = createPricingCard(
             plan: .annual,
             title: "Annual",
@@ -247,7 +253,7 @@ class PaywallScene: SKScene {
             badge: "Best Value",
             isSelected: selectedPlan == .annual
         )
-        annualCard.position = CGPoint(x: size.width / 2, y: optionsY - 72)
+        annualCard.position = CGPoint(x: size.width / 2, y: annualY)
         annualCard.name = "plan_annual"
         addChild(annualCard)
         planCards[.annual] = annualCard
@@ -327,13 +333,17 @@ class PaywallScene: SKScene {
         subPriceLabel.name = "subPriceLabel"
         card.addChild(subPriceLabel)
 
-        // Badge (e.g. "Best Value")
+        // Badge (e.g. "Best Value" / "Free Trial") — named so we can update it dynamically
         if let badge {
+            let badgeNode = SKNode()
+            badgeNode.name = "badgeNode"
+            badgeNode.position = CGPoint(x: cardWidth / 2 - 46, y: 0)
+
             let badgeBg = SKShapeNode(rectOf: CGSize(width: CGFloat(badge.count) * 8 + 16, height: 22), cornerRadius: 11)
             badgeBg.fillColor = accentColor
             badgeBg.strokeColor = .clear
-            badgeBg.position = CGPoint(x: cardWidth / 2 - 40, y: 0)
-            card.addChild(badgeBg)
+            badgeBg.name = "badgeBg"
+            badgeNode.addChild(badgeBg)
 
             let badgeLabel = SKLabelNode(text: badge)
             badgeLabel.fontName = PixelFont.name
@@ -341,8 +351,10 @@ class PaywallScene: SKScene {
             badgeLabel.fontColor = .white
             badgeLabel.verticalAlignmentMode = .center
             badgeLabel.horizontalAlignmentMode = .center
-            badgeLabel.position = CGPoint(x: cardWidth / 2 - 40, y: 0)
-            card.addChild(badgeLabel)
+            badgeLabel.name = "badgeLabel"
+            badgeNode.addChild(badgeLabel)
+
+            card.addChild(badgeNode)
         }
 
         return card
@@ -498,10 +510,55 @@ class PaywallScene: SKScene {
             case .monthly:
                 subPriceLabel.text = "\(price)/mo"
             case .annual:
-                // RevenueCat computes the per-month equivalent automatically
-                let monthly = package.storeProduct.localizedPricePerMonth ?? ""
-                subPriceLabel.text = monthly.isEmpty ? "billed yearly" : "\(monthly)/mo"
+                let monthlyEquiv = package.storeProduct.localizedPricePerMonth ?? ""
+
+                // Check for a free trial introductory offer
+                if let intro = package.storeProduct.introductoryDiscount, intro.price == 0 {
+                    let trialStr = formatTrialPeriod(intro.subscriptionPeriod)
+                    let perMonth = monthlyEquiv.isEmpty ? price : "\(monthlyEquiv)/mo"
+                    subPriceLabel.text = "\(trialStr), then \(perMonth)"
+
+                    // Update badge to "Free Trial"
+                    updateBadge(on: card, text: "Free Trial")
+
+                    // Update continue button text
+                    updateContinueButtonLabel(to: "Start Free Trial")
+                } else {
+                    subPriceLabel.text = monthlyEquiv.isEmpty ? "billed yearly" : "\(monthlyEquiv)/mo"
+                }
             }
+        }
+    }
+
+    private func formatTrialPeriod(_ period: SubscriptionPeriod) -> String {
+        let value = period.value
+        let unit: String
+        switch period.unit {
+        case .day:   unit = value == 1 ? "day" : "days"
+        case .week:  unit = value == 1 ? "week" : "weeks"
+        case .month: unit = value == 1 ? "month" : "months"
+        case .year:  unit = value == 1 ? "year" : "years"
+        @unknown default: unit = "period"
+        }
+        return "\(value) \(unit) free"
+    }
+
+    private func updateBadge(on card: SKNode, text: String) {
+        guard let badgeNode = card.childNode(withName: "badgeNode") else { return }
+        if let label = badgeNode.childNode(withName: "badgeLabel") as? SKLabelNode {
+            label.text = text
+        }
+        if let bg = badgeNode.childNode(withName: "badgeBg") as? SKShapeNode {
+            let newWidth = CGFloat(text.count) * 8 + 16
+            bg.path = CGPath(roundedRect: CGRect(x: -newWidth/2, y: -11, width: newWidth, height: 22),
+                             cornerWidth: 11, cornerHeight: 11, transform: nil)
+        }
+    }
+
+    private func updateContinueButtonLabel(to text: String) {
+        if let button = childNode(withName: "continueButton"),
+           let label = button.children.compactMap({ $0 as? SKLabelNode }).first {
+            label.text = text
         }
     }
 
