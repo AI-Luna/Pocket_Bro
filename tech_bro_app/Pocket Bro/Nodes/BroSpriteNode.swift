@@ -534,7 +534,7 @@ class BroSpriteNode: SKNode {
             // Scale to keep the same on-screen width as the normal sprite.
             let frameW: CGFloat = 440.0 / 5.0
             let frameH: CGFloat = 566.0
-            let eatScale = pixelScale * (normalBodySize.width / frameW)
+            let eatScale = pixelScale * (normalBodySize.width / frameW) * 0.8
 
             bodySprite.size = CGSize(width: frameW, height: frameH)
             bodySprite.setScale(eatScale)
