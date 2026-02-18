@@ -686,7 +686,7 @@ class BroSpriteNode: SKNode {
             // Scale to match the on-screen width of the bro sleeping pose.
             let frameW: CGFloat = 440.0 / 3.0
             let frameH: CGFloat = 566.0
-            let sleepScale = originalScale * (originalSize.width / frameW) * 0.60
+            let sleepScale = originalScale * (originalSize.width / frameW) * 0.70
 
             bodySprite.size = CGSize(width: frameW, height: frameH)
             bodySprite.setScale(sleepScale)
@@ -701,8 +701,8 @@ class BroSpriteNode: SKNode {
                 self.startIdleAnimation()
             }
         } else {
-            // Scale down to 60% for the bro sleeping pose
-            let sleepScale = originalScale * 0.60
+            // Scale down to 70% for the bro sleeping pose
+            let sleepScale = originalScale * 0.70
             let shrink = SKAction.scale(to: sleepScale, duration: 0.2)
 
             let sleepCycle = SKAction.animate(with: frames, timePerFrame: 0.6, resize: false, restore: false)
