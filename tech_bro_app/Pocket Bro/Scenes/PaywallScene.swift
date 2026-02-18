@@ -530,7 +530,7 @@ class PaywallScene: SKScene {
         }
     }
 
-    private func formatTrialPeriod(_ period: SubscriptionPeriod) -> String {
+    private func formatTrialPeriod(_ period: RevenueCat.SubscriptionPeriod) -> String {
         let value = period.value
         let unit: String
         switch period.unit {
