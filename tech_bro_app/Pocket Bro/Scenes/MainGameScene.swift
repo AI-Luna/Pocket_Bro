@@ -753,7 +753,9 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         dialogueBubble?.removeFromParent()
 
         let bubble = DialogueBubbleNode(maxWidth: 260)
-        bubble.position = CGPoint(x: size.width / 2, y: broSprite.position.y + 100)
+        let bubbleHalfWidth: CGFloat = 140
+        let clampedX = min(max(broSprite.position.x, bubbleHalfWidth + 10), size.width - bubbleHalfWidth - 10)
+        bubble.position = CGPoint(x: clampedX, y: broSprite.position.y + 100)
         bubble.zPosition = 200
         addChild(bubble)
         bubble.show(text: text, emoji: emoji)
@@ -765,7 +767,9 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         dialogueBubble?.removeFromParent()
 
         let bubble = DialogueBubbleNode(maxWidth: 280)
-        bubble.position = CGPoint(x: size.width / 2, y: size.height / 2 + 50)
+        let bubbleHalfWidth: CGFloat = 150
+        let clampedX = min(max(broSprite.position.x, bubbleHalfWidth + 10), size.width - bubbleHalfWidth - 10)
+        bubble.position = CGPoint(x: clampedX, y: broSprite.position.y + 100)
         bubble.zPosition = 200
         addChild(bubble)
         bubble.showEvent(event)
