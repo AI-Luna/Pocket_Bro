@@ -205,13 +205,13 @@ class ActionSelectModal: SKNode {
         var iconYOffset: CGFloat = 0  // Offset to correct for uncentered sprites
 
         if let iconIndex = action.foodIconIndex {
-            iconSprite = createIconFromSheet(sheetName: "FoodIcons", index: iconIndex, targetSize: iconTargetSize * 1.6)
+            iconSprite = createIconFromSheet(sheetName: "FoodIcons", index: iconIndex, targetSize: min(iconTargetSize * 1.6, size - 10))
             let foodOffsets: [Int: CGFloat] = [
                 3: -6   // DoorDash bag - nudge down so it doesn't clip the top
             ]
             iconYOffset = foodOffsets[iconIndex] ?? 0
         } else if let iconIndex = action.socialIconIndex {
-            iconSprite = createIconFromSheet(sheetName: "SocialIcons", index: iconIndex, targetSize: iconTargetSize * 1.6)
+            iconSprite = createIconFromSheet(sheetName: "SocialIcons", index: iconIndex, targetSize: min(iconTargetSize * 1.6, size - 10))
         } else if let iconIndex = action.workIconIndex {
             iconSprite = createIconFromSheet(sheetName: "WorkIcons", index: iconIndex, targetSize: iconTargetSize * 1.2)
             iconYOffset = 0
@@ -245,7 +245,7 @@ class ActionSelectModal: SKNode {
                 } else {
                     imageSizeMultiplier = 0.6
                 }
-                let targetSize = iconTargetSize * imageSizeMultiplier
+                let targetSize = min(iconTargetSize * imageSizeMultiplier, size - 10)
                 let originalSize = texture.size()
                 let scale = targetSize / max(originalSize.width, originalSize.height)
                 sprite.size = CGSize(width: originalSize.width * scale, height: originalSize.height * scale)
