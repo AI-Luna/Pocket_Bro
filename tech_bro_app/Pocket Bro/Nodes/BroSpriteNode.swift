@@ -96,6 +96,7 @@ class BroSpriteNode: SKNode {
     private var jumpFrame: SKTexture?
     private var eatDrinkFrames: [SKTexture] = []
     private var typingFrames: [SKTexture] = []
+    private var babeTypingFrames: [SKTexture] = []
     private var sleepingFrames: [SKTexture] = []
 
     var archetype: Archetype = .bro {
@@ -116,6 +117,7 @@ class BroSpriteNode: SKNode {
         loadSpriteSheet()
         loadEatingDrinkingSpriteSheet()
         loadTypingSpriteSheet()
+        loadBabeTypingSpriteSheet()
         loadSleepingSpriteSheet()
         setupSprites()
     }
@@ -250,6 +252,58 @@ class BroSpriteNode: SKNode {
             typingSheetFrames[0][0], typingSheetFrames[0][1], typingSheetFrames[0][2], typingSheetFrames[0][3],
             typingSheetFrames[1][0], typingSheetFrames[1][1], typingSheetFrames[1][2]
         ]
+    }
+
+    private func loadBabeTypingSpriteSheet() {
+        // Babe typing sheet: 4 columns × 2 rows (8 sprites).
+        // Sprites are irregularly spaced with transparent padding.
+        // Crop coordinates below were authored against a 440×566 reference image;
+        // the actual asset may be higher-resolution so we scale dynamically.
+        guard let uiImage = UIImage(named: "BabeTypingSpriteSheet"),
+              let cgImage = uiImage.cgImage else { return }
+
+        let refWidth: CGFloat = 440
+        let refHeight: CGFloat = 566
+        let scaleX = CGFloat(cgImage.width) / refWidth
+        let scaleY = CGFloat(cgImage.height) / refHeight
+
+        let cropW = Int(90.0 * scaleX)
+        let cropH = Int(144.0 * scaleY)
+
+        // Crop origins centred on sprite content in each cell (reference coords).
+        // Row 0 (4 typing setup poses):  content y ≈ 62-202
+        // Row 1 (4 keystroke poses):     content y ≈ 238-380
+        let refOrigins: [(x: CGFloat, y: CGFloat)] = [
+            (5,  60), (112, 60), (219, 60), (323, 60),     // row 0
+            (11, 237), (121, 237), (229, 237), (335, 237)   // row 1
+        ]
+
+        var frames: [SKTexture] = []
+        for o in refOrigins {
+            let ox = Int(o.x * scaleX)
+            let oy = Int(o.y * scaleY)
+            let cropRect = CGRect(x: ox, y: oy, width: cropW, height: cropH)
+            guard let cropped = cgImage.cropping(to: cropRect) else { continue }
+
+            // CGImage.cropping shares the original pixel buffer, which causes
+            // SpriteKit to sample adjacent sprite data (diagonal bleed).
+            // Draw into a fresh pixel buffer to create a truly independent image.
+            guard let ctx = CGContext(
+                data: nil, width: cropW, height: cropH,
+                bitsPerComponent: 8, bytesPerRow: 0,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ) else { continue }
+            ctx.interpolationQuality = .none
+            ctx.draw(cropped, in: CGRect(x: 0, y: 0, width: cropW, height: cropH))
+
+            guard let freshImage = ctx.makeImage() else { continue }
+            let tex = SKTexture(cgImage: freshImage)
+            tex.filteringMode = .nearest
+            frames.append(tex)
+        }
+
+        babeTypingFrames = frames
     }
 
     private func loadSleepingSpriteSheet() {
@@ -416,27 +470,59 @@ class BroSpriteNode: SKNode {
     }
 
     func playTypingAnimation() {
-        guard !typingFrames.isEmpty else {
+        let isBabe = archetype == .gal && !babeTypingFrames.isEmpty
+        let frames = isBabe ? babeTypingFrames : typingFrames
+
+        guard !frames.isEmpty else {
             playActionAnimation()
             return
         }
 
         stopAllAnimations()
 
-        // Play through all typing frames, then loop the main typing cycle
-        let fullCycle = SKAction.animate(with: typingFrames, timePerFrame: 0.18, resize: false, restore: false)
+        if isBabe {
+            // Babe typing frames are 90×144 (larger than the general 80×92 frames).
+            // Set the sprite size to match the typing texture, adjust scale to keep
+            // the same on-screen width, and use resize:false to avoid artefacts.
+            let originalScale = bodySprite.xScale
+            let originalSize = bodySprite.size
+            let typingScale = originalScale * (originalSize.width / 90.0)
 
-        // Loop the hand-movement frames (row 0, indices 0-3) for sustained typing
-        let keystrokeFrames = Array(typingFrames[0...3])
-        let keystrokeLoop = SKAction.repeat(
-            SKAction.animate(with: keystrokeFrames, timePerFrame: 0.15, resize: false, restore: false),
-            count: 3
-        )
+            bodySprite.size = CGSize(width: 90, height: 144)
+            bodySprite.setScale(typingScale)
 
-        let sequence = SKAction.sequence([fullCycle, keystrokeLoop])
+            let fullCycle = SKAction.animate(with: frames, timePerFrame: 0.18, resize: false, restore: false)
 
-        bodySprite.run(sequence) { [weak self] in
-            self?.startIdleAnimation()
+            // Keystroke loop: row 1 (indices 4-7)
+            let keystrokeFrames = Array(frames[4...7])
+            let keystrokeLoop = SKAction.repeat(
+                SKAction.animate(with: keystrokeFrames, timePerFrame: 0.15, resize: false, restore: false),
+                count: 3
+            )
+
+            let sequence = SKAction.sequence([fullCycle, keystrokeLoop])
+
+            bodySprite.run(sequence) { [weak self] in
+                guard let self = self else { return }
+                self.bodySprite.size = originalSize
+                self.bodySprite.setScale(originalScale)
+                self.startIdleAnimation()
+            }
+        } else {
+            // Bro typing: frame size matches general frames, no resize needed
+            let fullCycle = SKAction.animate(with: frames, timePerFrame: 0.18, resize: false, restore: false)
+
+            let keystrokeFrames = Array(frames[0...3])
+            let keystrokeLoop = SKAction.repeat(
+                SKAction.animate(with: keystrokeFrames, timePerFrame: 0.15, resize: false, restore: false),
+                count: 3
+            )
+
+            let sequence = SKAction.sequence([fullCycle, keystrokeLoop])
+
+            bodySprite.run(sequence) { [weak self] in
+                self?.startIdleAnimation()
+            }
         }
     }
 
