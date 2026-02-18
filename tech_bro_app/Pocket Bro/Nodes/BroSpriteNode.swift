@@ -80,7 +80,7 @@ class BroSpriteNode: SKNode {
     private var allFrames: [[SKTexture]] = []
     private var loadedSheetName: String?
 
-    // Eating/drinking sprite sheet layout: 5 columns x 4 rows
+    // Eating/drinking sprite sheet layout: 5 columns x 4 rows (bro)
     private var eatingFrames: [[SKTexture]] = []
 
     // Typing sprite sheet layout: 5 columns x 4 rows (7 frames used)
@@ -312,27 +312,49 @@ class BroSpriteNode: SKNode {
     }
 
     private func loadBabeEatingDrinkingSpriteSheet() {
+        // New sprite sheet: 361×691, 10 frames across 4 rows (2+2+3+3).
+        // Sprites are ~43×91 content within irregular positions.
+        // We crop 80×92 rects centered on each sprite to match the normal babe frame size.
         guard let uiImage = UIImage(named: "BabeEatingDrinkingSpriteSheet"),
               let cgImage = uiImage.cgImage else { return }
 
-        let columns = 5
-        let colWidth = cgImage.width / columns
-        let frameHeight = cgImage.height
+        let refWidth: CGFloat = 361
+        let refHeight: CGFloat = 691
+        let scaleX = CGFloat(cgImage.width) / refWidth
+        let scaleY = CGFloat(cgImage.height) / refHeight
+
+        let cropW = Int(80.0 * scaleX)
+        let cropH = Int(92.0 * scaleY)
+
+        // Crop origins (reference coords) for each of the 10 frames,
+        // centered on the sprite content in each cell.
+        let refOrigins: [(x: CGFloat, y: CGFloat)] = [
+            // Row 0: 2 frames (reaching for food)
+            (92, 30), (174, 30),
+            // Row 1: 2 frames (holding / bringing to mouth)
+            (91, 128), (172, 128),
+            // Row 2: 3 frames (eating)
+            (13, 226), (92, 226), (172, 226),
+            // Row 3: 3 frames (chewing / finishing)
+            (13, 324), (94, 324), (176, 324)
+        ]
 
         var frames: [SKTexture] = []
-        for col in 0..<columns {
-            let ox = col * colWidth
-            let cropRect = CGRect(x: ox, y: 0, width: colWidth, height: frameHeight)
-            guard let cropped = cgImage.cropping(to: cropRect) else { continue }
+        for o in refOrigins {
+            let ox = Int(o.x * scaleX)
+            let oy = Int(o.y * scaleY)
+            guard let cropped = cgImage.cropping(to: CGRect(x: ox, y: oy, width: cropW, height: cropH)) else { continue }
 
+            // Draw into a fresh pixel buffer to create a truly independent image
+            // (avoids SpriteKit diagonal bleed from shared CGImage backing store).
             guard let ctx = CGContext(
-                data: nil, width: colWidth, height: frameHeight,
+                data: nil, width: cropW, height: cropH,
                 bitsPerComponent: 8, bytesPerRow: 0,
                 space: CGColorSpaceCreateDeviceRGB(),
                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
             ) else { continue }
             ctx.interpolationQuality = .none
-            ctx.draw(cropped, in: CGRect(x: 0, y: 0, width: colWidth, height: frameHeight))
+            ctx.draw(cropped, in: CGRect(x: 0, y: 0, width: cropW, height: cropH))
 
             guard let freshImage = ctx.makeImage() else { continue }
             let tex = SKTexture(cgImage: freshImage)
@@ -530,35 +552,22 @@ class BroSpriteNode: SKNode {
 
             stopAllAnimations()
 
-            // Babe eating frames are 88×566 (440/5 × 566) with transparent padding.
-            // Scale to keep the same on-screen width as the normal sprite.
-            let frameW: CGFloat = 440.0 / 5.0
-            let frameH: CGFloat = 566.0
-            let eatScale = pixelScale * (normalBodySize.width / frameW) * 0.8
+            // Frames are cropped at 80×92, matching the normal babe frame size,
+            // so no special scaling or positioning is needed.
 
-            bodySprite.size = CGSize(width: frameW, height: frameH)
-            bodySprite.setScale(eatScale)
-
-            // Full cycle through all 5 frames, then loop middle frames for sustained eating
-            let fullCycle = SKAction.animate(with: babeEatingDrinkingFrames, timePerFrame: 0.3, resize: false, restore: false)
-            let middleFrames = Array(babeEatingDrinkingFrames[1...3])
+            // Full cycle through all 10 frames, then loop the eating/chewing
+            // frames (last 6) for sustained eating.
+            let fullCycle = SKAction.animate(with: babeEatingDrinkingFrames, timePerFrame: 0.25, resize: false, restore: false)
+            let eatingLoopFrames = Array(babeEatingDrinkingFrames.suffix(6))
             let eatLoop = SKAction.repeat(
-                SKAction.animate(with: middleFrames, timePerFrame: 0.25, resize: false, restore: false),
-                count: 3
+                SKAction.animate(with: eatingLoopFrames, timePerFrame: 0.2, resize: false, restore: false),
+                count: 2
             )
 
             let sequence = SKAction.sequence([fullCycle, eatLoop])
 
             bodySprite.run(sequence) { [weak self] in
-                guard let self = self else { return }
-                // Swap to an idle texture before resizing so the tall eating
-                // frame is never rendered squished into the normal-size box.
-                if let firstIdle = self.idleFrames.first {
-                    self.bodySprite.texture = firstIdle
-                    self.bodySprite.texture?.filteringMode = .nearest
-                }
-                self.stopAllAnimations()
-                self.startIdleAnimation()
+                self?.startIdleAnimation()
                 completion?()
             }
         } else {
