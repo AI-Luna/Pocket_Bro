@@ -30,7 +30,7 @@ enum FeedingActions {
             .health: -5,
             .burnout: 5
         ],
-        foodIconIndex: 0
+        iconImageName: "EnergyDrink"
     )
 
     static let soylent = GameAction(
@@ -44,7 +44,7 @@ enum FeedingActions {
             .health: 5,
             .happiness: -5
         ],
-        foodIconIndex: 1
+        iconImageName: "ProteinShake"
     )
 
     static let ramen = GameAction(
@@ -58,12 +58,12 @@ enum FeedingActions {
             .happiness: 5,
             .health: -3
         ],
-        foodIconIndex: 2
+        iconImageName: "Uncrustable"
     )
 
     static let doordash = GameAction(
         id: "feed_doordash",
-        name: "DoorDash Order",
+        name: "FoodDash Order",
         category: .feed,
         description: "Convenience at a premium. Burns runway faster.",
         emoji: "📦",
@@ -72,7 +72,7 @@ enum FeedingActions {
             .happiness: 15,
             .runway: -1
         ],
-        foodIconIndex: 3
+        iconImageName: "FoodDash"
     )
 
     static let healthyMeal = GameAction(
@@ -88,7 +88,7 @@ enum FeedingActions {
             .burnout: -5
         ],
         cooldownSeconds: 300,
-        foodIconIndex: 4
+        iconImageName: "HealthyMeal"
     )
 
     static let teamLunch = GameAction(
@@ -103,6 +103,6 @@ enum FeedingActions {
             .social: 15,
             .runway: -2
         ],
-        foodIconIndex: 5
+        iconImageName: "TeamLunch"
     )
 }

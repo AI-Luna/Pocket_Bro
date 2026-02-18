@@ -3,6 +3,7 @@
 //  Pocket Bro
 
 import SpriteKit
+import UIKit
 
 protocol ActionSelectModalDelegate: AnyObject {
     func actionSelectModal(_ modal: ActionSelectModal, didSelect action: GameAction)
@@ -310,7 +311,7 @@ class ActionSelectModal: SKNode {
         let nameLabel = SKLabelNode(text: action.name)
         nameLabel.fontName = PixelFont.name
         nameLabel.fontSize = 12
-        nameLabel.fontColor = canPerform ? secondaryTextColor : disabledColor
+        nameLabel.fontColor = canPerform ? textColor : disabledColor
         nameLabel.horizontalAlignmentMode = .center
         nameLabel.verticalAlignmentMode = .top
         nameLabel.position = CGPoint(x: 0, y: 0)
@@ -400,6 +401,7 @@ class ActionSelectModal: SKNode {
     private func handleActionTap(_ action: GameAction, card: SKNode) {
         // Check if premium action - open paywall instead
         if action.isPremium {
+            Haptics.selection()
             animatePress(card)
             delegate?.actionSelectModalDidSelectPremium(self)
             run(SKAction.sequence([
@@ -418,6 +420,7 @@ class ActionSelectModal: SKNode {
             return
         }
 
+        Haptics.confirm()
         animatePress(card)
         delegate?.actionSelectModal(self, didSelect: action)
 

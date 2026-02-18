@@ -4,6 +4,7 @@
 //
 
 import SpriteKit
+import UIKit
 
 class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
@@ -588,6 +589,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             if button.contains(location), let name = button.name, name.hasPrefix("category_") {
                 let categoryName = String(name.dropFirst("category_".count))
                 if let category = ActionCategory.allCases.first(where: { $0.rawValue == categoryName }) {
+                    Haptics.selection()
                     animateButtonPress(button)
                     showActionModal(for: category)
                     return

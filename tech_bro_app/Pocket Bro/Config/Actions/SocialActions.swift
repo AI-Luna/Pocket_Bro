@@ -31,7 +31,7 @@ enum SocialActions {
             .burnout: -5
         ],
         cooldownSeconds: 300,
-        socialIconIndex: 0
+        iconImageName: "CallFamily"
     )
 
     static let coffeeChat = GameAction(
@@ -46,7 +46,7 @@ enum SocialActions {
             .energy: 5,
             .funding: 3
         ],
-        socialIconIndex: 1
+        iconImageName: "CoffeeChat"
     )
 
     static let founderDinner = GameAction(
@@ -62,7 +62,7 @@ enum SocialActions {
             .energy: -10,
             .runway: -2
         ],
-        socialIconIndex: 2
+        iconImageName: "FounderDinner"
     )
 
     static let dating = GameAction(
@@ -79,7 +79,7 @@ enum SocialActions {
         ],
         cooldownSeconds: 900,
         triggersMinigame: .dating,
-        socialIconIndex: 3
+        iconImageName: "GoOnADate"
     )
 
     static let partyTime = GameAction(
@@ -113,6 +113,6 @@ enum SocialActions {
             .product: 5
         ],
         cooldownSeconds: 600,
-        socialIconIndex: 5
+        iconImageName: "MentorMeeting"
     )
 }

@@ -230,8 +230,8 @@ class OnboardingScene: SKScene {
 
         // Larger cards with bigger character icons
         let archetypes = Archetype.allCases
-        let cardSize = CGSize(width: 110, height: 150)  // Taller cards to fit larger text
-        let spacing: CGFloat = 12
+        let cardSize = CGSize(width: 130, height: 175)
+        let spacing: CGFloat = 28
         let totalWidth = CGFloat(archetypes.count) * cardSize.width + CGFloat(archetypes.count - 1) * spacing
         let startX = (size.width - totalWidth) / 2 + cardSize.width / 2
         let cardY = size.height / 2 - 50  // Moved up, closer to title
@@ -284,7 +284,7 @@ class OnboardingScene: SKScene {
         card.addChild(border)
 
         // Character icon - larger size
-        let iconSize: CGFloat = 75
+        let iconSize: CGFloat = 95
         
         switch archetype {
         case .bro:
@@ -314,7 +314,7 @@ class OnboardingScene: SKScene {
         nameLabel.fontName = PixelFont.name
         nameLabel.fontSize = PixelFont.body  // Larger font for readability
         nameLabel.fontColor = textColor
-        nameLabel.position = CGPoint(x: 0, y: -size.height / 2 + 25)
+        nameLabel.position = CGPoint(x: 0, y: -size.height / 2 + 22)
         nameLabel.horizontalAlignmentMode = .center
         nameLabel.verticalAlignmentMode = .center
         card.addChild(nameLabel)
@@ -678,12 +678,12 @@ class OnboardingScene: SKScene {
         banner.run(SKAction.sequence([SKAction.wait(forDuration: 0.3), slideIn]))
         shadowBanner.run(SKAction.sequence([SKAction.wait(forDuration: 0.3), SKAction.moveTo(y: bannerY - 4, duration: 0.4)]))
 
-        // Bell icon - closer to text
-        let bell = SKLabelNode(text: "🔔")
-        bell.fontSize = 60
+        // Briefcase icon
+        let briefcaseTexture = SKTexture(imageNamed: "Briefcase")
+        briefcaseTexture.filteringMode = .nearest
+        let bell = SKSpriteNode(texture: briefcaseTexture)
+        bell.size = CGSize(width: 80, height: 80)
         bell.position = CGPoint(x: size.width / 2, y: size.height / 2 + 60)
-        bell.horizontalAlignmentMode = .center
-        bell.verticalAlignmentMode = .center
         contentNode.addChild(bell)
 
         // Wiggle animation
@@ -739,6 +739,7 @@ class OnboardingScene: SKScene {
 
         // Check next button
         if nextButton.contains(location) {
+            Haptics.confirm()
             animateButtonPress(nextButton)
             handleNextButton()
             return
@@ -750,6 +751,7 @@ class OnboardingScene: SKScene {
                 if let name = card.name, name.hasPrefix("founder_") {
                     let archetypeName = String(name.dropFirst("founder_".count))
                     if let archetype = Archetype.allCases.first(where: { $0.rawValue == archetypeName }) {
+                        Haptics.selection()
                         selectedArchetype = archetype
                         updateFounderSelection()
                     }
@@ -764,6 +766,7 @@ class OnboardingScene: SKScene {
                 if let name = card.name, name.hasPrefix("city_") {
                     let cityName = String(name.dropFirst("city_".count))
                     if let city = City.allCases.first(where: { $0.rawValue == cityName }) {
+                        Haptics.selection()
                         selectedCity = city
                         updateCitySelection()
                     }
@@ -779,6 +782,7 @@ class OnboardingScene: SKScene {
             let fieldY = size.height / 2 - 60  // Same as setupNameFounderStep
             let fieldArea = CGRect(x: (size.width - fieldWidth) / 2, y: fieldY - fieldHeight / 2, width: fieldWidth, height: fieldHeight)
             if fieldArea.contains(location) {
+                Haptics.selection()
                 promptForName()
             }
         }
