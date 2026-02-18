@@ -45,6 +45,7 @@ final class GameManager {
             simulateElapsedTime(from: lastBackground)
         }
 
+        StatNotificationManager.shared.scheduleDailyNotifications(name: savedState.name)
         startGameLoop()
         notifyStateUpdate()
         return true
@@ -53,6 +54,7 @@ final class GameManager {
     func newGame(name: String, archetype: Archetype, city: City = .sanFrancisco) {
         state = BroState.new(name: name, archetype: archetype, city: city)
         saveGame()
+        StatNotificationManager.shared.scheduleDailyNotifications(name: name)
         startGameLoop()
         notifyStateUpdate()
     }
@@ -88,12 +90,14 @@ final class GameManager {
 
     func deleteGame() {
         stopGameLoop()
+        StatNotificationManager.shared.cancelDailyNotifications()
         state = nil
         persistence.delete()
     }
 
     func resetAllData() {
         stopGameLoop()
+        StatNotificationManager.shared.cancelDailyNotifications()
         state = nil
         persistence.delete()
         persistence.clearOnboardingComplete()
@@ -176,11 +180,18 @@ final class GameManager {
         persistence.saveLastBackgroundTime(Date())
         saveGame()
         stopGameLoop()
+        if let state = state {
+            StatNotificationManager.shared.scheduleBackgroundNotifications(state: state)
+        }
     }
 
     func appDidEnterForeground() {
+        StatNotificationManager.shared.cancelBackgroundNotifications()
         if let lastBackground = persistence.loadLastBackgroundTime() {
             simulateElapsedTime(from: lastBackground)
+        }
+        if let name = state?.name {
+            StatNotificationManager.shared.scheduleDailyNotifications(name: name)
         }
         startGameLoop()
         notifyStateUpdate()

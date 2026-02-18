@@ -4,6 +4,7 @@
 
 import SpriteKit
 import StoreKit
+import MessageUI
 
 class SettingsScene: SKScene {
     weak var sceneManager: SceneManager?
@@ -14,11 +15,10 @@ class SettingsScene: SKScene {
     private let textColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0) // Bright cyan
     private let secondaryTextColor = SKColor(red: 0.7, green: 0.8, blue: 0.9, alpha: 1.0)
     private let accentColor = SKColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0) // Hot pink
+    private let cofounderColor = SKColor(red: 0.0, green: 0.55, blue: 1.0, alpha: 1.0) // Electric blue
     private let toggleOnColor = SKColor(red: 0.0, green: 0.85, blue: 0.85, alpha: 1.0) // Cyan
     private let toggleOffColor = SKColor(red: 0.35, green: 0.25, blue: 0.50, alpha: 1.0)
 
-    // State
-    private var liveActivitiesEnabled = true
 
     init(size: CGSize, sceneManager: SceneManager) {
         self.sceneManager = sceneManager
@@ -38,7 +38,7 @@ class SettingsScene: SKScene {
         setupHeader()
         setupProBanner()
         setupProfileSection()
-        setupPreferencesSection()
+        setupCofounderBanner()
         setupLinksSection()
         setupVersionLabel()
     }
@@ -120,6 +120,40 @@ class SettingsScene: SKScene {
         banner.addChild(text)
     }
 
+    // MARK: - Co-Founder Banner
+
+    private func setupCofounderBanner() {
+        let safeTop = view?.safeAreaInsets.top ?? 50
+        let bannerWidth = size.width - 50
+        let bannerHeight: CGFloat = 60
+
+        let banner = SKNode()
+        // Sits 15pt below the profile section bottom (profile center -210, height 100, bottom -260)
+        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 305)
+        banner.name = "cofounderBanner"
+        addChild(banner)
+
+        let glowBg = SKShapeNode(rectOf: CGSize(width: bannerWidth + 8, height: bannerHeight + 8), cornerRadius: 16)
+        glowBg.fillColor = cofounderColor.withAlphaComponent(0.3)
+        glowBg.strokeColor = .clear
+        glowBg.glowWidth = 10
+        glowBg.zPosition = -1
+        banner.addChild(glowBg)
+
+        let bg = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 12)
+        bg.fillColor = cofounderColor
+        bg.strokeColor = .clear
+        banner.addChild(bg)
+
+        let text = SKLabelNode(text: "Text a Co-Founder")
+        text.fontName = PixelFont.name
+        text.fontSize = 18
+        text.fontColor = .white
+        text.verticalAlignmentMode = .center
+        text.horizontalAlignmentMode = .center
+        banner.addChild(text)
+    }
+
     // MARK: - Profile Section (Name & City)
 
     private func setupProfileSection() {
@@ -153,28 +187,11 @@ class SettingsScene: SKScene {
 
     // MARK: - Preferences Section
 
-    private func setupPreferencesSection() {
-        let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 330
-        let rowHeight: CGFloat = 50
-        let sectionWidth = size.width - 50
-
-        // Section background
-        let section = createSectionBackground(rows: 1, rowHeight: rowHeight, width: sectionWidth)
-        section.position = CGPoint(x: size.width / 2, y: sectionY)
-        addChild(section)
-
-        // Row: Live Activities
-        let row = createToggleRow(title: "Live Activities", id: "liveActivities", isOn: liveActivitiesEnabled, width: sectionWidth)
-        row.position = CGPoint(x: size.width / 2, y: sectionY)
-        addChild(row)
-    }
-
     // MARK: - Links Section
 
     private func setupLinksSection() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 490
+        let sectionY = size.height - safeTop - 500
         let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 50
 
@@ -361,6 +378,13 @@ class SettingsScene: SKScene {
             return
         }
 
+        // Co-founder banner
+        if let banner = childNode(withName: "cofounderBanner"), banner.contains(location) {
+            animatePress(banner)
+            shareWithCofounder()
+            return
+        }
+
         // Reset onboarding button
         if let resetButton = childNode(withName: "resetOnboarding") as? SKLabelNode {
             let expandedFrame = resetButton.frame.insetBy(dx: -20, dy: -15)
@@ -391,12 +415,6 @@ class SettingsScene: SKScene {
         case "city":
             showCityPicker()
 
-        case "liveActivities":
-            if let toggle = node.childNode(withName: "toggle_liveActivities") {
-                toggleSwitch(toggle)
-                liveActivitiesEnabled.toggle()
-            }
-
         case "rate":
             requestAppReview()
 
@@ -407,10 +425,10 @@ class SettingsScene: SKScene {
             restorePurchases()
 
         case "privacy":
-            openURL("https://example.com/privacy")
+            openURL("https://techbrotamagotchihome.vercel.app/privacy")
 
         case "terms":
-            openURL("https://example.com/terms")
+            openURL("https://techbrotamagotchihome.vercel.app/terms")
 
         default:
             break
@@ -444,6 +462,29 @@ class SettingsScene: SKScene {
         }
 
         viewController.present(activityVC, animated: true, completion: nil)
+    }
+
+    private func shareWithCofounder() {
+        guard let viewController = self.view?.window?.rootViewController else { return }
+
+        let appURL = "https://apps.apple.com/app/idYOURAPPID"
+        let message = "okay you NEED to download this app rn 👇\n\nit's called Pocket Bro — you raise a tamagotchi-style startup founder, grind through pitch decks, survive investor meetings, avoid burnout... it's unhinged and weirdly accurate 💀🚀\n\nwe should both be playing this → \(appURL)"
+
+        if MFMessageComposeViewController.canSendText() {
+            let messageVC = MFMessageComposeViewController()
+            messageVC.body = message
+            messageVC.messageComposeDelegate = CofounderMessageDelegate.shared
+            viewController.present(messageVC, animated: true)
+        } else {
+            // Fallback to share sheet on simulator / devices without SMS
+            let activityVC = UIActivityViewController(activityItems: [message], applicationActivities: nil)
+            if let popover = activityVC.popoverPresentationController {
+                popover.sourceView = viewController.view
+                popover.sourceRect = CGRect(x: viewController.view.bounds.midX, y: viewController.view.bounds.midY, width: 0, height: 0)
+                popover.permittedArrowDirections = []
+            }
+            viewController.present(activityVC, animated: true)
+        }
     }
 
     private func restorePurchases() {
@@ -594,5 +635,15 @@ class SettingsScene: SKScene {
             SKAction.scale(to: 1.0, duration: 0.1)
         ])
         node.run(press)
+    }
+}
+
+// MARK: - SMS Delegate
+
+private class CofounderMessageDelegate: NSObject, MFMessageComposeViewControllerDelegate {
+    static let shared = CofounderMessageDelegate()
+
+    func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
+        controller.dismiss(animated: true)
     }
 }

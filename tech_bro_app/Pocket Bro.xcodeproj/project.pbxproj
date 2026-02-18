@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BD7AFD522F43D63C00057869 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = BD7AFD512F43D63C00057869 /* RevenueCat */; };
+		BD7AFD542F43D63C00057869 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = BD7AFD532F43D63C00057869 /* RevenueCatUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		BD6F33C62F2D7C5F006124B9 /* Pocket Bro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pocket Bro.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BD7AFD542F43D63C00057869 /* RevenueCatUI in Frameworks */,
+				BD7AFD522F43D63C00057869 /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +72,8 @@
 			);
 			name = "Pocket Bro";
 			packageProductDependencies = (
+				BD7AFD512F43D63C00057869 /* RevenueCat */,
+				BD7AFD532F43D63C00057869 /* RevenueCatUI */,
 			);
 			productName = "Pocket Bro";
 			productReference = BD6F33C62F2D7C5F006124B9 /* Pocket Bro.app */;
@@ -94,6 +103,9 @@
 			);
 			mainGroup = BD6F33BD2F2D7C5F006124B9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BD7AFD502F43D63C00057869 /* XCRemoteSwiftPackageReference "purchases-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BD6F33C72F2D7C5F006124B9 /* Products */;
 			projectDirPath = "";
@@ -256,6 +268,7 @@
 				DEVELOPMENT_TEAM = U28R3VYMAU;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = TechBro;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -273,6 +286,7 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -293,6 +307,7 @@
 				DEVELOPMENT_TEAM = U28R3VYMAU;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = TechBro;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -310,6 +325,7 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -342,6 +358,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BD7AFD502F43D63C00057869 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.59.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BD7AFD512F43D63C00057869 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD7AFD502F43D63C00057869 /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCat;
+		};
+		BD7AFD532F43D63C00057869 /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD7AFD502F43D63C00057869 /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCatUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BD6F33BE2F2D7C5F006124B9 /* Project object */;
 }

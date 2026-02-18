@@ -191,12 +191,12 @@ class PaywallScene: SKScene {
         title.position = CGPoint(x: 0, y: 25)
         widget.addChild(title)
 
-        // Feature icons with synthwave colors
-        let features: [(emoji: String, color: SKColor)] = [
-            ("🚀", SKColor(red: 1.0, green: 0.7, blue: 0.2, alpha: 1.0)),
-            ("🎮", SKColor(red: 0.2, green: 0.85, blue: 0.7, alpha: 1.0)),
-            ("💎", accentColor),
-            ("🌆", SKColor(red: 0.5, green: 0.4, blue: 0.9, alpha: 1.0))
+        // Feature icons using generated PNGs
+        let features: [(imageName: String, color: SKColor)] = [
+            ("MiniVacationIcon", SKColor(red: 1.0, green: 0.7, blue: 0.2, alpha: 1.0)),
+            ("GymIcon",          SKColor(red: 0.2, green: 0.85, blue: 0.7, alpha: 1.0)),
+            ("TherapyIcon",      accentColor),
+            ("BedIcon",          SKColor(red: 0.5, green: 0.4, blue: 0.9, alpha: 1.0))
         ]
 
         let iconSize: CGFloat = 48
@@ -214,12 +214,14 @@ class PaywallScene: SKScene {
             iconBg.position = CGPoint(x: xPos, y: iconsY)
             widget.addChild(iconBg)
 
-            let emoji = SKLabelNode(text: feature.emoji)
-            emoji.fontSize = 22
-            emoji.position = CGPoint(x: xPos, y: iconsY)  // Same position as background
-            emoji.verticalAlignmentMode = .center
-            emoji.horizontalAlignmentMode = .center
-            widget.addChild(emoji)
+            let texture = SKTexture(imageNamed: feature.imageName)
+            texture.filteringMode = .nearest
+            let sprite = SKSpriteNode(texture: texture)
+            let originalSize = texture.size()
+            let scale = (iconSize * 0.65) / max(originalSize.width, originalSize.height)
+            sprite.size = CGSize(width: originalSize.width * scale, height: originalSize.height * scale)
+            sprite.position = CGPoint(x: xPos, y: iconsY)
+            widget.addChild(sprite)
         }
     }
 
@@ -544,7 +546,7 @@ class PaywallScene: SKScene {
         if let termsButton = childNode(withName: "termsButton") as? SKLabelNode {
             let expandedFrame = termsButton.frame.insetBy(dx: -15, dy: -10)
             if expandedFrame.contains(location) {
-                openURL("https://example.com/terms")
+                openURL("https://techbrotamagotchihome.vercel.app/terms")
                 return
             }
         }
@@ -553,7 +555,7 @@ class PaywallScene: SKScene {
         if let privacyButton = childNode(withName: "privacyButton") as? SKLabelNode {
             let expandedFrame = privacyButton.frame.insetBy(dx: -15, dy: -10)
             if expandedFrame.contains(location) {
-                openURL("https://example.com/privacy")
+                openURL("https://techbrotamagotchihome.vercel.app/privacy")
                 return
             }
         }

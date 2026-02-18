@@ -175,7 +175,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     private func setupStatsArea() {
         // Settings button in top-right corner
         let settingsButton = createSettingsButton()
-        settingsButton.position = CGPoint(x: size.width - 35, y: size.height - safeAreaInsets().top - 35)
+        settingsButton.position = CGPoint(x: size.width - 35, y: size.height - safeAreaInsets().top - 20)
         settingsButton.name = "settingsButton"
         settingsButton.zPosition = 100
         addChild(settingsButton)
@@ -221,37 +221,32 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
     private func drawGearIcon() -> SKNode {
         let node = SKNode()
-        let pixelSize: CGFloat = 2.5
         let color = lcdDarkColor
 
-        // Simple 8x8 gear pattern
-        let gear: [[Int]] = [
-            [0,0,1,1,1,1,0,0],
-            [0,1,1,0,0,1,1,0],
-            [1,1,0,0,0,0,1,1],
-            [1,0,0,1,1,0,0,1],
-            [1,0,0,1,1,0,0,1],
-            [1,1,0,0,0,0,1,1],
-            [0,1,1,0,0,1,1,0],
-            [0,0,1,1,1,1,0,0]
-        ]
+        let toothCount = 8
+        let outerRadius: CGFloat = 11.0
+        let innerRadius: CGFloat = 8.0
+        let holeRadius: CGFloat = 3.5
+        let totalPoints = toothCount * 2
 
-        let rows = gear.count
-        let cols = gear[0].count
-        let totalW = CGFloat(cols) * pixelSize
-        let totalH = CGFloat(rows) * pixelSize
+        let path = CGMutablePath()
 
-        for (rowIdx, row) in gear.enumerated() {
-            for (colIdx, pixel) in row.enumerated() {
-                if pixel == 1 {
-                    let px = SKSpriteNode(color: color, size: CGSize(width: pixelSize, height: pixelSize))
-                    let xPos = CGFloat(colIdx) * pixelSize - totalW / 2 + pixelSize / 2
-                    let yPos = CGFloat(rows - 1 - rowIdx) * pixelSize - totalH / 2 + pixelSize / 2
-                    px.position = CGPoint(x: xPos, y: yPos)
-                    node.addChild(px)
-                }
-            }
+        // Gear outline - alternating tooth tips (outerRadius) and valleys (innerRadius)
+        for i in 0..<totalPoints {
+            let angle = CGFloat(i) * (2 * .pi) / CGFloat(totalPoints) - .pi / 2
+            let r = (i % 2 == 0) ? outerRadius : innerRadius
+            let pt = CGPoint(x: cos(angle) * r, y: sin(angle) * r)
+            if i == 0 { path.move(to: pt) } else { path.addLine(to: pt) }
         }
+        path.closeSubpath()
+
+        // Center hole - opposite winding to cut out via nonzero winding rule
+        path.addArc(center: .zero, radius: holeRadius, startAngle: 0, endAngle: 2 * .pi, clockwise: false)
+
+        let shape = SKShapeNode(path: path)
+        shape.fillColor = color
+        shape.strokeColor = .clear
+        node.addChild(shape)
 
         return node
     }

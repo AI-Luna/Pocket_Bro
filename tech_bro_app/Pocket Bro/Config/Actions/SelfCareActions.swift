@@ -29,6 +29,7 @@ enum SelfCareActions {
             .energy: 25,
             .burnout: -5
         ],
+        iconImageName: "ClockIcon",
         isPremium: false  // Free action
     )
 
@@ -44,6 +45,8 @@ enum SelfCareActions {
             .health: 5
         ],
         cooldownSeconds: 300,
+        galIconImageName: "TechBabeMeditationIcon",
+        broIconImageName: "TechBroMeditationIcon",
         isPremium: true
     )
 
@@ -60,6 +63,7 @@ enum SelfCareActions {
             .burnout: -10
         ],
         cooldownSeconds: 600,
+        iconImageName: "GymIcon",
         isPremium: true
     )
 
@@ -76,6 +80,7 @@ enum SelfCareActions {
             .runway: -1
         ],
         cooldownSeconds: 900,
+        iconImageName: "TherapyIcon",
         isPremium: true
     )
 
@@ -93,6 +98,7 @@ enum SelfCareActions {
             .runway: -5
         ],
         cooldownSeconds: 3600,
+        iconImageName: "MiniVacationIcon",
         isPremium: true
     )
 
@@ -109,6 +115,7 @@ enum SelfCareActions {
             .happiness: 10
         ],
         cooldownSeconds: 600,
+        iconImageName: "BedIcon",
         isPremium: true
     )
 }

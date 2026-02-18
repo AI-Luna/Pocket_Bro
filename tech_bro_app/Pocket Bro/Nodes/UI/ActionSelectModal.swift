@@ -13,15 +13,15 @@ protocol ActionSelectModalDelegate: AnyObject {
 class ActionSelectModal: SKNode {
     weak var delegate: ActionSelectModalDelegate?
 
-    // Colors - Synthwave theme
-    private let overlayColor = SKColor.black.withAlphaComponent(0.5)
-    private let modalBackground = SKColor(red: 0.22, green: 0.12, blue: 0.38, alpha: 1.0) // Deep purple
-    private let cardColor = SKColor(red: 0.28, green: 0.18, blue: 0.45, alpha: 1.0)
-    private let selectedCardColor = SKColor(red: 0.35, green: 0.22, blue: 0.55, alpha: 1.0)
-    private let textColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0) // Bright cyan
-    private let secondaryTextColor = SKColor(red: 0.85, green: 0.9, blue: 0.95, alpha: 1.0)
-    private let accentColor = SKColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0) // Hot pink
-    private let disabledColor = SKColor(red: 0.5, green: 0.45, blue: 0.6, alpha: 1.0)
+    // Colors - exact match to app LCD background palette
+    private let overlayColor = SKColor.black.withAlphaComponent(0.4)
+    private let modalBackground = SKColor(red: 0.45, green: 0.55, blue: 0.45, alpha: 1.0) // lcdBackground
+    private let cardColor = SKColor(red: 0.30, green: 0.39, blue: 0.28, alpha: 1.0)       // starker contrast
+    private let selectedCardColor = SKColor(red: 0.25, green: 0.33, blue: 0.23, alpha: 1.0)
+    private let textColor = SKColor(red: 0.18, green: 0.22, blue: 0.18, alpha: 1.0)       // lcdDarkColor
+    private let secondaryTextColor = SKColor(red: 0.22, green: 0.27, blue: 0.22, alpha: 1.0)
+    private let accentColor = SKColor(red: 0.18, green: 0.22, blue: 0.18, alpha: 1.0)     // lcdDarkColor
+    private let disabledColor = SKColor(red: 0.50, green: 0.58, blue: 0.50, alpha: 1.0)
 
     private let category: ActionCategory
     private let sceneSize: CGSize
@@ -187,8 +187,8 @@ class ActionSelectModal: SKNode {
         // Use faint pink for premium cells
         let bg = SKShapeNode(rectOf: CGSize(width: size, height: size), cornerRadius: 6)
         if action.isPremium {
-            bg.fillColor = SKColor(red: 0.45, green: 0.20, blue: 0.40, alpha: 1.0)  // Faint pink/purple tint
-            bg.strokeColor = accentColor.withAlphaComponent(0.3)  // Pink border for premium
+            bg.fillColor = SKColor(red: 0.30, green: 0.39, blue: 0.28, alpha: 1.0)  // Starker contrast card for premium
+            bg.strokeColor = SKColor(red: 0.18, green: 0.22, blue: 0.18, alpha: 0.5)
         } else {
             bg.fillColor = cardColor
             bg.strokeColor = textColor.withAlphaComponent(0.2)
@@ -204,13 +204,16 @@ class ActionSelectModal: SKNode {
         var iconYOffset: CGFloat = 0  // Offset to correct for uncentered sprites
 
         if let iconIndex = action.foodIconIndex {
-            iconSprite = createIconFromSheet(sheetName: "FoodIcons", index: iconIndex, targetSize: iconTargetSize)
+            iconSprite = createIconFromSheet(sheetName: "FoodIcons", index: iconIndex, targetSize: iconTargetSize * 1.6)
+            let foodOffsets: [Int: CGFloat] = [
+                3: -6   // DoorDash bag - nudge down so it doesn't clip the top
+            ]
+            iconYOffset = foodOffsets[iconIndex] ?? 0
         } else if let iconIndex = action.socialIconIndex {
-            iconSprite = createIconFromSheet(sheetName: "SocialIcons", index: iconIndex, targetSize: iconTargetSize)
+            iconSprite = createIconFromSheet(sheetName: "SocialIcons", index: iconIndex, targetSize: iconTargetSize * 1.6)
         } else if let iconIndex = action.workIconIndex {
-            iconSprite = createIconFromSheet(sheetName: "WorkIcons", index: iconIndex, targetSize: iconTargetSize)
-            // Work sprite sheet - icons sit slightly high, move them down
-            iconYOffset = -5
+            iconSprite = createIconFromSheet(sheetName: "WorkIcons", index: iconIndex, targetSize: iconTargetSize * 1.2)
+            iconYOffset = 0
         } else if let iconIndex = action.selfCareIconIndex {
             iconSprite = createIconFromSheet(sheetName: "SelfCareIcons", index: iconIndex, targetSize: iconTargetSize)
             // SelfCare sprite sheet has uneven icon positioning - apply corrections
@@ -224,6 +227,22 @@ class ActionSelectModal: SKNode {
                 5: -3    // Bed - move down slightly
             ]
             iconYOffset = selfCareOffsets[iconIndex] ?? 0
+        } else {
+            let archetype = GameManager.shared.state?.archetype
+            let resolvedImageName = (archetype == .gal ? action.galIconImageName : nil)
+                ?? (archetype == .bro ? action.broIconImageName : nil)
+                ?? action.iconImageName
+            if let imageName = resolvedImageName {
+                let texture = SKTexture(imageNamed: imageName)
+                texture.filteringMode = .nearest
+                let sprite = SKSpriteNode(texture: texture)
+                let imageSizeMultiplier: CGFloat = (category == .selfCare || category == .work) ? 1.2 : 0.6
+                let targetSize = iconTargetSize * imageSizeMultiplier
+                let originalSize = texture.size()
+                let scale = targetSize / max(originalSize.width, originalSize.height)
+                sprite.size = CGSize(width: originalSize.width * scale, height: originalSize.height * scale)
+                iconSprite = sprite
+            }
         }
 
         if let sprite = iconSprite {

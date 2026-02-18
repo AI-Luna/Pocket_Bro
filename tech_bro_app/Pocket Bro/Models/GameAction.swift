@@ -20,6 +20,9 @@ struct GameAction: Identifiable, Equatable {
     let socialIconIndex: Int? // Index in social sprite sheet (0-5), nil if using emoji
     let workIconIndex: Int? // Index in work sprite sheet (0-5), nil if using emoji
     let selfCareIconIndex: Int? // Index in self-care sprite sheet (0-5), nil if using emoji
+    let iconImageName: String? // Named image asset, nil if using sprite sheet or emoji
+    let galIconImageName: String? // Override icon when playing as Tech Gal archetype
+    let broIconImageName: String? // Override icon when playing as Tech Bro archetype
     let isPremium: Bool // Whether this action requires premium/pro access
 
     init(
@@ -37,6 +40,9 @@ struct GameAction: Identifiable, Equatable {
         socialIconIndex: Int? = nil,
         workIconIndex: Int? = nil,
         selfCareIconIndex: Int? = nil,
+        iconImageName: String? = nil,
+        galIconImageName: String? = nil,
+        broIconImageName: String? = nil,
         isPremium: Bool = false
     ) {
         self.id = id
@@ -53,6 +59,9 @@ struct GameAction: Identifiable, Equatable {
         self.socialIconIndex = socialIconIndex
         self.workIconIndex = workIconIndex
         self.selfCareIconIndex = selfCareIconIndex
+        self.iconImageName = iconImageName
+        self.galIconImageName = galIconImageName
+        self.broIconImageName = broIconImageName
         self.isPremium = isPremium
     }
 
