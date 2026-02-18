@@ -227,10 +227,10 @@ class PaywallScene: SKScene {
         let cardHeight: CGFloat = 60
         let cardGap: CGFloat = 12
 
-        let annualY = continueButtonY + cardHeight + cardGap + 10  // sits just above continue
-        let monthlyY = annualY + cardHeight + cardGap               // sits just above annual
+        let monthlyY = continueButtonY + cardHeight + cardGap + 10  // sits just above continue
+        let annualY = monthlyY + cardHeight + cardGap               // annual on top of monthly
 
-        // Monthly card — placeholder prices, updated when offerings load
+        // Monthly card — below annual
         let monthlyCard = createPricingCard(
             plan: .monthly,
             title: "Monthly",
@@ -244,7 +244,7 @@ class PaywallScene: SKScene {
         addChild(monthlyCard)
         planCards[.monthly] = monthlyCard
 
-        // Annual card — selected by default + "Best Value" badge (may become "Free Trial")
+        // Annual card — on top, selected by default + badge
         let annualCard = createPricingCard(
             plan: .annual,
             title: "Annual",
@@ -337,7 +337,8 @@ class PaywallScene: SKScene {
         if let badge {
             let badgeNode = SKNode()
             badgeNode.name = "badgeNode"
-            badgeNode.position = CGPoint(x: cardWidth / 2 - 46, y: 0)
+            // Sit badge on the top border of the card
+            badgeNode.position = CGPoint(x: cardWidth / 2 - 46, y: cardHeight / 2)
 
             let badgeBg = SKShapeNode(rectOf: CGSize(width: CGFloat(badge.count) * 8 + 16, height: 22), cornerRadius: 11)
             badgeBg.fillColor = accentColor
