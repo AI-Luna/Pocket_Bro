@@ -498,13 +498,9 @@ class PaywallScene: SKScene {
             case .monthly:
                 subPriceLabel.text = "\(price)/mo"
             case .annual:
-                // Show monthly equivalent
-                let monthlyPrice = package.storeProduct.price / 12 as NSDecimalNumber
-                let fmt = NumberFormatter()
-                fmt.numberStyle = .currency
-                fmt.locale = package.storeProduct.priceLocale
-                let monthly = fmt.string(from: monthlyPrice) ?? ""
-                subPriceLabel.text = "\(monthly)/mo"
+                // RevenueCat computes the per-month equivalent automatically
+                let monthly = package.storeProduct.localizedPricePerMonth ?? ""
+                subPriceLabel.text = monthly.isEmpty ? "billed yearly" : "\(monthly)/mo"
             }
         }
     }
