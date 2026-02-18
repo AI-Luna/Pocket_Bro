@@ -295,7 +295,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     private func setupCharacter() {
         let currentArchetype = GameManager.shared.state?.archetype ?? .bro
         let archetypeYOffset: CGFloat = currentArchetype == .gal ? 20 : 0
-        let characterY = buttonAreaHeight + gameAreaHeight / 2 - 140 + archetypeYOffset
+        let characterY = buttonAreaHeight + gameAreaHeight / 2 - 120 + archetypeYOffset
         broSprite = BroSpriteNode(archetype: currentArchetype)
         broSprite.position = CGPoint(x: size.width / 2, y: characterY)
         broSprite.zPosition = 10
