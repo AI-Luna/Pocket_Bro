@@ -20,6 +20,10 @@ class LockInMinigameScene: BaseGameScene {
     private var distractionTimer: Timer?
     private var isGameOver = false
 
+    // Fatigue system
+    private var fatigueLevel: CGFloat = 0.0
+    private var fatigueOverlay: SKSpriteNode?
+
     private let distractions: [(emoji: String, damage: CGFloat)] = [
         ("📱", 0.18),  // Phone notification
         ("🐦", 0.12),  // Twitter
@@ -31,7 +35,60 @@ class LockInMinigameScene: BaseGameScene {
     ]
 
     override func setupScene() {
+        computeFatigueLevel()
         setupUI()
+
+        if fatigueLevel >= 0.3 {
+            showFatigueWarning()
+        } else {
+            startGame()
+        }
+    }
+
+    private func computeFatigueLevel() {
+        let energy = CGFloat(GameManager.shared.state?.stats.energy ?? 80)
+        let burnout = CGFloat(GameManager.shared.state?.stats.burnout ?? 10)
+        fatigueLevel = min(1.0, ((100 - energy) / 100) * 0.6 + (burnout / 100) * 0.4)
+    }
+
+    private func showFatigueWarning() {
+        let overlay = SKSpriteNode(color: SKColor(white: 0, alpha: 0.7), size: size)
+        overlay.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        overlay.zPosition = 50
+        overlay.name = "fatigueWarning"
+        addChild(overlay)
+
+        let warningText: String
+        if fatigueLevel >= 0.6 {
+            warningText = "😵 Exhausted! Staying locked in\nwill be much harder"
+        } else {
+            warningText = "😴 Feeling tired... Focus will\ndrift more easily"
+        }
+
+        let warningLabel = createLabel(text: warningText, fontSize: 18)
+        warningLabel.numberOfLines = 0
+        warningLabel.preferredMaxLayoutWidth = size.width - 80
+        warningLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 + 40)
+        warningLabel.zPosition = 51
+        warningLabel.name = "fatigueWarningLabel"
+        addChild(warningLabel)
+
+        let startButton = PixelButtonNode(text: "Start", size: CGSize(width: 150, height: 50))
+        startButton.position = CGPoint(x: size.width / 2, y: size.height / 2 - 60)
+        startButton.zPosition = 51
+        startButton.name = "fatigueWarningButton"
+
+        startButton.onTap = { [weak self] in
+            self?.dismissFatigueWarning()
+        }
+
+        addChild(startButton)
+    }
+
+    private func dismissFatigueWarning() {
+        childNode(withName: "fatigueWarning")?.removeFromParent()
+        childNode(withName: "fatigueWarningLabel")?.removeFromParent()
+        childNode(withName: "fatigueWarningButton")?.removeFromParent()
         startGame()
     }
 
@@ -89,13 +146,38 @@ class LockInMinigameScene: BaseGameScene {
     }
 
     private func startGame() {
+        // Add pulsing fatigue overlay if fatigued
+        if fatigueLevel >= 0.3 {
+            setupFatigueOverlay()
+        }
+
+        // Fatigue makes distractions spawn much faster (1.1s base -> 0.45s at max fatigue)
+        let spawnInterval = 1.1 - Double(fatigueLevel) * 0.65
+
         gameTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.gameLoop()
         }
 
-        distractionTimer = Timer.scheduledTimer(withTimeInterval: 1.1, repeats: true) { [weak self] _ in
+        distractionTimer = Timer.scheduledTimer(withTimeInterval: spawnInterval, repeats: true) { [weak self] _ in
             self?.spawnDistraction()
         }
+    }
+
+    private func setupFatigueOverlay() {
+        let overlay = SKSpriteNode(color: .black, size: size)
+        overlay.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        overlay.zPosition = 10
+        overlay.alpha = 0
+        overlay.isUserInteractionEnabled = false
+        addChild(overlay)
+        fatigueOverlay = overlay
+
+        let maxAlpha = fatigueLevel * 0.2
+        let pulse = SKAction.sequence([
+            SKAction.fadeAlpha(to: maxAlpha, duration: 1.25),
+            SKAction.fadeAlpha(to: 0, duration: 1.25)
+        ])
+        overlay.run(SKAction.repeatForever(pulse))
     }
 
     private func gameLoop() {
@@ -115,7 +197,7 @@ class LockInMinigameScene: BaseGameScene {
         }
 
         // Passive focus drain from existing distractions
-        let distractionPenalty = CGFloat(distractionNodes.count) * 0.03
+        let distractionPenalty = CGFloat(distractionNodes.count) * 0.02
         focusLevel = max(0, focusLevel - distractionPenalty)
         updateFocusMeter()
 
@@ -125,7 +207,9 @@ class LockInMinigameScene: BaseGameScene {
     }
 
     private func spawnDistraction() {
-        guard !isGameOver, distractionNodes.count < 8 else { return }
+        // Fatigue raises the max distractions cap (8 base -> 14 at max fatigue)
+        let maxDistractions = 8 + Int(fatigueLevel * 6)
+        guard !isGameOver, distractionNodes.count < maxDistractions else { return }
 
         let distraction = distractions.randomElement()!
 
@@ -223,8 +307,8 @@ class LockInMinigameScene: BaseGameScene {
 
         node.run(SKAction.sequence([dismiss, SKAction.removeFromParent()]))
 
-        // Small focus recovery
-        focusLevel = min(1.0, focusLevel + 0.03)
+        // Focus recovery for dismissing
+        focusLevel = min(1.0, focusLevel + 0.05)
         updateFocusMeter()
 
         // Bonus productivity for quick dismiss
@@ -238,6 +322,11 @@ class LockInMinigameScene: BaseGameScene {
         isGameOver = true
         gameTimer?.invalidate()
         distractionTimer?.invalidate()
+
+        // Remove fatigue overlay
+        fatigueOverlay?.removeAllActions()
+        fatigueOverlay?.removeFromParent()
+        fatigueOverlay = nil
 
         // Clear remaining distractions
         for node in distractionNodes {
