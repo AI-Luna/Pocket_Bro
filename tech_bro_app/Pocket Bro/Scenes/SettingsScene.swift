@@ -111,9 +111,9 @@ class SettingsScene: SKScene {
         banner.addChild(bg)
 
         // Text only - no emojis
-        let text = SKLabelNode(text: "Get Full Access Now!")
+        let text = SKLabelNode(text: "Get TechBro Pro Full Access Now!")
         text.fontName = PixelFont.name
-        text.fontSize = 18
+        text.fontSize = 14
         text.fontColor = .white
         text.verticalAlignmentMode = .center
         text.horizontalAlignmentMode = .center
@@ -128,8 +128,8 @@ class SettingsScene: SKScene {
         let bannerHeight: CGFloat = 60
 
         let banner = SKNode()
-        // Sits 15pt below the profile section bottom (profile center -210, height 100, bottom -260)
-        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 350)
+        // Sits directly below the pro banner (pro center -155, height 60, bottom -185, +12 gap)
+        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 227)
         banner.name = "cofounderBanner"
         addChild(banner)
 
@@ -158,7 +158,7 @@ class SettingsScene: SKScene {
 
     private func setupProfileSection() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 255
+        let sectionY = size.height - safeTop - 322
         let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 50
 
@@ -191,7 +191,7 @@ class SettingsScene: SKScene {
 
     private func setupLinksSection() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 545
+        let sectionY = size.height - safeTop - 512
         let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 50
 
@@ -366,6 +366,7 @@ class SettingsScene: SKScene {
 
         // Close button
         if let closeButton = childNode(withName: "closeButton"), closeButton.contains(location) {
+            Haptics.selection()
             animatePress(closeButton)
             sceneManager?.popToMainGame()
             return
@@ -373,6 +374,7 @@ class SettingsScene: SKScene {
 
         // Pro banner
         if let banner = childNode(withName: "proBanner"), banner.contains(location) {
+            Haptics.confirm()
             animatePress(banner)
             sceneManager?.presentScene(.paywall)
             return
@@ -380,6 +382,7 @@ class SettingsScene: SKScene {
 
         // Co-founder banner
         if let banner = childNode(withName: "cofounderBanner"), banner.contains(location) {
+            Haptics.confirm()
             animatePress(banner)
             shareWithCofounder()
             return
@@ -389,6 +392,7 @@ class SettingsScene: SKScene {
         if let resetButton = childNode(withName: "resetOnboarding") as? SKLabelNode {
             let expandedFrame = resetButton.frame.insetBy(dx: -20, dy: -15)
             if expandedFrame.contains(location) {
+                Haptics.selection()
                 resetOnboarding()
                 return
             }
@@ -400,6 +404,7 @@ class SettingsScene: SKScene {
 
             if node.contains(location) {
                 let id = String(name.dropFirst("row_".count))
+                Haptics.selection()
                 animatePress(node)
                 handleRowTap(id: id, node: node)
                 return

@@ -237,7 +237,7 @@ class ActionSelectModal: SKNode {
                 let texture = SKTexture(imageNamed: imageName)
                 texture.filteringMode = .nearest
                 let sprite = SKSpriteNode(texture: texture)
-                let imageSizeMultiplier: CGFloat = (category == .selfCare || category == .work) ? 1.2 : 0.6
+                let imageSizeMultiplier: CGFloat = (category == .selfCare || category == .work || category == .social || category == .feed) ? 1.2 : 0.6
                 let targetSize = iconTargetSize * imageSizeMultiplier
                 let originalSize = texture.size()
                 let scale = targetSize / max(originalSize.width, originalSize.height)
@@ -280,19 +280,31 @@ class ActionSelectModal: SKNode {
             card.addChild(crown)
         }
 
-        // Cooldown overlay
+        // Cooldown overlay - visually distinct so the user knows it's locked
         if isOnCooldown {
+            // Darken the card border
+            bg.strokeColor = SKColor(red: 0.85, green: 0.25, blue: 0.15, alpha: 0.8)
+            bg.lineWidth = 3
+
             let cooldownBg = SKShapeNode(rectOf: CGSize(width: size - 4, height: size - 4), cornerRadius: 12)
-            cooldownBg.fillColor = SKColor.black.withAlphaComponent(0.5)
+            cooldownBg.fillColor = SKColor(red: 0.08, green: 0.04, blue: 0.04, alpha: 0.78)
             cooldownBg.strokeColor = .clear
             cooldownBg.zPosition = 3
             card.addChild(cooldownBg)
 
-            let cooldownLabel = SKLabelNode(text: "\(Int(cooldown))s")
+            let clockLabel = SKLabelNode(text: "⏰")
+            clockLabel.fontSize = 22
+            clockLabel.position = CGPoint(x: 0, y: 13)
+            clockLabel.verticalAlignmentMode = .center
+            clockLabel.horizontalAlignmentMode = .center
+            clockLabel.zPosition = 4
+            card.addChild(clockLabel)
+
+            let cooldownLabel = SKLabelNode(text: formatCooldown(cooldown))
             cooldownLabel.fontName = PixelFont.name
-            cooldownLabel.fontSize = 18
-            cooldownLabel.fontColor = .white
-            cooldownLabel.position = CGPoint(x: 0, y: 0)
+            cooldownLabel.fontSize = 14
+            cooldownLabel.fontColor = SKColor(red: 1.0, green: 0.72, blue: 0.35, alpha: 1.0)
+            cooldownLabel.position = CGPoint(x: 0, y: -10)
             cooldownLabel.verticalAlignmentMode = .center
             cooldownLabel.horizontalAlignmentMode = .center
             cooldownLabel.zPosition = 4
@@ -416,7 +428,14 @@ class ActionSelectModal: SKNode {
         let canPerform = GameManager.shared.canPerformAction(action)
 
         guard canPerform else {
-            shakeCard(card)
+            let remaining = GameManager.shared.cooldownRemaining(for: action)
+            if remaining > 0 {
+                Haptics.selection()
+                shakeCard(card)
+                showCooldownToast(seconds: remaining)
+            } else {
+                shakeCard(card)
+            }
             return
         }
 
@@ -448,6 +467,54 @@ class ActionSelectModal: SKNode {
             SKAction.scale(to: 1.0, duration: 0.1)
         ])
         node.run(press)
+    }
+
+    private func formatCooldown(_ seconds: TimeInterval) -> String {
+        let secs = Int(seconds)
+        if secs >= 60 {
+            let m = secs / 60
+            let s = secs % 60
+            return s > 0 ? "\(m)m \(s)s" : "\(m)m"
+        }
+        return "\(secs)s"
+    }
+
+    private func showCooldownToast(seconds: TimeInterval) {
+        guard let modal = childNode(withName: "modalContainer") else { return }
+
+        // Remove any existing toast
+        modal.childNode(withName: "cooldownToast")?.removeFromParent()
+
+        let toastWidth: CGFloat = 220
+        let toastHeight: CGFloat = 40
+        let toast = SKNode()
+        toast.name = "cooldownToast"
+        toast.zPosition = 20
+        toast.position = CGPoint(x: 0, y: -modal.frame.height / 2 + 28)
+
+        let bg = SKShapeNode(rectOf: CGSize(width: toastWidth, height: toastHeight), cornerRadius: 20)
+        bg.fillColor = SKColor(red: 0.1, green: 0.06, blue: 0.06, alpha: 0.92)
+        bg.strokeColor = SKColor(red: 0.85, green: 0.25, blue: 0.15, alpha: 0.7)
+        bg.lineWidth = 1.5
+        toast.addChild(bg)
+
+        let label = SKLabelNode(text: "⏰ Ready in \(formatCooldown(seconds))")
+        label.fontName = PixelFont.name
+        label.fontSize = 13
+        label.fontColor = SKColor(red: 1.0, green: 0.72, blue: 0.35, alpha: 1.0)
+        label.verticalAlignmentMode = .center
+        label.horizontalAlignmentMode = .center
+        toast.addChild(label)
+
+        toast.alpha = 0
+        modal.addChild(toast)
+
+        toast.run(SKAction.sequence([
+            SKAction.fadeIn(withDuration: 0.15),
+            SKAction.wait(forDuration: 2.0),
+            SKAction.fadeOut(withDuration: 0.3),
+            SKAction.removeFromParent()
+        ]))
     }
 
     func dismiss() {

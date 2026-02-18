@@ -284,7 +284,7 @@ class OnboardingScene: SKScene {
         card.addChild(border)
 
         // Character icon - larger size
-        let iconSize: CGFloat = 95
+        let iconSize: CGFloat = 140
         
         switch archetype {
         case .bro:
@@ -591,121 +591,126 @@ class OnboardingScene: SKScene {
 
     private func setupNotificationsStep() {
         let name = founderName.isEmpty ? "Your TechBro" : founderName
-
-        // iOS-style notification banner - positioned below safe area
-        let bannerWidth = size.width - 32
-        let bannerHeight: CGFloat = 90
         let safeTop = safeAreaInsets().top
-        let bannerY = size.height - safeTop - 70 // Below dynamic island/notch
-        
-        // Banner background - iOS style with blur effect simulation
-        let banner = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 20)
-        banner.fillColor = SKColor(red: 0.95, green: 0.95, blue: 0.97, alpha: 0.95)
-        banner.strokeColor = .clear
-        banner.position = CGPoint(x: size.width / 2, y: bannerY)
-        banner.zPosition = 10
-        contentNode.addChild(banner)
-        
-        // Subtle shadow effect
+
+        // MARK: - iOS Notification Banner
+        let bannerWidth = size.width - 32
+        let bannerHeight: CGFloat = 94
+        let bannerY = size.height - safeTop - 56 - bannerHeight / 2
+
+        // Drop shadow
         let shadowBanner = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 20)
-        shadowBanner.fillColor = SKColor(white: 0, alpha: 0.15)
+        shadowBanner.fillColor = SKColor(white: 0, alpha: 0.18)
         shadowBanner.strokeColor = .clear
-        shadowBanner.position = CGPoint(x: size.width / 2, y: bannerY - 4)
+        shadowBanner.position = CGPoint(x: size.width / 2, y: bannerY - 3)
         shadowBanner.zPosition = 9
         contentNode.addChild(shadowBanner)
 
-        // App icon - rounded square with actual app icon/character
-        let iconSize: CGFloat = 44
-        let iconX = -bannerWidth / 2 + 20 + iconSize / 2
-        
-        let iconBg = SKShapeNode(rectOf: CGSize(width: iconSize, height: iconSize), cornerRadius: 10)
-        iconBg.fillColor = SKColor(red: 0.22, green: 0.12, blue: 0.38, alpha: 1.0) // Match app purple
-        iconBg.strokeColor = .clear
-        iconBg.position = CGPoint(x: iconX, y: 0)
-        banner.addChild(iconBg)
+        // Banner background - frosted glass look
+        let banner = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 20)
+        banner.fillColor = SKColor(red: 0.97, green: 0.97, blue: 0.98, alpha: 0.96)
+        banner.strokeColor = SKColor(white: 0.85, alpha: 0.6)
+        banner.lineWidth = 0.5
+        banner.position = CGPoint(x: size.width / 2, y: bannerY)
+        banner.zPosition = 10
+        contentNode.addChild(banner)
 
-        // Use the selected character's icon in the notification
-        let appIconTexture = SKTexture(imageNamed: "TechBroIcon")
+        // App icon - actual app icon with rounded corners via crop node
+        let iconSize: CGFloat = 46
+        let iconX: CGFloat = -bannerWidth / 2 + 16 + iconSize / 2
+
+        let appIconTexture = SKTexture(imageNamed: "PocketBroAppIcon")
         let appIconSprite = SKSpriteNode(texture: appIconTexture)
-        let appIconScale: CGFloat = 32 / max(appIconTexture.size().width, appIconTexture.size().height)
-        appIconSprite.setScale(appIconScale)
-        appIconSprite.position = CGPoint(x: iconX, y: 0)
-        banner.addChild(appIconSprite)
+        appIconSprite.size = CGSize(width: iconSize, height: iconSize)
 
-        // Text content area
-        let textX = iconX + iconSize / 2 + 14
-        
-        // App name and time on same line
-        let appName = SKLabelNode(text: "TechBro Tamagotchi")
-        appName.fontName = "Helvetica-Bold"
-        appName.fontSize = 14
-        appName.fontColor = SKColor(white: 0.1, alpha: 1.0)
-        appName.horizontalAlignmentMode = .left
-        appName.position = CGPoint(x: textX, y: 20)
-        banner.addChild(appName)
+        let maskShape = SKShapeNode(rectOf: CGSize(width: iconSize, height: iconSize), cornerRadius: 11)
+        maskShape.fillColor = .white
+        maskShape.strokeColor = .clear
+        let cropNode = SKCropNode()
+        cropNode.maskNode = maskShape
+        cropNode.addChild(appIconSprite)
+        cropNode.position = CGPoint(x: iconX, y: 2)
+        banner.addChild(cropNode)
+
+        // Text content starts after icon
+        let textX: CGFloat = iconX + iconSize / 2 + 10
+
+        // App name (small caps) + time on same row
+        let appNameLabel = SKLabelNode(text: "Pocket Bro")
+        appNameLabel.fontName = "Helvetica-Bold"
+        appNameLabel.fontSize = 13
+        appNameLabel.fontColor = SKColor(white: 0.15, alpha: 1.0)
+        appNameLabel.horizontalAlignmentMode = .left
+        appNameLabel.verticalAlignmentMode = .center
+        appNameLabel.position = CGPoint(x: textX, y: 30)
+        banner.addChild(appNameLabel)
 
         let notifTime = SKLabelNode(text: "now")
         notifTime.fontName = "Helvetica"
         notifTime.fontSize = 13
-        notifTime.fontColor = SKColor(white: 0.5, alpha: 1.0)
+        notifTime.fontColor = SKColor(white: 0.55, alpha: 1.0)
         notifTime.horizontalAlignmentMode = .right
-        notifTime.position = CGPoint(x: bannerWidth / 2 - 20, y: 20)
+        notifTime.verticalAlignmentMode = .center
+        notifTime.position = CGPoint(x: bannerWidth / 2 - 16, y: 30)
         banner.addChild(notifTime)
 
         // Notification title
-        let notifTitle = SKLabelNode(text: "\(name) is hungry! 🍕")
+        let notifTitle = SKLabelNode(text: "\(name) is burning out! 🔥")
         notifTitle.fontName = "Helvetica-Bold"
         notifTitle.fontSize = 15
-        notifTitle.fontColor = SKColor(white: 0.1, alpha: 1.0)
+        notifTitle.fontColor = SKColor(white: 0.08, alpha: 1.0)
         notifTitle.horizontalAlignmentMode = .left
-        notifTitle.position = CGPoint(x: textX, y: -2)
+        notifTitle.verticalAlignmentMode = .center
+        notifTitle.position = CGPoint(x: textX, y: 10)
         banner.addChild(notifTitle)
-        
+
         // Notification body
-        let notifBody = SKLabelNode(text: "Feed \(name) before they get hangry!")
+        let notifBody = SKLabelNode(text: "Take a break before it's too late!")
         notifBody.fontName = "Helvetica"
         notifBody.fontSize = 14
-        notifBody.fontColor = SKColor(white: 0.3, alpha: 1.0)
+        notifBody.fontColor = SKColor(white: 0.35, alpha: 1.0)
         notifBody.horizontalAlignmentMode = .left
-        notifBody.position = CGPoint(x: textX, y: -22)
+        notifBody.verticalAlignmentMode = .center
+        notifBody.position = CGPoint(x: textX, y: -10)
         banner.addChild(notifBody)
-        
-        // Slide in animation for banner
+
+        // Slide in from top
+        let finalBannerY = bannerY
         banner.position.y = size.height + bannerHeight
-        shadowBanner.position.y = size.height + bannerHeight - 4
-        let slideIn = SKAction.moveTo(y: bannerY, duration: 0.4)
+        shadowBanner.position.y = size.height + bannerHeight - 3
+        let slideIn = SKAction.moveTo(y: finalBannerY, duration: 0.45)
         slideIn.timingMode = .easeOut
         banner.run(SKAction.sequence([SKAction.wait(forDuration: 0.3), slideIn]))
-        shadowBanner.run(SKAction.sequence([SKAction.wait(forDuration: 0.3), SKAction.moveTo(y: bannerY - 4, duration: 0.4)]))
+        shadowBanner.run(SKAction.sequence([SKAction.wait(forDuration: 0.3), SKAction.moveTo(y: finalBannerY - 3, duration: 0.45)]))
 
-        // Briefcase icon
-        let briefcaseTexture = SKTexture(imageNamed: "Briefcase")
-        briefcaseTexture.filteringMode = .nearest
-        let bell = SKSpriteNode(texture: briefcaseTexture)
-        bell.size = CGSize(width: 80, height: 80)
-        bell.position = CGPoint(x: size.width / 2, y: size.height / 2 + 60)
+        // MARK: - Bell icon with wiggle
+        let bellTexture = SKTexture(imageNamed: "Bell")
+        bellTexture.filteringMode = .nearest
+        let bell = SKSpriteNode(texture: bellTexture)
+        bell.size = CGSize(width: 110, height: 110)
+        bell.position = CGPoint(x: size.width / 2, y: size.height / 2 + 50)
         contentNode.addChild(bell)
 
-        // Wiggle animation
         let wiggle = SKAction.sequence([
-            SKAction.rotate(toAngle: 0.15, duration: 0.1),
-            SKAction.rotate(toAngle: -0.15, duration: 0.1),
-            SKAction.rotate(toAngle: 0.1, duration: 0.1),
-            SKAction.rotate(toAngle: -0.1, duration: 0.1),
-            SKAction.rotate(toAngle: 0, duration: 0.1),
+            SKAction.rotate(toAngle: 0.18, duration: 0.08),
+            SKAction.rotate(toAngle: -0.18, duration: 0.08),
+            SKAction.rotate(toAngle: 0.12, duration: 0.08),
+            SKAction.rotate(toAngle: -0.12, duration: 0.08),
+            SKAction.rotate(toAngle: 0.06, duration: 0.08),
+            SKAction.rotate(toAngle: 0, duration: 0.08),
             SKAction.wait(forDuration: 2.0)
         ])
         bell.run(SKAction.repeatForever(wiggle))
 
-        // Message - reduced gap from bell
+        // MARK: - Message label
         titleLabel = SKLabelNode(text: "\(name) will miss you!\nTurn on notifications to\nstay connected.")
         titleLabel.fontName = PixelFont.name
-        titleLabel.fontSize = PixelFont.medium
+        titleLabel.fontSize = PixelFont.large
         titleLabel.fontColor = textColor
         titleLabel.numberOfLines = 3
         titleLabel.horizontalAlignmentMode = .center
         titleLabel.verticalAlignmentMode = .top
-        titleLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 + 10)
+        titleLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 - 10)
         contentNode.addChild(titleLabel)
 
         // Update button text
