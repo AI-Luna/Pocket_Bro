@@ -58,20 +58,28 @@ class LockInMinigameScene: BaseGameScene {
         overlay.name = "fatigueWarning"
         addChild(overlay)
 
-        let warningText: String
+        let line1: String
+        let line2: String
         if fatigueLevel >= 0.6 {
-            warningText = "😵 Exhausted! Staying locked in\nwill be much harder"
+            line1 = "😵 Exhausted!"
+            line2 = "Staying locked in will be much harder"
         } else {
-            warningText = "😴 Feeling tired... Focus will\ndrift more easily"
+            line1 = "😴 Feeling tired..."
+            line2 = "Focus will drift more easily"
         }
 
-        let warningLabel = createLabel(text: warningText, fontSize: 18)
-        warningLabel.numberOfLines = 0
-        warningLabel.preferredMaxLayoutWidth = size.width - 80
-        warningLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 + 40)
-        warningLabel.zPosition = 51
-        warningLabel.name = "fatigueWarningLabel"
-        addChild(warningLabel)
+        let warningLabel1 = createLabel(text: line1, fontSize: 20)
+        warningLabel1.position = CGPoint(x: size.width / 2, y: size.height / 2 + 60)
+        warningLabel1.zPosition = 51
+        warningLabel1.name = "fatigueWarningLine1"
+        addChild(warningLabel1)
+
+        let warningLabel2 = createLabel(text: line2, fontSize: 15)
+        warningLabel2.fontColor = SKColor(white: 0.7, alpha: 1.0)
+        warningLabel2.position = CGPoint(x: size.width / 2, y: size.height / 2 + 25)
+        warningLabel2.zPosition = 51
+        warningLabel2.name = "fatigueWarningLine2"
+        addChild(warningLabel2)
 
         let startButton = PixelButtonNode(text: "Start", size: CGSize(width: 150, height: 50))
         startButton.position = CGPoint(x: size.width / 2, y: size.height / 2 - 60)
@@ -87,7 +95,8 @@ class LockInMinigameScene: BaseGameScene {
 
     private func dismissFatigueWarning() {
         childNode(withName: "fatigueWarning")?.removeFromParent()
-        childNode(withName: "fatigueWarningLabel")?.removeFromParent()
+        childNode(withName: "fatigueWarningLine1")?.removeFromParent()
+        childNode(withName: "fatigueWarningLine2")?.removeFromParent()
         childNode(withName: "fatigueWarningButton")?.removeFromParent()
         startGame()
     }
