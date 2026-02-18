@@ -552,8 +552,9 @@ class BroSpriteNode: SKNode {
 
             stopAllAnimations()
 
-            // Frames are cropped at 80×92, matching the normal babe frame size,
-            // so no special scaling or positioning is needed.
+            // Scale down to 80% during eating so the babe appears a bit smaller.
+            let eatScale = pixelScale * 0.8
+            bodySprite.setScale(eatScale)
 
             // Full cycle through all 10 frames, then loop the eating/chewing
             // frames (last 6) for sustained eating.
@@ -567,6 +568,7 @@ class BroSpriteNode: SKNode {
             let sequence = SKAction.sequence([fullCycle, eatLoop])
 
             bodySprite.run(sequence) { [weak self] in
+                self?.stopAllAnimations()
                 self?.startIdleAnimation()
                 completion?()
             }
