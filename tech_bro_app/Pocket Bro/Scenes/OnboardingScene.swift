@@ -513,8 +513,9 @@ class OnboardingScene: SKScene {
             label.text = "Next"
         }
         
-        // Title - "Name Your TechBro" style
-        titleLabel = createTitle("Name Your TechBro")
+        // Title - dynamic based on chosen archetype
+        let nameStepTitle = selectedArchetype == .bro ? "Name Your TechBro" : "Name Your TechBabe"
+        titleLabel = createTitle(nameStepTitle)
         let titleY = size.height - 160
         titleLabel.position.y = titleY
         contentNode.addChild(titleLabel)
