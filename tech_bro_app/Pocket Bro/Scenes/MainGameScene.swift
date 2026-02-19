@@ -271,7 +271,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
         let greetLabel = SKLabelNode(text: timeGreeting)
         greetLabel.fontName = PixelFont.name
-        greetLabel.fontSize = 16
+        greetLabel.fontSize = 20
         greetLabel.fontColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0)
         greetLabel.horizontalAlignmentMode = .center
         greetLabel.verticalAlignmentMode = .center
@@ -280,21 +280,40 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
         let nameLabel = SKLabelNode(text: "\(state.name)!")
         nameLabel.fontName = PixelFont.name
-        nameLabel.fontSize = 28
+        nameLabel.fontSize = 32
         nameLabel.fontColor = SKColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0)
         nameLabel.horizontalAlignmentMode = .center
         nameLabel.verticalAlignmentMode = .center
-        nameLabel.position = CGPoint(x: cx, y: cy + 30)
+        nameLabel.position = CGPoint(x: cx, y: cy + 26)
         overlay.addChild(nameLabel)
 
-        let sub = state.startupName.isEmpty ? "Time to build your startup!" : "\(state.startupName) needs you today."
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
+        let startup = state.startupName.isEmpty ? "your startup" : state.startupName
+        let subMessages = [
+            "\(startup) is counting on you.",
+            "The hustle continues at \(startup).",
+            "Ship something great today.",
+            "Your runway won't extend itself.",
+            "Make \(startup) proud today.",
+            "Today's grind builds tomorrow's exit.",
+            "The market waits for no one.",
+            "One day closer to unicorn.",
+            "Coffee ready. Code waiting.",
+            "Keep building. Keep shipping.",
+            "The competition isn't sleeping.",
+            "Move the needle at \(startup) today.",
+            "Another day, another feature shipped.",
+            "Your MVP won't ship itself.",
+            "Burn rate is real. So is your drive.",
+        ]
+        let sub = subMessages[dayOfYear % subMessages.count]
         let subLabel = SKLabelNode(text: sub)
         subLabel.fontName = PixelFont.name
-        subLabel.fontSize = 13
+        subLabel.fontSize = 14
         subLabel.fontColor = SKColor(red: 0.7, green: 0.8, blue: 0.9, alpha: 1.0)
         subLabel.horizontalAlignmentMode = .center
         subLabel.verticalAlignmentMode = .center
-        subLabel.position = CGPoint(x: cx, y: cy - 14)
+        subLabel.position = CGPoint(x: cx, y: cy - 16)
         overlay.addChild(subLabel)
 
         let btnW: CGFloat = panelW - 40
@@ -310,7 +329,7 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
         let btnLabel = SKLabelNode(text: "Let's Go!")
         btnLabel.fontName = PixelFont.name
-        btnLabel.fontSize = 18
+        btnLabel.fontSize = 20
         btnLabel.fontColor = SKColor(red: 0.18, green: 0.10, blue: 0.30, alpha: 1.0)
         btnLabel.horizontalAlignmentMode = .center
         btnLabel.verticalAlignmentMode = .center
