@@ -42,9 +42,11 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
 
         setupBackground()
         setupStatsArea()
+        setupStartupNameLabel()
         setupCharacter()
         setupBottomButtons()
         updateUI()
+        showDailyGreetingIfNeeded()
     }
 
     // MARK: - Background
@@ -201,6 +203,131 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
             addChild(statNode)
             statBars[stat.name] = statNode
         }
+    }
+
+    // MARK: - Startup Name Label
+
+    private func setupStartupNameLabel() {
+        let startupName = GameManager.shared.state?.startupName ?? ""
+        guard !startupName.isEmpty else { return }
+        let label = SKLabelNode(text: "\(startupName) HQ")
+        label.fontName = PixelFont.name
+        label.fontSize = 13
+        label.fontColor = lcdDarkColor
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: size.width / 2, y: size.height - safeAreaInsets().top - 53)
+        label.zPosition = 10
+        addChild(label)
+    }
+
+    // MARK: - Daily Greeting
+
+    private func showDailyGreetingIfNeeded() {
+        let key = "lastGreetingDate"
+        let today = Calendar.current.startOfDay(for: Date())
+        if let last = UserDefaults.standard.object(forKey: key) as? Date,
+           Calendar.current.isDate(last, inSameDayAs: today) { return }
+        UserDefaults.standard.set(today, forKey: key)
+        run(SKAction.wait(forDuration: 0.8)) { [weak self] in
+            self?.showDailyGreeting()
+        }
+    }
+
+    private func showDailyGreeting() {
+        guard let state = GameManager.shared.state else { return }
+
+        let overlay = SKNode()
+        overlay.name = "greetingOverlay"
+        overlay.zPosition = 200
+        addChild(overlay)
+
+        let dim = SKShapeNode(rectOf: size)
+        dim.fillColor = SKColor(red: 0, green: 0, blue: 0, alpha: 0.65)
+        dim.strokeColor = .clear
+        dim.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        overlay.addChild(dim)
+
+        let panelW: CGFloat = size.width - 50
+        let panelH: CGFloat = 230
+        let cx = size.width / 2
+        let cy = size.height / 2 + 20
+
+        let panel = SKShapeNode(rectOf: CGSize(width: panelW, height: panelH), cornerRadius: 22)
+        panel.fillColor = SKColor(red: 0.22, green: 0.12, blue: 0.38, alpha: 1.0)
+        panel.strokeColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 0.5)
+        panel.lineWidth = 2
+        panel.position = CGPoint(x: cx, y: cy)
+        overlay.addChild(panel)
+
+        let hour = Calendar.current.component(.hour, from: Date())
+        let timeGreeting: String
+        switch hour {
+        case 5..<12:  timeGreeting = "Good morning,"
+        case 12..<17: timeGreeting = "Good afternoon,"
+        case 17..<21: timeGreeting = "Good evening,"
+        default:      timeGreeting = "Still grinding,"
+        }
+
+        let greetLabel = SKLabelNode(text: timeGreeting)
+        greetLabel.fontName = PixelFont.name
+        greetLabel.fontSize = 16
+        greetLabel.fontColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0)
+        greetLabel.horizontalAlignmentMode = .center
+        greetLabel.verticalAlignmentMode = .center
+        greetLabel.position = CGPoint(x: cx, y: cy + 72)
+        overlay.addChild(greetLabel)
+
+        let nameLabel = SKLabelNode(text: "\(state.name)!")
+        nameLabel.fontName = PixelFont.name
+        nameLabel.fontSize = 28
+        nameLabel.fontColor = SKColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0)
+        nameLabel.horizontalAlignmentMode = .center
+        nameLabel.verticalAlignmentMode = .center
+        nameLabel.position = CGPoint(x: cx, y: cy + 30)
+        overlay.addChild(nameLabel)
+
+        let sub = state.startupName.isEmpty ? "Time to build your startup!" : "\(state.startupName) needs you today."
+        let subLabel = SKLabelNode(text: sub)
+        subLabel.fontName = PixelFont.name
+        subLabel.fontSize = 13
+        subLabel.fontColor = SKColor(red: 0.7, green: 0.8, blue: 0.9, alpha: 1.0)
+        subLabel.horizontalAlignmentMode = .center
+        subLabel.verticalAlignmentMode = .center
+        subLabel.position = CGPoint(x: cx, y: cy - 14)
+        overlay.addChild(subLabel)
+
+        let btnW: CGFloat = panelW - 40
+        let btnH: CGFloat = 50
+        let btnY = cy - 76
+
+        let btnBg = SKShapeNode(rectOf: CGSize(width: btnW, height: btnH), cornerRadius: 14)
+        btnBg.fillColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0)
+        btnBg.strokeColor = .clear
+        btnBg.position = CGPoint(x: cx, y: btnY)
+        btnBg.name = "greetingButton"
+        overlay.addChild(btnBg)
+
+        let btnLabel = SKLabelNode(text: "Let's Go!")
+        btnLabel.fontName = PixelFont.name
+        btnLabel.fontSize = 18
+        btnLabel.fontColor = SKColor(red: 0.18, green: 0.10, blue: 0.30, alpha: 1.0)
+        btnLabel.horizontalAlignmentMode = .center
+        btnLabel.verticalAlignmentMode = .center
+        btnLabel.position = CGPoint(x: cx, y: btnY)
+        overlay.addChild(btnLabel)
+
+        overlay.alpha = 0
+        overlay.run(SKAction.fadeIn(withDuration: 0.3))
+    }
+
+    private func dismissGreeting() {
+        guard let overlay = childNode(withName: "greetingOverlay") else { return }
+        Haptics.confirm()
+        overlay.run(SKAction.sequence([
+            SKAction.fadeOut(withDuration: 0.2),
+            SKAction.removeFromParent()
+        ]))
     }
 
     private func createSettingsButton() -> SKNode {
@@ -569,6 +696,12 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
+
+        // Dismiss daily greeting overlay
+        if childNode(withName: "greetingOverlay") != nil {
+            dismissGreeting()
+            return
+        }
 
         // Check if modal is active
         if let modal = activeModal as? ActionSelectModal {
