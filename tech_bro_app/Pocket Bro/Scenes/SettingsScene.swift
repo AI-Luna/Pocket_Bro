@@ -143,7 +143,7 @@ class SettingsScene: SKScene {
 
         let banner = SKNode()
         // Sits directly below the pro banner (pro center -115, height 60, bottom -145, +12 gap)
-        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 302)
+        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 294)
         banner.name = "cofounderBanner"
         addChild(banner)
 
@@ -172,7 +172,7 @@ class SettingsScene: SKScene {
 
     private func setupProfileSection() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 397
+        let sectionY = size.height - safeTop - 390
         let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 50
 
@@ -205,7 +205,7 @@ class SettingsScene: SKScene {
 
     private func setupLinksSection() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 572
+        let sectionY = size.height - safeTop - 581
         let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 50
 
