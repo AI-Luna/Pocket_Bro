@@ -1033,10 +1033,6 @@ class OnboardingScene: SKScene {
                 let names = ["ByteCo", "Launchpad", "Nexus", "StackUp", "Foundry", "Pivotal", "Syndicate"]
                 startupName = names.randomElement() ?? "Startup"
             }
-            // Prompt for a review right after the user names their startup
-            if let windowScene = view?.window?.windowScene {
-                SKStoreReviewController.requestReview(in: windowScene)
-            }
             currentStep = .notifications
             showStep(currentStep)
 
@@ -1323,9 +1319,15 @@ class OnboardingScene: SKScene {
     }
 
     private func requestNotificationsAndStart() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in
-            DispatchQueue.main.async { [weak self] in
-                self?.startGame()
+        // Show rate us first, then notification permission after a short delay
+        if let windowScene = view?.window?.windowScene {
+            SKStoreReviewController.requestReview(in: windowScene)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in
+                DispatchQueue.main.async {
+                    self?.startGame()
+                }
             }
         }
     }
