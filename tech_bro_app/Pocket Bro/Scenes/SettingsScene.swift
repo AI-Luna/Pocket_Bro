@@ -430,10 +430,10 @@ class SettingsScene: SKScene {
             restorePurchases()
 
         case "privacy":
-            openURL("https://techbrotamagotchihome.vercel.app/privacy")
+            openURL("https://tiny-techbro.vercel.app/privacy")
 
         case "terms":
-            openURL("https://techbrotamagotchihome.vercel.app/terms")
+            openURL("https://tiny-techbro.vercel.app/terms")
 
         default:
             break

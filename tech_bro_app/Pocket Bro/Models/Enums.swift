@@ -26,6 +26,18 @@ enum StartupType: String, Codable, CaseIterable {
         }
     }
 
+    var imageName: String? {
+        switch self {
+        case .ai: return "AIRobot"
+        case .saas: return "SaaSLaptop"
+        case .healthTech: return "HealthTech"
+        case .fintech: return "Fintech"
+        case .consumerApp: return "ConsumerApp"
+        case .eCommerce: return "ECommerce"
+        default: return nil
+        }
+    }
+
     var tagline: String {
         switch self {
         case .ai: return "Building the future"
