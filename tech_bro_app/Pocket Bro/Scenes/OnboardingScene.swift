@@ -207,14 +207,14 @@ class OnboardingScene: SKScene {
         let targetWidth = size.width * 1.1
         let scale = targetWidth / logoTexture.size().width
         logo.setScale(scale)
-        logo.position = CGPoint(x: size.width / 2, y: size.height - 180)
+        logo.position = CGPoint(x: size.width / 2 + 5, y: size.height - 180)
         logo.zPosition = 10
 
         // Add pink/magenta glow behind logo
         let glowNode = SKShapeNode(rectOf: CGSize(width: logo.size.width * 0.7, height: logo.size.height * 0.8), cornerRadius: 20)
         glowNode.fillColor = pinkAccent.withAlphaComponent(0.2)
         glowNode.strokeColor = .clear
-        glowNode.position = logo.position
+        glowNode.position = CGPoint(x: size.width / 2, y: size.height - 180)
         glowNode.zPosition = 9
         glowNode.glowWidth = 30
         contentNode.addChild(glowNode)
