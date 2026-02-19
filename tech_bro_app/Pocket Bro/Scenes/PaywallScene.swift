@@ -111,7 +111,7 @@ class PaywallScene: SKScene {
         addChild(glow)
 
         let sparklePositions: [(CGFloat, CGFloat, CGFloat)] = [
-            (-70, 45, 16), (75, 40, 14), (-50, -20, 12), (85, -15, 16), (0, 65, 18), (-90, 10, 10)
+            (-70, 45, 20), (75, 40, 17), (-50, -20, 15), (85, -15, 20), (0, 65, 22), (-90, 10, 13)
         ]
         for (index, pos) in sparklePositions.enumerated() {
             let sparkle = SKLabelNode(text: "✦")
@@ -129,7 +129,7 @@ class PaywallScene: SKScene {
         // Logo centered between characters, slightly behind them
         let logoTexture = SKTexture(imageNamed: "TechBroLogo")
         let logoSprite = SKSpriteNode(texture: logoTexture)
-        let logoHeight: CGFloat = 55
+        let logoHeight: CGFloat = 68
         let logoScale = logoHeight / logoTexture.size().height
         logoSprite.setScale(logoScale)
         logoSprite.position = CGPoint(x: size.width / 2, y: heroY)
@@ -138,14 +138,14 @@ class PaywallScene: SKScene {
 
         let leftChar = SKSpriteNode(imageNamed: "TechBroIcon")
         leftChar.texture?.filteringMode = .nearest
-        let leftScale: CGFloat = 80 / max(leftChar.size.width, leftChar.size.height)
+        let leftScale: CGFloat = 96 / max(leftChar.size.width, leftChar.size.height)
         leftChar.setScale(leftScale)
         leftChar.position = CGPoint(x: size.width / 2 - 90, y: heroY - 10)
         addChild(leftChar)
 
         let rightChar = SKSpriteNode(imageNamed: "TechGalIcon")
         rightChar.texture?.filteringMode = .nearest
-        let rightScale: CGFloat = 80 / max(rightChar.size.width, rightChar.size.height)
+        let rightScale: CGFloat = 96 / max(rightChar.size.width, rightChar.size.height)
         rightChar.setScale(rightScale)
         rightChar.position = CGPoint(x: size.width / 2 + 90, y: heroY - 10)
         addChild(rightChar)
