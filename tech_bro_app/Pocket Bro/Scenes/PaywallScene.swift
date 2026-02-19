@@ -18,6 +18,7 @@ class PaywallScene: SKScene {
     private let secondaryTextColor = SKColor(red: 0.7, green: 0.8, blue: 0.9, alpha: 1.0)
     private let featureCardColor = SKColor(red: 0.18, green: 0.10, blue: 0.30, alpha: 1.0)
     private let darkPurple = SKColor(red: 0.18, green: 0.10, blue: 0.30, alpha: 1.0)
+    private let selectedFillColor = SKColor(red: 0.06, green: 0.26, blue: 0.30, alpha: 1.0)
 
     private let cardHeight: CGFloat = 72
 
@@ -65,15 +66,6 @@ class PaywallScene: SKScene {
         closeButton.position = CGPoint(x: 40, y: headerY)
         closeButton.name = "closeButton"
         addChild(closeButton)
-
-        // App logo centered in header row
-        let logoTexture = SKTexture(imageNamed: "TechBroLogo")
-        let logo = SKSpriteNode(texture: logoTexture)
-        let logoHeight: CGFloat = 26
-        let logoScale = logoHeight / logoTexture.size().height
-        logo.setScale(logoScale)
-        logo.position = CGPoint(x: size.width / 2, y: headerY - 2)
-        addChild(logo)
 
         let restoreLabel = SKLabelNode(text: "Restore")
         restoreLabel.fontName = PixelFont.name
@@ -134,18 +126,28 @@ class PaywallScene: SKScene {
             addChild(sparkle)
         }
 
+        // Logo centered between characters, slightly behind them
+        let logoTexture = SKTexture(imageNamed: "TechBroLogo")
+        let logoSprite = SKSpriteNode(texture: logoTexture)
+        let logoHeight: CGFloat = 55
+        let logoScale = logoHeight / logoTexture.size().height
+        logoSprite.setScale(logoScale)
+        logoSprite.position = CGPoint(x: size.width / 2, y: heroY)
+        logoSprite.zPosition = -0.5
+        addChild(logoSprite)
+
         let leftChar = SKSpriteNode(imageNamed: "TechBroIcon")
         leftChar.texture?.filteringMode = .nearest
         let leftScale: CGFloat = 80 / max(leftChar.size.width, leftChar.size.height)
         leftChar.setScale(leftScale)
-        leftChar.position = CGPoint(x: size.width / 2 - 60, y: heroY - 10)
+        leftChar.position = CGPoint(x: size.width / 2 - 90, y: heroY - 10)
         addChild(leftChar)
 
         let rightChar = SKSpriteNode(imageNamed: "TechGalIcon")
         rightChar.texture?.filteringMode = .nearest
         let rightScale: CGFloat = 80 / max(rightChar.size.width, rightChar.size.height)
         rightChar.setScale(rightScale)
-        rightChar.position = CGPoint(x: size.width / 2 + 60, y: heroY - 10)
+        rightChar.position = CGPoint(x: size.width / 2 + 90, y: heroY - 10)
         addChild(rightChar)
 
         let floatUp = SKAction.moveBy(x: 0, y: 6, duration: 0.8)
@@ -296,7 +298,7 @@ class PaywallScene: SKScene {
         }
 
         let bg = SKShapeNode(rectOf: CGSize(width: cardWidth, height: cardHeight), cornerRadius: 14)
-        bg.fillColor = cardColor
+        bg.fillColor = isSelected ? selectedFillColor : cardColor
         bg.strokeColor = isSelected ? cyanColor : secondaryTextColor.withAlphaComponent(0.2)
         bg.lineWidth = isSelected ? 2 : 1
         bg.name = "cardBg"
@@ -335,18 +337,18 @@ class PaywallScene: SKScene {
         let priceLabel = SKLabelNode(text: price)
         priceLabel.fontName = PixelFont.name
         priceLabel.fontSize = 16
-        priceLabel.fontColor = isSelected ? cyanColor : secondaryTextColor
+        priceLabel.fontColor = isSelected ? .white : secondaryTextColor
         priceLabel.horizontalAlignmentMode = .right
         priceLabel.verticalAlignmentMode = .center
         priceLabel.position = CGPoint(x: cardWidth / 2 - 14, y: 11)
         priceLabel.name = "priceLabel"
         card.addChild(priceLabel)
 
-        // Sub price — right side, bottom half of card, smaller font
+        // Sub price — right side, bottom half of card
         let subPriceLabel = SKLabelNode(text: subPrice)
         subPriceLabel.fontName = PixelFont.regularName
-        subPriceLabel.fontSize = 11
-        subPriceLabel.fontColor = secondaryTextColor.withAlphaComponent(0.7)
+        subPriceLabel.fontSize = 13
+        subPriceLabel.fontColor = isSelected ? cyanColor.withAlphaComponent(0.9) : secondaryTextColor.withAlphaComponent(0.7)
         subPriceLabel.horizontalAlignmentMode = .right
         subPriceLabel.verticalAlignmentMode = .center
         subPriceLabel.position = CGPoint(x: cardWidth / 2 - 14, y: -10)
@@ -359,7 +361,7 @@ class PaywallScene: SKScene {
             badgeNode.name = "badgeNode"
             badgeNode.position = CGPoint(x: cardWidth / 2 - 46, y: cardHeight / 2)
 
-            let badgeBg = SKShapeNode(rectOf: CGSize(width: CGFloat(badge.count) * 8 + 16, height: 24), cornerRadius: 12)
+            let badgeBg = SKShapeNode(rectOf: CGSize(width: CGFloat(badge.count) * 9 + 20, height: 28), cornerRadius: 14)
             badgeBg.fillColor = pinkColor
             badgeBg.strokeColor = .clear
             badgeBg.name = "badgeBg"
@@ -367,7 +369,7 @@ class PaywallScene: SKScene {
 
             let badgeLabel = SKLabelNode(text: badge)
             badgeLabel.fontName = PixelFont.name
-            badgeLabel.fontSize = 11
+            badgeLabel.fontSize = 13
             badgeLabel.fontColor = .white
             badgeLabel.verticalAlignmentMode = .center
             badgeLabel.horizontalAlignmentMode = .center
@@ -398,6 +400,7 @@ class PaywallScene: SKScene {
             }
 
             if let bg = card.childNode(withName: "cardBg") as? SKShapeNode {
+                bg.fillColor = isSelected ? selectedFillColor : cardColor
                 bg.strokeColor = isSelected ? cyanColor : secondaryTextColor.withAlphaComponent(0.2)
                 bg.lineWidth = isSelected ? 2 : 1
             }
@@ -417,7 +420,10 @@ class PaywallScene: SKScene {
                 titleLabel.fontColor = isSelected ? .white : secondaryTextColor
             }
             if let priceLabel = card.childNode(withName: "priceLabel") as? SKLabelNode {
-                priceLabel.fontColor = isSelected ? cyanColor : secondaryTextColor
+                priceLabel.fontColor = isSelected ? .white : secondaryTextColor
+            }
+            if let subPriceLabel = card.childNode(withName: "subPriceLabel") as? SKLabelNode {
+                subPriceLabel.fontColor = isSelected ? cyanColor.withAlphaComponent(0.9) : secondaryTextColor.withAlphaComponent(0.7)
             }
         }
     }
@@ -535,7 +541,8 @@ class PaywallScene: SKScene {
                     let trialStr = formatTrialPeriod(intro.subscriptionPeriod)
                     let perMonth = monthlyEquiv.isEmpty ? price : "\(monthlyEquiv)/mo"
                     subPriceLabel.text = "\(trialStr) • then \(perMonth)"
-                    subPriceLabel.fontColor = cyanColor  // bright cyan — makes free trial obvious
+                    subPriceLabel.fontSize = 13
+                    subPriceLabel.fontColor = cyanColor
 
                     updateBadge(on: card, text: "Free Trial")
                     updateContinueButtonLabel(to: "Start Free Trial")
@@ -567,9 +574,9 @@ class PaywallScene: SKScene {
             label.fontColor = isFreeTrial ? darkPurple : .white
         }
         if let bg = badgeNode.childNode(withName: "badgeBg") as? SKShapeNode {
-            let newWidth = CGFloat(text.count) * 8 + 16
-            bg.path = CGPath(roundedRect: CGRect(x: -newWidth/2, y: -12, width: newWidth, height: 24),
-                             cornerWidth: 12, cornerHeight: 12, transform: nil)
+            let newWidth = CGFloat(text.count) * 9 + 20
+            bg.path = CGPath(roundedRect: CGRect(x: -newWidth/2, y: -14, width: newWidth, height: 28),
+                             cornerWidth: 14, cornerHeight: 14, transform: nil)
             bg.fillColor = isFreeTrial ? cyanColor : pinkColor
         }
     }
