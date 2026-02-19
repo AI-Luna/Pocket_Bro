@@ -203,8 +203,8 @@ class OnboardingScene: SKScene {
         let logoTexture = SKTexture(imageNamed: "TechBroLogo")
         let logo = SKSpriteNode(texture: logoTexture)
         
-        // Scale logo to fit nicely - about 80% of screen width
-        let targetWidth = size.width * 0.85
+        // Scale logo to fit nicely
+        let targetWidth = size.width * 1.1
         let scale = targetWidth / logoTexture.size().width
         logo.setScale(scale)
         logo.position = CGPoint(x: size.width / 2, y: size.height - 180)  // Moved down closer to text
