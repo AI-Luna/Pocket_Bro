@@ -211,7 +211,7 @@ class OnboardingScene: SKScene {
         logo.zPosition = 10
         
         // Add pink/magenta glow behind logo
-        let glowNode = SKShapeNode(rectOf: CGSize(width: logo.size.width * 0.9, height: logo.size.height * 0.8), cornerRadius: 20)
+        let glowNode = SKShapeNode(rectOf: CGSize(width: logo.size.width * 0.7, height: logo.size.height * 0.8), cornerRadius: 20)
         glowNode.fillColor = pinkAccent.withAlphaComponent(0.2)
         glowNode.strokeColor = .clear
         glowNode.position = logo.position
