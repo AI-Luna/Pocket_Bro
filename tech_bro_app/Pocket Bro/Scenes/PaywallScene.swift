@@ -124,16 +124,16 @@ class PaywallScene: SKScene {
 
         let leftChar = SKSpriteNode(imageNamed: "TechBroIcon")
         leftChar.texture?.filteringMode = .nearest
-        let leftScale: CGFloat = 110 / max(leftChar.size.width, leftChar.size.height)
+        let leftScale: CGFloat = 80 / max(leftChar.size.width, leftChar.size.height)
         leftChar.setScale(leftScale)
-        leftChar.position = CGPoint(x: size.width / 2 - 44, y: heroY - 10)
+        leftChar.position = CGPoint(x: size.width / 2 - 60, y: heroY - 10)
         addChild(leftChar)
 
         let rightChar = SKSpriteNode(imageNamed: "TechGalIcon")
         rightChar.texture?.filteringMode = .nearest
-        let rightScale: CGFloat = 110 / max(rightChar.size.width, rightChar.size.height)
+        let rightScale: CGFloat = 80 / max(rightChar.size.width, rightChar.size.height)
         rightChar.setScale(rightScale)
-        rightChar.position = CGPoint(x: size.width / 2 + 44, y: heroY - 10)
+        rightChar.position = CGPoint(x: size.width / 2 + 60, y: heroY - 10)
         addChild(rightChar)
 
         let floatUp = SKAction.moveBy(x: 0, y: 6, duration: 0.8)
@@ -146,18 +146,10 @@ class PaywallScene: SKScene {
     // MARK: - Feature Bullets
 
     private func setupFeatureWidget() {
-        // Anchor widget just above the title so there's no gap
-        let safeBottom = view?.safeAreaInsets.bottom ?? 20
-        let continueButtonY = safeBottom + 100
-        let cardHeight: CGFloat = 60
-        let cardGap: CGFloat = 12
-        let monthlyY = continueButtonY + cardHeight + cardGap + 10
-        let annualY = monthlyY + cardHeight + cardGap
-        let annualTopEdge = annualY + cardHeight / 2
-        let line1Y = annualTopEdge + 24 + 32  // matches setupTitle
+        let safeTop = view?.safeAreaInsets.top ?? 50
+        let widgetY = size.height - safeTop - 303
         let widgetWidth: CGFloat = size.width - 50
-        let widgetHeight: CGFloat = 152
-        let widgetY = line1Y + 18 + widgetHeight / 2  // 18px gap above title
+        let widgetHeight: CGFloat = 190
 
         let widget = SKShapeNode(rectOf: CGSize(width: widgetWidth, height: widgetHeight), cornerRadius: 16)
         widget.fillColor = featureCardColor
