@@ -30,8 +30,10 @@ class PaywallScene: SKScene {
     private var selectedPlan: PricingPlan = .annual
     private var planCards: [PricingPlan: SKNode] = [:]
     private var packages: [PricingPlan: Package] = [:]
+    private var isHardPaywall: Bool = false
 
-    init(size: CGSize, sceneManager: SceneManager) {
+    init(size: CGSize, sceneManager: SceneManager, isHardPaywall: Bool = false) {
+        self.isHardPaywall = isHardPaywall
         self.sceneManager = sceneManager
         super.init(size: size)
     }
@@ -62,10 +64,13 @@ class PaywallScene: SKScene {
         let safeTop = view?.safeAreaInsets.top ?? 50
         let headerY = size.height - safeTop - 30
 
-        let closeButton = createCloseButton()
-        closeButton.position = CGPoint(x: 40, y: headerY)
-        closeButton.name = "closeButton"
-        addChild(closeButton)
+        // Hard paywall has no close button — subscription is required to proceed
+        if !isHardPaywall {
+            let closeButton = createCloseButton()
+            closeButton.position = CGPoint(x: 40, y: headerY)
+            closeButton.name = "closeButton"
+            addChild(closeButton)
+        }
 
         let restoreLabel = SKLabelNode(text: "Restore")
         restoreLabel.fontName = PixelFont.name
@@ -704,6 +709,10 @@ class PaywallScene: SKScene {
     }
 
     private func dismiss() {
-        sceneManager?.popToMainGame()
+        if isHardPaywall {
+            sceneManager?.presentScene(.mainGame)
+        } else {
+            sceneManager?.popToMainGame()
+        }
     }
 }

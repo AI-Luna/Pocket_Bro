@@ -5,6 +5,7 @@
 
 import SpriteKit
 import UserNotifications
+import StoreKit
 
 enum OnboardingStep: Int, CaseIterable {
     case chooseFounder = 0
@@ -1032,6 +1033,10 @@ class OnboardingScene: SKScene {
                 let names = ["ByteCo", "Launchpad", "Nexus", "StackUp", "Foundry", "Pivotal", "Syndicate"]
                 startupName = names.randomElement() ?? "Startup"
             }
+            // Prompt for a review right after the user names their startup
+            if let windowScene = view?.window?.windowScene {
+                SKStoreReviewController.requestReview(in: windowScene)
+            }
             currentStep = .notifications
             showStep(currentStep)
 
@@ -1326,12 +1331,18 @@ class OnboardingScene: SKScene {
     }
 
     private func startGame() {
+        // Save game state first so it persists through paywall
         GameManager.shared.newGame(name: founderName, startupName: startupName, archetype: selectedArchetype, city: selectedCity, startupType: selectedStartupType)
 
-        // Fade out and transition
         let fadeOut = SKAction.fadeOut(withDuration: 0.4)
         run(fadeOut) { [weak self] in
-            self?.sceneManager?.presentScene(.mainGame)
+            guard let self else { return }
+            // Hard paywall: non-subscribers must subscribe before entering the game
+            if PurchaseManager.shared.isProActive {
+                self.sceneManager?.presentScene(.mainGame)
+            } else {
+                self.sceneManager?.presentScene(.hardPaywall)
+            }
         }
     }
 }

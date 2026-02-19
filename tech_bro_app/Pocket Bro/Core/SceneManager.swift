@@ -11,6 +11,7 @@ enum GameSceneType {
     case actionMenu(ActionCategory)
     case settings
     case paywall
+    case hardPaywall
     case gameOver(GameOverReason)
     case victory
     case minigame(MinigameType)
@@ -72,6 +73,8 @@ final class SceneManager {
             return SettingsScene(size: size, sceneManager: self)
         case .paywall:
             return PaywallScene(size: size, sceneManager: self)
+        case .hardPaywall:
+            return PaywallScene(size: size, sceneManager: self, isHardPaywall: true)
         case .actionMenu(let category):
             return ActionMenuScene(size: size, sceneManager: self, category: category)
         case .gameOver(let reason):
