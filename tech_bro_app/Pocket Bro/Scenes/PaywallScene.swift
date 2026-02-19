@@ -161,7 +161,7 @@ class PaywallScene: SKScene {
         // Header
         let header = SKLabelNode(text: "TechBro Pro Features")
         header.fontName = PixelFont.name
-        header.fontSize = 14
+        header.fontSize = 17
         header.fontColor = accentColor
         header.horizontalAlignmentMode = .left
         header.verticalAlignmentMode = .center
