@@ -59,9 +59,7 @@ final class SceneManager {
     }
 
     private func createScene(for type: GameSceneType) -> SKScene {
-        guard let view = view else {
-            fatalError("SceneManager view is nil")
-        }
+        guard let view = view else { return SKScene() }
 
         let size = view.bounds.size
 

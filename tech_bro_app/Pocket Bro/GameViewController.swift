@@ -16,9 +16,7 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        guard let skView = self.view as? SKView else {
-            fatalError("View is not an SKView")
-        }
+        guard let skView = self.view as? SKView else { return }
 
         // Configure view
         skView.ignoresSiblingOrder = true
