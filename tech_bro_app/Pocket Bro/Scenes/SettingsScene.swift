@@ -50,10 +50,10 @@ class SettingsScene: SKScene {
         let safeTop = view?.safeAreaInsets.top ?? 50
         let logoTexture = SKTexture(imageNamed: "TechBroLogo")
         let logo = SKSpriteNode(texture: logoTexture)
-        let logoHeight: CGFloat = 48
+        let logoHeight: CGFloat = 144
         let logoScale = logoHeight / logoTexture.size().height
         logo.setScale(logoScale)
-        logo.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 110)
+        logo.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 150)
         addChild(logo)
     }
 
@@ -107,7 +107,7 @@ class SettingsScene: SKScene {
         let bannerHeight: CGFloat = 60
 
         let banner = SKNode()
-        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 165)
+        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 285)
         banner.name = "proBanner"
         addChild(banner)
 
@@ -143,7 +143,7 @@ class SettingsScene: SKScene {
 
         let banner = SKNode()
         // Sits directly below the pro banner (pro center -115, height 60, bottom -145, +12 gap)
-        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 237)
+        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 357)
         banner.name = "cofounderBanner"
         addChild(banner)
 
@@ -172,7 +172,7 @@ class SettingsScene: SKScene {
 
     private func setupProfileSection() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 332
+        let sectionY = size.height - safeTop - 452
         let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 50
 
@@ -205,7 +205,7 @@ class SettingsScene: SKScene {
 
     private func setupLinksSection() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let sectionY = size.height - safeTop - 522
+        let sectionY = size.height - safeTop - 642
         let rowHeight: CGFloat = 50
         let sectionWidth = size.width - 50
 
@@ -244,7 +244,7 @@ class SettingsScene: SKScene {
         resetButton.fontName = PixelFont.regularName
         resetButton.fontSize = 12
         resetButton.fontColor = textColor.withAlphaComponent(0.25)
-        resetButton.position = CGPoint(x: size.width / 2, y: safeBottom + 75)
+        resetButton.position = CGPoint(x: size.width / 2, y: safeBottom + 40)
         resetButton.name = "resetOnboarding"
         addChild(resetButton)
 
@@ -252,7 +252,7 @@ class SettingsScene: SKScene {
         version.fontName = PixelFont.regularName
         version.fontSize = 14
         version.fontColor = textColor.withAlphaComponent(0.4)
-        version.position = CGPoint(x: size.width / 2, y: safeBottom + 50)
+        version.position = CGPoint(x: size.width / 2, y: safeBottom + 20)
         addChild(version)
     }
 
