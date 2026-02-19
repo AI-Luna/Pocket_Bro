@@ -673,14 +673,14 @@ class PaywallScene: SKScene {
 
         if let termsButton = childNode(withName: "termsButton") as? SKLabelNode {
             if termsButton.frame.insetBy(dx: -15, dy: -10).contains(location) {
-                openURL("https://techbrotamagotchihome.vercel.app/terms")
+                openURL("https://tiny-techbro.vercel.app/terms")
                 return
             }
         }
 
         if let privacyButton = childNode(withName: "privacyButton") as? SKLabelNode {
             if privacyButton.frame.insetBy(dx: -15, dy: -10).contains(location) {
-                openURL("https://techbrotamagotchihome.vercel.app/privacy")
+                openURL("https://tiny-techbro.vercel.app/privacy")
                 return
             }
         }

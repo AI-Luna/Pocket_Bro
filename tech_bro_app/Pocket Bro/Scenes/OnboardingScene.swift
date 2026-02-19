@@ -453,13 +453,24 @@ class OnboardingScene: SKScene {
         border.isHidden = true
         card.addChild(border)
 
-        // Large emoji centered in card
-        let emojiLabel = SKLabelNode(text: type.emoji)
-        emojiLabel.fontSize = size.height * 0.48
-        emojiLabel.verticalAlignmentMode = .center
-        emojiLabel.horizontalAlignmentMode = .center
-        emojiLabel.position = CGPoint(x: 0, y: 8)
-        card.addChild(emojiLabel)
+        // Icon — use custom image if available, otherwise emoji
+        if let imageName = type.imageName {
+            let texture = SKTexture(imageNamed: imageName)
+            texture.filteringMode = .nearest
+            let iconSprite = SKSpriteNode(texture: texture)
+            let iconSize = size.height * 0.62
+            let scale = iconSize / max(texture.size().width, texture.size().height)
+            iconSprite.size = CGSize(width: texture.size().width * scale, height: texture.size().height * scale)
+            iconSprite.position = CGPoint(x: 0, y: 8)
+            card.addChild(iconSprite)
+        } else {
+            let emojiLabel = SKLabelNode(text: type.emoji)
+            emojiLabel.fontSize = size.height * 0.48
+            emojiLabel.verticalAlignmentMode = .center
+            emojiLabel.horizontalAlignmentMode = .center
+            emojiLabel.position = CGPoint(x: 0, y: 8)
+            card.addChild(emojiLabel)
+        }
 
         // Name label below card
         let nameLabel = SKLabelNode(text: type.rawValue)
