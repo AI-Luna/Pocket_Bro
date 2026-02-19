@@ -264,7 +264,7 @@ class OnboardingScene: SKScene {
         
         // Subtitle - positioned closer to cards below
         titleLabel = createTitle("Choose your founder")
-        titleLabel.fontSize = PixelFont.medium
+        titleLabel.fontSize = PixelFont.title
         titleLabel.position.y = size.height - 355
         contentNode.addChild(titleLabel)
 
@@ -393,7 +393,7 @@ class OnboardingScene: SKScene {
         let types = StartupType.allCases
         let cols = 3
         let cardW: CGFloat = (size.width - 90) / CGFloat(cols)
-        let cardH: CGFloat = cardW * 0.72
+        let cardH: CGFloat = cardW
         let spacingX: CGFloat = 14
         let spacingY: CGFloat = 10
         let labelH: CGFloat = 22
@@ -458,10 +458,10 @@ class OnboardingScene: SKScene {
             let texture = SKTexture(imageNamed: imageName)
             texture.filteringMode = .nearest
             let iconSprite = SKSpriteNode(texture: texture)
-            let iconSize = size.height * 0.62
+            let iconSize = size.height * 0.78
             let scale = iconSize / max(texture.size().width, texture.size().height)
             iconSprite.size = CGSize(width: texture.size().width * scale, height: texture.size().height * scale)
-            iconSprite.position = CGPoint(x: 0, y: 8)
+            iconSprite.position = CGPoint(x: 0, y: 0)
             card.addChild(iconSprite)
         } else {
             let emojiLabel = SKLabelNode(text: type.emoji)
@@ -475,7 +475,7 @@ class OnboardingScene: SKScene {
         // Name label below card
         let nameLabel = SKLabelNode(text: type.rawValue)
         nameLabel.fontName = PixelFont.name
-        nameLabel.fontSize = PixelFont.small
+        nameLabel.fontSize = PixelFont.body
         nameLabel.fontColor = textColor
         nameLabel.horizontalAlignmentMode = .center
         nameLabel.verticalAlignmentMode = .center
