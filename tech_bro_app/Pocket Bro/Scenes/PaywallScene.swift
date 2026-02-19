@@ -149,7 +149,7 @@ class PaywallScene: SKScene {
         let safeTop = view?.safeAreaInsets.top ?? 50
         let widgetY = size.height - safeTop - 293
         let widgetWidth: CGFloat = size.width - 50
-        let widgetHeight: CGFloat = 178
+        let widgetHeight: CGFloat = 190
 
         let widget = SKShapeNode(rectOf: CGSize(width: widgetWidth, height: widgetHeight), cornerRadius: 16)
         widget.fillColor = featureCardColor
@@ -165,7 +165,7 @@ class PaywallScene: SKScene {
         header.fontColor = accentColor
         header.horizontalAlignmentMode = .left
         header.verticalAlignmentMode = .center
-        header.position = CGPoint(x: -widgetWidth / 2 + 20, y: 56)
+        header.position = CGPoint(x: -widgetWidth / 2 + 20, y: 62)
         widget.addChild(header)
 
         // 5 bullet points with pixel art icons
@@ -178,7 +178,7 @@ class PaywallScene: SKScene {
         ]
 
         let bulletSpacing: CGFloat = 24
-        let firstBulletY: CGFloat = 26
+        let firstBulletY: CGFloat = 32
         let iconSize: CGFloat = 20
 
         for (index, bullet) in bullets.enumerated() {
