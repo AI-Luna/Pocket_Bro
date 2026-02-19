@@ -18,7 +18,7 @@ class PaywallScene: SKScene {
     private let secondaryTextColor = SKColor(red: 0.7, green: 0.8, blue: 0.9, alpha: 1.0)
     private let featureCardColor = SKColor(red: 0.18, green: 0.10, blue: 0.30, alpha: 1.0)
     private let darkPurple = SKColor(red: 0.18, green: 0.10, blue: 0.30, alpha: 1.0)
-    private let selectedFillColor = SKColor(red: 0.06, green: 0.26, blue: 0.30, alpha: 1.0)
+    private let selectedFillColor = SKColor(red: 0.42, green: 0.10, blue: 0.32, alpha: 1.0)
 
     private let cardHeight: CGFloat = 72
 
@@ -163,7 +163,7 @@ class PaywallScene: SKScene {
         let safeTop = view?.safeAreaInsets.top ?? 50
         let widgetY = size.height - safeTop - 300
         let widgetWidth: CGFloat = size.width - 50
-        let widgetHeight: CGFloat = 175
+        let widgetHeight: CGFloat = 152
 
         let widget = SKShapeNode(rectOf: CGSize(width: widgetWidth, height: widgetHeight), cornerRadius: 16)
         widget.fillColor = featureCardColor
@@ -232,14 +232,14 @@ class PaywallScene: SKScene {
 
         let line1 = SKLabelNode(text: "Unlock")
         line1.fontName = PixelFont.name
-        line1.fontSize = 22
+        line1.fontSize = 26
         line1.fontColor = cyanColor
         line1.position = CGPoint(x: size.width / 2, y: line1Y)
         addChild(line1)
 
         let line2 = SKLabelNode(text: "TechBro Pro")
         line2.fontName = PixelFont.name
-        line2.fontSize = 24
+        line2.fontSize = 30
         line2.fontColor = pinkColor
         line2.position = CGPoint(x: size.width / 2, y: line2Y)
         addChild(line2)
