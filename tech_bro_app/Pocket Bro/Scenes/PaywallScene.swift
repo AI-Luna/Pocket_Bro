@@ -147,7 +147,7 @@ class PaywallScene: SKScene {
 
     private func setupFeatureWidget() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let widgetY = size.height - safeTop - 293
+        let widgetY = size.height - safeTop - 303
         let widgetWidth: CGFloat = size.width - 50
         let widgetHeight: CGFloat = 190
 
@@ -214,7 +214,7 @@ class PaywallScene: SKScene {
         let annualTopEdge = annualY + cardHeight / 2
 
         let line2Y = annualTopEdge + 24
-        let line1Y = line2Y + 32
+        let line1Y = line2Y + 22
 
         let line1 = SKLabelNode(text: "Unlock")
         line1.fontName = PixelFont.name
