@@ -132,7 +132,10 @@ class DatingMinigameScene: BaseGameScene {
         let shuffledChoices = scenario.choices.shuffled()
         let buttonHeight: CGFloat = 58
         let spacing: CGFloat = 14
-        let startY = size.height / 2 + CGFloat(shuffledChoices.count - 1) * (buttonHeight + spacing) / 2
+        // Anchor buttons below the dialogue box (center: safeTop+210, height: 110 → bottom: safeTop+265)
+        let boxBottom = size.height - safeAreaInsets().top - 265
+        let gap: CGFloat = 28
+        let startY = boxBottom - gap - buttonHeight / 2
 
         for (index, choice) in shuffledChoices.enumerated() {
             let button = PixelButtonNode(text: choice.text, size: CGSize(width: size.width - 50, height: buttonHeight))
