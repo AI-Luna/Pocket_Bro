@@ -396,7 +396,7 @@ class OnboardingScene: SKScene {
         let cardH: CGFloat = cardW
         let spacingX: CGFloat = 14
         let spacingY: CGFloat = 10
-        let labelH: CGFloat = 22
+        let labelH: CGFloat = 34
 
         let totalW = CGFloat(cols) * cardW + CGFloat(cols - 1) * spacingX
         let startX = (size.width - totalW) / 2 + cardW / 2
@@ -479,7 +479,7 @@ class OnboardingScene: SKScene {
         nameLabel.fontColor = textColor
         nameLabel.horizontalAlignmentMode = .center
         nameLabel.verticalAlignmentMode = .center
-        nameLabel.position = CGPoint(x: 0, y: -size.height / 2 - 14)
+        nameLabel.position = CGPoint(x: 0, y: -size.height / 2 - 26)
         card.addChild(nameLabel)
 
         return card
