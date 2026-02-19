@@ -92,24 +92,15 @@ class DatingMinigameScene: BaseGameScene {
         scoreLabel.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 105)
         addChild(scoreLabel)
 
-        // Dialogue box background
-        let boxW = size.width - 40
-        let boxH: CGFloat = 110
+        // Dialogue label - no box, plain text so it clearly reads as the question
+        let boxW = size.width - 60
         let boxY = size.height - safeTop - 210
-        let box = SKShapeNode(rectOf: CGSize(width: boxW, height: boxH), cornerRadius: 14)
-        box.fillColor = SKColor(red: 0.28, green: 0.18, blue: 0.45, alpha: 1.0)
-        box.strokeColor = cyanColor.withAlphaComponent(0.3)
-        box.lineWidth = 2
-        box.position = CGPoint(x: size.width / 2, y: boxY)
-        addChild(box)
-
-        // Dialogue label inside box
         dialogueLabel = SKLabelNode(text: "")
         dialogueLabel.fontName = PixelFont.name
-        dialogueLabel.fontSize = 18
-        dialogueLabel.fontColor = cyanColor
+        dialogueLabel.fontSize = 20
+        dialogueLabel.fontColor = .white
         dialogueLabel.numberOfLines = 3
-        dialogueLabel.preferredMaxLayoutWidth = boxW - 30
+        dialogueLabel.preferredMaxLayoutWidth = boxW
         dialogueLabel.horizontalAlignmentMode = .center
         dialogueLabel.verticalAlignmentMode = .center
         dialogueLabel.position = CGPoint(x: size.width / 2, y: boxY)
