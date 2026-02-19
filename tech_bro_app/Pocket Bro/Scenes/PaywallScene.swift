@@ -178,7 +178,7 @@ class PaywallScene: SKScene {
         ]
 
         let bulletSpacing: CGFloat = 24
-        let firstBulletY: CGFloat = 36
+        let firstBulletY: CGFloat = 26
         let iconSize: CGFloat = 20
 
         for (index, bullet) in bullets.enumerated() {
