@@ -53,7 +53,7 @@ class SettingsScene: SKScene {
         let logoHeight: CGFloat = 144
         let logoScale = logoHeight / logoTexture.size().height
         logo.setScale(logoScale)
-        logo.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 115)
+        logo.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 125)
         addChild(logo)
     }
 
@@ -107,7 +107,7 @@ class SettingsScene: SKScene {
         let bannerHeight: CGFloat = 60
 
         let banner = SKNode()
-        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 230)
+        banner.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 218)
         banner.name = "proBanner"
         addChild(banner)
 
