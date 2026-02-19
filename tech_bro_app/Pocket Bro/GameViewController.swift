@@ -11,24 +11,32 @@ import GameplayKit
 
 class GameViewController: UIViewController {
     private var sceneManager: SceneManager?
+    private var didPresentInitialScene = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        guard let view = self.view as? SKView else {
+        guard let skView = self.view as? SKView else {
             fatalError("View is not an SKView")
         }
 
         // Configure view
-        view.ignoresSiblingOrder = true
-        // Debug info disabled
-        view.showsFPS = false
-        view.showsNodeCount = false
+        skView.ignoresSiblingOrder = true
+        skView.isAsynchronous = false
+        skView.showsFPS = false
+        skView.showsNodeCount = false
 
-        // Initialize scene manager
-        sceneManager = SceneManager(view: view)
+        // Initialize scene manager only — do NOT present here (bounds may be zero)
+        sceneManager = SceneManager(view: skView)
+    }
 
-        // Present initial scene
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard !didPresentInitialScene else { return }
+        guard let skView = self.view as? SKView, skView.bounds.width > 0, skView.bounds.height > 0 else { return }
+
+        didPresentInitialScene = true
         sceneManager?.presentInitialScene()
     }
 

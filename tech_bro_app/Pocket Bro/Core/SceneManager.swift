@@ -29,7 +29,8 @@ final class SceneManager {
         guard let view = view else { return }
 
         let scene = createScene(for: sceneType)
-        scene.scaleMode = .aspectFill
+        scene.size = view.bounds.size
+        scene.scaleMode = .resizeFill
 
         if let transition = transition {
             view.presentScene(scene, transition: transition)
