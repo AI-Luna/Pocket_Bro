@@ -53,6 +53,7 @@ class SettingsScene: SKScene {
         let logoHeight: CGFloat = 144
         let logoScale = logoHeight / logoTexture.size().height
         logo.setScale(logoScale)
+        logo.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         logo.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 125)
         addChild(logo)
     }
