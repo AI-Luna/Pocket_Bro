@@ -18,7 +18,7 @@ class PaywallScene: SKScene {
     private let secondaryTextColor = SKColor(red: 0.7, green: 0.8, blue: 0.9, alpha: 1.0)
     private let featureCardColor = SKColor(red: 0.18, green: 0.10, blue: 0.30, alpha: 1.0)
     private let darkPurple = SKColor(red: 0.18, green: 0.10, blue: 0.30, alpha: 1.0)
-    private let selectedFillColor = SKColor(red: 0.42, green: 0.10, blue: 0.32, alpha: 1.0)
+    private let selectedFillColor = SKColor(red: 0.36, green: 0.22, blue: 0.55, alpha: 1.0)
 
     private let cardHeight: CGFloat = 72
 
@@ -163,7 +163,7 @@ class PaywallScene: SKScene {
         let safeTop = view?.safeAreaInsets.top ?? 50
         let widgetY = size.height - safeTop - 300
         let widgetWidth: CGFloat = size.width - 50
-        let widgetHeight: CGFloat = 152
+        let widgetHeight: CGFloat = 168
 
         let widget = SKShapeNode(rectOf: CGSize(width: widgetWidth, height: widgetHeight), cornerRadius: 16)
         widget.fillColor = featureCardColor
@@ -175,7 +175,7 @@ class PaywallScene: SKScene {
         // Header — centered, larger, cyan
         let header = SKLabelNode(text: "TechBro Pro Features")
         header.fontName = PixelFont.name
-        header.fontSize = 20
+        header.fontSize = 22
         header.fontColor = pinkColor
         header.horizontalAlignmentMode = .center
         header.verticalAlignmentMode = .center
@@ -191,7 +191,7 @@ class PaywallScene: SKScene {
             ("paywall_heart",    "Support Indie Development")
         ]
 
-        let bulletSpacing: CGFloat = 18
+        let bulletSpacing: CGFloat = 22
         let firstBulletY: CGFloat = 28
         let iconSize: CGFloat = 20
 
