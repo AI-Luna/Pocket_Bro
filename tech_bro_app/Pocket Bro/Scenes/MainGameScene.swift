@@ -212,11 +212,12 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         guard !startupName.isEmpty else { return }
         let label = SKLabelNode(text: "\(startupName) HQ")
         label.fontName = PixelFont.name
-        label.fontSize = 13
+        label.fontSize = 18
         label.fontColor = lcdDarkColor
-        label.horizontalAlignmentMode = .center
+        label.horizontalAlignmentMode = .left
         label.verticalAlignmentMode = .center
-        label.position = CGPoint(x: size.width / 2, y: size.height - safeAreaInsets().top - 53)
+        // Vertically in line with the settings button, left-aligned with padding
+        label.position = CGPoint(x: 18, y: size.height - safeAreaInsets().top - 20)
         label.zPosition = 10
         addChild(label)
     }
