@@ -231,7 +231,7 @@ class OnboardingScene: SKScene {
         // Subtitle - positioned closer to cards below
         titleLabel = createTitle("Choose your founder")
         titleLabel.fontSize = PixelFont.medium
-        titleLabel.position.y = size.height - 280  // Moved down, closer to character cards
+        titleLabel.position.y = size.height - 355
         contentNode.addChild(titleLabel)
 
         // Larger cards with bigger character icons
