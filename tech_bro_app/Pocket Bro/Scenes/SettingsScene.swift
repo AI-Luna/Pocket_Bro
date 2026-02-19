@@ -111,9 +111,9 @@ class SettingsScene: SKScene {
         banner.addChild(bg)
 
         // Text only - no emojis
-        let text = SKLabelNode(text: "Get TechBro Pro Full Access Now!")
+        let text = SKLabelNode(text: "Get Full Access Now!")
         text.fontName = PixelFont.name
-        text.fontSize = 14
+        text.fontSize = 18
         text.fontColor = .white
         text.verticalAlignmentMode = .center
         text.horizontalAlignmentMode = .center

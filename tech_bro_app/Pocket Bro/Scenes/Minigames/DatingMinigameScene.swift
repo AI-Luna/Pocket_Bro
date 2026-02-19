@@ -63,31 +63,56 @@ class DatingMinigameScene: BaseGameScene {
 
     private var currentScenario: (prompt: String, choices: [(text: String, score: Int)])?
 
+    private let cyanColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0)
+    private let pinkColor = SKColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0)
+
+    override var backgroundColor_: SKColor {
+        SKColor(red: 0.22, green: 0.12, blue: 0.38, alpha: 1.0)
+    }
+
     override func setupScene() {
         setupUI()
         showNextRound()
     }
 
     private func setupUI() {
+        let safeTop = safeAreaInsets().top
+
         // Title
-        let titleLabel = createLabel(text: "❤️ Dating Minigame", fontSize: 24)
-        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - safeAreaInsets().top - 60)
+        let titleLabel = createLabel(text: "❤️ Dating Minigame", fontSize: 28)
+        titleLabel.fontName = PixelFont.name
+        titleLabel.fontColor = cyanColor
+        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 65)
         addChild(titleLabel)
 
         // Score
-        scoreLabel = createLabel(text: "Vibe: 💕💕💕", fontSize: 16)
-        scoreLabel.position = CGPoint(x: size.width / 2, y: size.height - safeAreaInsets().top - 95)
+        scoreLabel = createLabel(text: "Vibe: 💕💕💕", fontSize: 20)
+        scoreLabel.fontName = PixelFont.name
+        scoreLabel.fontColor = cyanColor
+        scoreLabel.position = CGPoint(x: size.width / 2, y: size.height - safeTop - 105)
         addChild(scoreLabel)
 
-        // Dialogue
+        // Dialogue box background
+        let boxW = size.width - 40
+        let boxH: CGFloat = 110
+        let boxY = size.height - safeTop - 210
+        let box = SKShapeNode(rectOf: CGSize(width: boxW, height: boxH), cornerRadius: 14)
+        box.fillColor = SKColor(red: 0.28, green: 0.18, blue: 0.45, alpha: 1.0)
+        box.strokeColor = cyanColor.withAlphaComponent(0.3)
+        box.lineWidth = 2
+        box.position = CGPoint(x: size.width / 2, y: boxY)
+        addChild(box)
+
+        // Dialogue label inside box
         dialogueLabel = SKLabelNode(text: "")
-        dialogueLabel.fontName = "Menlo"
-        dialogueLabel.fontSize = 16
-        dialogueLabel.fontColor = .white
+        dialogueLabel.fontName = PixelFont.name
+        dialogueLabel.fontSize = 18
+        dialogueLabel.fontColor = cyanColor
         dialogueLabel.numberOfLines = 3
-        dialogueLabel.preferredMaxLayoutWidth = size.width - 60
+        dialogueLabel.preferredMaxLayoutWidth = boxW - 30
         dialogueLabel.horizontalAlignmentMode = .center
-        dialogueLabel.position = CGPoint(x: size.width / 2, y: size.height - safeAreaInsets().top - 180)
+        dialogueLabel.verticalAlignmentMode = .center
+        dialogueLabel.position = CGPoint(x: size.width / 2, y: boxY)
         addChild(dialogueLabel)
     }
 
@@ -105,12 +130,12 @@ class DatingMinigameScene: BaseGameScene {
         dialogueLabel.text = scenario.prompt
 
         let shuffledChoices = scenario.choices.shuffled()
-        let buttonHeight: CGFloat = 50
-        let spacing: CGFloat = 15
-        let startY = size.height / 2 + 20
+        let buttonHeight: CGFloat = 58
+        let spacing: CGFloat = 14
+        let startY = size.height / 2 + CGFloat(shuffledChoices.count - 1) * (buttonHeight + spacing) / 2
 
         for (index, choice) in shuffledChoices.enumerated() {
-            let button = PixelButtonNode(text: choice.text, size: CGSize(width: size.width - 60, height: buttonHeight))
+            let button = PixelButtonNode(text: choice.text, size: CGSize(width: size.width - 50, height: buttonHeight))
             button.position = CGPoint(x: size.width / 2, y: startY - CGFloat(index) * (buttonHeight + spacing))
 
             let choiceScore = choice.score
@@ -145,9 +170,10 @@ class DatingMinigameScene: BaseGameScene {
             color = .red
         }
 
-        let feedbackLabel = createLabel(text: feedback, fontSize: 24)
+        let feedbackLabel = createLabel(text: feedback, fontSize: 28)
+        feedbackLabel.fontName = PixelFont.name
         feedbackLabel.fontColor = color
-        feedbackLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 - 150)
+        feedbackLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 - 160)
         addChild(feedbackLabel)
 
         // Update vibe meter
@@ -187,8 +213,10 @@ class DatingMinigameScene: BaseGameScene {
         let success = score >= 5
 
         let resultTitle = success ? "Great Date! 💕" : "Awkward Date 😅"
-        let resultLabel = createLabel(text: resultTitle, fontSize: 28)
-        resultLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 + 50)
+        let resultLabel = createLabel(text: resultTitle, fontSize: 32)
+        resultLabel.fontName = PixelFont.name
+        resultLabel.fontColor = cyanColor
+        resultLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 + 60)
         addChild(resultLabel)
 
         let message = success ?
@@ -196,12 +224,13 @@ class DatingMinigameScene: BaseGameScene {
             "Well, at least you tried.\nSmall social boost."
 
         let messageLabel = SKLabelNode(text: message)
-        messageLabel.fontName = "Menlo"
-        messageLabel.fontSize = 14
-        messageLabel.fontColor = SKColor(white: 0.7, alpha: 1.0)
+        messageLabel.fontName = PixelFont.name
+        messageLabel.fontSize = 18
+        messageLabel.fontColor = cyanColor.withAlphaComponent(0.8)
         messageLabel.numberOfLines = 2
         messageLabel.horizontalAlignmentMode = .center
-        messageLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 - 20)
+        messageLabel.preferredMaxLayoutWidth = size.width - 60
+        messageLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 - 10)
         addChild(messageLabel)
 
         // Apply bonus effects

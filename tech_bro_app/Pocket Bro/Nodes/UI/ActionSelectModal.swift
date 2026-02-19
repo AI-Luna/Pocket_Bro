@@ -20,7 +20,7 @@ class ActionSelectModal: SKNode {
     private let cardColor = SKColor(red: 0.30, green: 0.39, blue: 0.28, alpha: 1.0)       // starker contrast
     private let selectedCardColor = SKColor(red: 0.25, green: 0.33, blue: 0.23, alpha: 1.0)
     private let textColor = SKColor(red: 0.18, green: 0.22, blue: 0.18, alpha: 1.0)       // lcdDarkColor
-    private let secondaryTextColor = SKColor(red: 0.22, green: 0.27, blue: 0.22, alpha: 1.0)
+    private let secondaryTextColor = SKColor(red: 0.08, green: 0.20, blue: 0.08, alpha: 1.0)
     private let accentColor = SKColor(red: 0.18, green: 0.22, blue: 0.18, alpha: 1.0)     // lcdDarkColor
     private let disabledColor = SKColor(red: 0.50, green: 0.58, blue: 0.50, alpha: 1.0)
 
@@ -170,7 +170,7 @@ class ActionSelectModal: SKNode {
 
             // Create text label below the card
             let textNode = createActionLabel(action: action, cardSize: cardSize)
-            textNode.position = CGPoint(x: 0, y: -cardSize/2 - 18)
+            textNode.position = CGPoint(x: 0, y: -cardSize/2 - 10)
             cardContainer.addChild(textNode)
 
             actionCards.append(cardContainer)
@@ -299,13 +299,13 @@ class ActionSelectModal: SKNode {
             cooldownBg.zPosition = 3
             card.addChild(cooldownBg)
 
-            let clockLabel = SKLabelNode(text: "⏰")
-            clockLabel.fontSize = 22
-            clockLabel.position = CGPoint(x: 0, y: 13)
-            clockLabel.verticalAlignmentMode = .center
-            clockLabel.horizontalAlignmentMode = .center
-            clockLabel.zPosition = 4
-            card.addChild(clockLabel)
+            let clockTexture = SKTexture(imageNamed: "AlarmClock")
+            clockTexture.filteringMode = .nearest
+            let clockSprite = SKSpriteNode(texture: clockTexture)
+            clockSprite.size = CGSize(width: 28, height: 28)
+            clockSprite.position = CGPoint(x: 0, y: 13)
+            clockSprite.zPosition = 4
+            card.addChild(clockSprite)
 
             let cooldownLabel = SKLabelNode(text: formatCooldown(cooldown))
             cooldownLabel.fontName = PixelFont.name
@@ -330,7 +330,8 @@ class ActionSelectModal: SKNode {
         let nameLabel = SKLabelNode(text: action.name)
         nameLabel.fontName = PixelFont.name
         nameLabel.fontSize = 12
-        nameLabel.fontColor = canPerform ? secondaryTextColor : disabledColor
+        let isOnCooldown = GameManager.shared.cooldownRemaining(for: action) > 0
+        nameLabel.fontColor = canPerform ? secondaryTextColor : (isOnCooldown ? SKColor(red: 0.20, green: 0.38, blue: 0.20, alpha: 1.0) : disabledColor)
         nameLabel.horizontalAlignmentMode = .center
         nameLabel.verticalAlignmentMode = .top
         nameLabel.position = CGPoint(x: 0, y: 0)

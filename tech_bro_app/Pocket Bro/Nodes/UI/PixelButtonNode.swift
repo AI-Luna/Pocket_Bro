@@ -16,9 +16,9 @@ class PixelButtonNode: SKNode {
 
     var onTap: (() -> Void)?
 
-    private let enabledColor = SKColor(red: 0.3, green: 0.5, blue: 0.8, alpha: 1.0)
-    private let disabledColor = SKColor(white: 0.3, alpha: 1.0)
-    private let pressedColor = SKColor(red: 0.2, green: 0.4, blue: 0.7, alpha: 1.0)
+    private let enabledColor = SKColor(red: 0.28, green: 0.18, blue: 0.45, alpha: 1.0)
+    private let disabledColor = SKColor(white: 0.25, alpha: 1.0)
+    private let pressedColor = SKColor(red: 0.20, green: 0.10, blue: 0.35, alpha: 1.0)
 
     init(text: String, icon: String? = nil, size: CGSize = CGSize(width: 120, height: 44)) {
         self.buttonSize = size
@@ -32,24 +32,28 @@ class PixelButtonNode: SKNode {
     }
 
     private func setupButton(text: String, icon: String?) {
-        // Background
-        background = SKSpriteNode(color: enabledColor, size: buttonSize)
+        // Background shape with rounded corners
+        let shape = SKShapeNode(rectOf: buttonSize, cornerRadius: 12)
+        shape.fillColor = enabledColor
+        shape.strokeColor = SKColor(red: 0.0, green: 0.85, blue: 0.85, alpha: 0.6)
+        shape.lineWidth = 2
+        shape.name = "buttonShape"
+        addChild(shape)
+
+        // Use a transparent sprite for touch detection (same size as shape)
+        background = SKSpriteNode(color: .clear, size: buttonSize)
         background.position = .zero
         addChild(background)
 
-        // Border effect
-        let border = SKSpriteNode(color: SKColor(white: 0.1, alpha: 1.0), size: CGSize(width: buttonSize.width + 4, height: buttonSize.height + 4))
-        border.position = CGPoint(x: 2, y: -2)
-        border.zPosition = -1
-        addChild(border)
-
         // Label
         label = SKLabelNode(text: text)
-        label.fontName = "Menlo-Bold"
-        label.fontSize = 14
-        label.fontColor = .white
+        label.fontName = PixelFont.name
+        label.fontSize = 17
+        label.fontColor = SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0)
         label.horizontalAlignmentMode = .center
         label.verticalAlignmentMode = .center
+        label.numberOfLines = 2
+        label.preferredMaxLayoutWidth = buttonSize.width - 24
 
         if let icon = icon {
             iconLabel = SKLabelNode(text: icon)
@@ -69,8 +73,10 @@ class PixelButtonNode: SKNode {
 
     func setEnabled(_ enabled: Bool) {
         isEnabled = enabled
-        background.color = enabled ? enabledColor : disabledColor
-        label.fontColor = enabled ? .white : SKColor(white: 0.5, alpha: 1.0)
+        let shape = children.first(where: { $0.name == "buttonShape" }) as? SKShapeNode
+        shape?.fillColor = enabled ? enabledColor : disabledColor
+        shape?.strokeColor = enabled ? SKColor(red: 0.0, green: 0.85, blue: 0.85, alpha: 0.6) : .clear
+        label.fontColor = enabled ? SKColor(red: 0.0, green: 0.95, blue: 0.95, alpha: 1.0) : SKColor(white: 0.4, alpha: 1.0)
         iconLabel?.fontColor = label.fontColor
     }
 
@@ -123,15 +129,15 @@ class PixelButtonNode: SKNode {
     }
 
     private func animatePress() {
-        background.color = pressedColor
-        let scale = SKAction.scale(to: 0.95, duration: 0.05)
-        run(scale)
+        let shape = children.first(where: { $0.name == "buttonShape" }) as? SKShapeNode
+        shape?.fillColor = pressedColor
+        run(SKAction.scale(to: 0.95, duration: 0.05))
     }
 
     private func animateRelease() {
-        background.color = enabledColor
-        let scale = SKAction.scale(to: 1.0, duration: 0.05)
-        run(scale)
+        let shape = children.first(where: { $0.name == "buttonShape" }) as? SKShapeNode
+        shape?.fillColor = enabledColor
+        run(SKAction.scale(to: 1.0, duration: 0.05))
     }
 }
 

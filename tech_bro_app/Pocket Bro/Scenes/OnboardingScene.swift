@@ -11,7 +11,8 @@ enum OnboardingStep: Int, CaseIterable {
     case chooseStartupType = 1
     case nameFounder = 2
     case chooseLocation = 3
-    case notifications = 4
+    case nameStartup = 4
+    case notifications = 5
 }
 
 // Using City enum from BroState.swift
@@ -24,6 +25,7 @@ class OnboardingScene: SKScene {
     private var selectedArchetype: Archetype = .bro
     private var selectedCity: City = .sanFrancisco
     private var founderName: String = ""
+    private var startupName: String = ""
 
     // UI Colors - Retro synthwave theme (purple/cyan/pink)
     private let backgroundColor_ = SKColor(red: 0.15, green: 0.08, blue: 0.30, alpha: 1.0) // Deep purple
@@ -36,6 +38,7 @@ class OnboardingScene: SKScene {
     // UI Elements
     private var contentNode: SKNode!
     private var nextButton: SKNode!
+    private var backButton: SKNode!
     private var titleLabel: SKLabelNode!
 
     // Selection tracking
@@ -59,6 +62,7 @@ class OnboardingScene: SKScene {
     override func didMove(to view: SKView) {
         setupGradientBackground()
         setupNextButton()
+        setupBackButton()
         showStep(currentStep)
     }
     
@@ -166,6 +170,32 @@ class OnboardingScene: SKScene {
         nextButton = button
     }
 
+    private func setupBackButton() {
+        let button = SKNode()
+        button.name = "backButton"
+        let safeTop = safeAreaInsets().top
+        button.position = CGPoint(x: 44, y: size.height - safeTop - 52)
+        button.zPosition = 100
+
+        // Invisible hit area
+        let hitArea = SKShapeNode(rectOf: CGSize(width: 56, height: 56), cornerRadius: 8)
+        hitArea.fillColor = .clear
+        hitArea.strokeColor = .clear
+        button.addChild(hitArea)
+
+        let arrow = SKLabelNode(text: "←")
+        arrow.fontName = "Helvetica"
+        arrow.fontSize = 26
+        arrow.fontColor = textColor.withAlphaComponent(0.35)
+        arrow.verticalAlignmentMode = .center
+        arrow.horizontalAlignmentMode = .center
+        button.addChild(arrow)
+
+        button.isHidden = true
+        addChild(button)
+        backButton = button
+    }
+
     private func showStep(_ step: OnboardingStep) {
         // Clean up text field if leaving name step
         if nameTextField != nil {
@@ -182,6 +212,8 @@ class OnboardingScene: SKScene {
         startupTypeCards.removeAll()
         cityCards.removeAll()
 
+        backButton.isHidden = (step == .chooseFounder)
+
         switch step {
         case .chooseFounder:
             setupChooseFounderStep()
@@ -191,6 +223,8 @@ class OnboardingScene: SKScene {
             setupNameFounderStep()
         case .chooseLocation:
             setupChooseLocationStep()
+        case .nameStartup:
+            setupNameStartupStep()
         case .notifications:
             setupNotificationsStep()
         }
@@ -356,22 +390,24 @@ class OnboardingScene: SKScene {
             label.text = "Next"
         }
 
-        titleLabel = createTitle("What are you building?")
-        titleLabel.fontSize = PixelFont.medium
-        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - 120)
-        contentNode.addChild(titleLabel)
-
         let types = StartupType.allCases
         let cols = 3
-        let cardW: CGFloat = (size.width - 50) / CGFloat(cols)
-        let cardH: CGFloat = cardW * 0.95
-        let spacingX: CGFloat = 10
-        let spacingY: CGFloat = 14
-        let labelH: CGFloat = 30
+        let cardW: CGFloat = (size.width - 90) / CGFloat(cols)
+        let cardH: CGFloat = cardW * 0.72
+        let spacingX: CGFloat = 14
+        let spacingY: CGFloat = 10
+        let labelH: CGFloat = 22
 
         let totalW = CGFloat(cols) * cardW + CGFloat(cols - 1) * spacingX
         let startX = (size.width - totalW) / 2 + cardW / 2
         let startY = size.height / 2 + cardH / 2 + spacingY + labelH
+
+        // Position title above the grid with consistent spacing
+        let gridTop = startY + cardH / 2
+        titleLabel = createTitle("What are you building?")
+        titleLabel.fontSize = 28
+        titleLabel.position = CGPoint(x: size.width / 2, y: gridTop + 95)
+        contentNode.addChild(titleLabel)
 
         for (index, type) in types.enumerated() {
             let row = index / cols
@@ -581,14 +617,14 @@ class OnboardingScene: SKScene {
         titleLabel.horizontalAlignmentMode = .center
         titleLabel.verticalAlignmentMode = .center
         titleLabel.preferredMaxLayoutWidth = size.width - 40
-        titleLabel.position = CGPoint(x: size.width / 2, y: size.height - 100)
-        contentNode.addChild(titleLabel)
-
         // Two city cards side by side - centered on screen
         let cardWidth: CGFloat = (size.width - 60) / 2
         let cardHeight: CGFloat = 280
         let spacing: CGFloat = 20
         let cardY = size.height / 2 + 20  // Moved up to be more centered
+
+        titleLabel.position = CGPoint(x: size.width / 2, y: cardY + cardHeight / 2 + 95)
+        contentNode.addChild(titleLabel)
 
         let cities = City.allCases
         let totalWidth = CGFloat(cities.count) * cardWidth + spacing
@@ -710,11 +746,11 @@ class OnboardingScene: SKScene {
 
         // MARK: - iOS Notification Banner
         let bannerWidth = size.width - 32
-        let bannerHeight: CGFloat = 94
-        let bannerY = size.height - safeTop - 56 - bannerHeight / 2
+        let bannerHeight: CGFloat = 68
+        let bannerY = size.height - safeTop - 52 - bannerHeight / 2
 
         // Drop shadow
-        let shadowBanner = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 20)
+        let shadowBanner = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 16)
         shadowBanner.fillColor = SKColor(white: 0, alpha: 0.18)
         shadowBanner.strokeColor = .clear
         shadowBanner.position = CGPoint(x: size.width / 2, y: bannerY - 3)
@@ -722,7 +758,7 @@ class OnboardingScene: SKScene {
         contentNode.addChild(shadowBanner)
 
         // Banner background - frosted glass look
-        let banner = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 20)
+        let banner = SKShapeNode(rectOf: CGSize(width: bannerWidth, height: bannerHeight), cornerRadius: 16)
         banner.fillColor = SKColor(red: 0.97, green: 0.97, blue: 0.98, alpha: 0.96)
         banner.strokeColor = SKColor(white: 0.85, alpha: 0.6)
         banner.lineWidth = 0.5
@@ -730,63 +766,63 @@ class OnboardingScene: SKScene {
         banner.zPosition = 10
         contentNode.addChild(banner)
 
-        // App icon - actual app icon with rounded corners via crop node
-        let iconSize: CGFloat = 46
-        let iconX: CGFloat = -bannerWidth / 2 + 16 + iconSize / 2
+        // App icon
+        let iconSize: CGFloat = 40
+        let iconX: CGFloat = -bannerWidth / 2 + 12 + iconSize / 2
 
         let appIconTexture = SKTexture(imageNamed: "PocketBroAppIcon")
         let appIconSprite = SKSpriteNode(texture: appIconTexture)
         appIconSprite.size = CGSize(width: iconSize, height: iconSize)
 
-        let maskShape = SKShapeNode(rectOf: CGSize(width: iconSize, height: iconSize), cornerRadius: 11)
+        let maskShape = SKShapeNode(rectOf: CGSize(width: iconSize, height: iconSize), cornerRadius: 9)
         maskShape.fillColor = .white
         maskShape.strokeColor = .clear
         let cropNode = SKCropNode()
         cropNode.maskNode = maskShape
         cropNode.addChild(appIconSprite)
-        cropNode.position = CGPoint(x: iconX, y: 2)
+        cropNode.position = CGPoint(x: iconX, y: 0)
         banner.addChild(cropNode)
 
         // Text content starts after icon
         let textX: CGFloat = iconX + iconSize / 2 + 10
 
-        // App name (small caps) + time on same row
+        // App name + time on same row
         let appNameLabel = SKLabelNode(text: "Pocket Bro")
         appNameLabel.fontName = "Helvetica-Bold"
-        appNameLabel.fontSize = 13
+        appNameLabel.fontSize = 12
         appNameLabel.fontColor = SKColor(white: 0.15, alpha: 1.0)
         appNameLabel.horizontalAlignmentMode = .left
         appNameLabel.verticalAlignmentMode = .center
-        appNameLabel.position = CGPoint(x: textX, y: 30)
+        appNameLabel.position = CGPoint(x: textX, y: 20)
         banner.addChild(appNameLabel)
 
         let notifTime = SKLabelNode(text: "now")
         notifTime.fontName = "Helvetica"
-        notifTime.fontSize = 13
+        notifTime.fontSize = 12
         notifTime.fontColor = SKColor(white: 0.55, alpha: 1.0)
         notifTime.horizontalAlignmentMode = .right
         notifTime.verticalAlignmentMode = .center
-        notifTime.position = CGPoint(x: bannerWidth / 2 - 16, y: 30)
+        notifTime.position = CGPoint(x: bannerWidth / 2 - 14, y: 20)
         banner.addChild(notifTime)
 
         // Notification title
         let notifTitle = SKLabelNode(text: "\(name) is burning out! 🔥")
         notifTitle.fontName = "Helvetica-Bold"
-        notifTitle.fontSize = 15
+        notifTitle.fontSize = 14
         notifTitle.fontColor = SKColor(white: 0.08, alpha: 1.0)
         notifTitle.horizontalAlignmentMode = .left
         notifTitle.verticalAlignmentMode = .center
-        notifTitle.position = CGPoint(x: textX, y: 10)
+        notifTitle.position = CGPoint(x: textX, y: 4)
         banner.addChild(notifTitle)
 
         // Notification body
         let notifBody = SKLabelNode(text: "Take a break before it's too late!")
         notifBody.fontName = "Helvetica"
-        notifBody.fontSize = 14
+        notifBody.fontSize = 13
         notifBody.fontColor = SKColor(white: 0.35, alpha: 1.0)
         notifBody.horizontalAlignmentMode = .left
         notifBody.verticalAlignmentMode = .center
-        notifBody.position = CGPoint(x: textX, y: -10)
+        notifBody.position = CGPoint(x: textX, y: -12)
         banner.addChild(notifBody)
 
         // Slide in from top
@@ -824,8 +860,9 @@ class OnboardingScene: SKScene {
         titleLabel.fontColor = textColor
         titleLabel.numberOfLines = 3
         titleLabel.horizontalAlignmentMode = .center
-        titleLabel.verticalAlignmentMode = .top
-        titleLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 - 10)
+        titleLabel.verticalAlignmentMode = .center
+        titleLabel.preferredMaxLayoutWidth = size.width - 40
+        titleLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 - 100)
         contentNode.addChild(titleLabel)
 
         // Update button text
@@ -856,6 +893,13 @@ class OnboardingScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
+
+        // Check back button
+        if !backButton.isHidden && backButton.contains(location) {
+            Haptics.selection()
+            handleBackButton()
+            return
+        }
 
         // Check next button
         if nextButton.contains(location) {
@@ -921,6 +965,18 @@ class OnboardingScene: SKScene {
                 promptForName()
             }
         }
+
+        // Check startup name field tap
+        if currentStep == .nameStartup {
+            let fieldWidth = size.width - 60
+            let fieldHeight: CGFloat = 65
+            let fieldY = size.height / 2 - 60
+            let fieldArea = CGRect(x: (size.width - fieldWidth) / 2, y: fieldY - fieldHeight / 2, width: fieldWidth, height: fieldHeight)
+            if fieldArea.contains(location) {
+                Haptics.selection()
+                promptForStartupName()
+            }
+        }
     }
 
     private func animateButtonPress(_ button: SKNode) {
@@ -929,6 +985,12 @@ class OnboardingScene: SKScene {
             SKAction.scale(to: 1.0, duration: 0.05)
         ])
         button.run(press)
+    }
+
+    private func handleBackButton() {
+        guard let prev = OnboardingStep(rawValue: currentStep.rawValue - 1) else { return }
+        currentStep = prev
+        showStep(currentStep)
     }
 
     private func handleNextButton() {
@@ -950,6 +1012,14 @@ class OnboardingScene: SKScene {
             showStep(currentStep)
 
         case .chooseLocation:
+            currentStep = .nameStartup
+            showStep(currentStep)
+
+        case .nameStartup:
+            if startupName.isEmpty {
+                let names = ["ByteCo", "Launchpad", "Nexus", "StackUp", "Foundry", "Pivotal", "Syndicate"]
+                startupName = names.randomElement() ?? "Startup"
+            }
             currentStep = .notifications
             showStep(currentStep)
 
@@ -1063,6 +1133,178 @@ class OnboardingScene: SKScene {
         }
     }
 
+    // MARK: - Step 5: Name Startup
+
+    private func setupNameStartupStep() {
+        if let label = nextButton.children.compactMap({ $0 as? SKLabelNode }).first {
+            label.text = "Next"
+        }
+
+        let titleY = size.height - 160
+        titleLabel = createTitle("What is your\nstartup called?")
+        titleLabel.numberOfLines = 2
+        titleLabel.preferredMaxLayoutWidth = size.width - 40
+        titleLabel.position.y = titleY
+        contentNode.addChild(titleLabel)
+
+        let fieldY = size.height / 2 - 60
+
+        // City image preview centered between title and input field
+        let previewY = (titleY + fieldY) / 2
+
+        // Glow behind image
+        let glowNode = SKShapeNode(circleOfRadius: 85)
+        glowNode.fillColor = pinkAccent.withAlphaComponent(0.3)
+        glowNode.strokeColor = .clear
+        glowNode.position = CGPoint(x: size.width / 2, y: previewY)
+        glowNode.glowWidth = 30
+        contentNode.addChild(glowNode)
+        let glowPulse = SKAction.sequence([
+            SKAction.fadeAlpha(to: 0.5, duration: 0.8),
+            SKAction.fadeAlpha(to: 0.2, duration: 0.8)
+        ])
+        glowNode.run(SKAction.repeatForever(glowPulse))
+
+        // City image in rounded rect
+        let imgW: CGFloat = 180
+        let imgH: CGFloat = 130
+        let texture = SKTexture(imageNamed: selectedCity.imageName)
+        texture.filteringMode = .linear
+        let imgSprite = SKSpriteNode(texture: texture)
+        let scaleX = imgW / texture.size().width
+        let scaleY = imgH / texture.size().height
+        imgSprite.setScale(max(scaleX, scaleY))
+
+        let maskShape = SKShapeNode(rectOf: CGSize(width: imgW, height: imgH), cornerRadius: 16)
+        maskShape.fillColor = .white
+        maskShape.strokeColor = .clear
+        let cropNode = SKCropNode()
+        cropNode.maskNode = maskShape
+        cropNode.addChild(imgSprite)
+        cropNode.position = CGPoint(x: size.width / 2, y: previewY)
+        contentNode.addChild(cropNode)
+
+        // Gentle float animation
+        let float = SKAction.sequence([
+            SKAction.moveBy(x: 0, y: 6, duration: 0.6),
+            SKAction.moveBy(x: 0, y: -6, duration: 0.6)
+        ])
+        cropNode.run(SKAction.repeatForever(float))
+
+        // Input field glow
+        let fieldWidth: CGFloat = size.width - 60
+        let fieldHeight: CGFloat = 65
+
+        let fieldGlow = SKShapeNode(rectOf: CGSize(width: fieldWidth + 10, height: fieldHeight + 10), cornerRadius: 24)
+        fieldGlow.fillColor = pinkAccent.withAlphaComponent(0.15)
+        fieldGlow.strokeColor = .clear
+        fieldGlow.glowWidth = 15
+        fieldGlow.position = CGPoint(x: size.width / 2, y: fieldY)
+        fieldGlow.zPosition = -1
+        fieldGlow.name = "startupFieldGlow"
+        contentNode.addChild(fieldGlow)
+
+        // Field background
+        let fieldBg = SKShapeNode(rectOf: CGSize(width: fieldWidth, height: fieldHeight), cornerRadius: 20)
+        fieldBg.fillColor = SKColor(red: 0.35, green: 0.15, blue: 0.45, alpha: 0.9)
+        fieldBg.strokeColor = pinkAccent
+        fieldBg.lineWidth = 3
+        fieldBg.position = CGPoint(x: size.width / 2, y: fieldY)
+        fieldBg.name = "startupFieldBg"
+        contentNode.addChild(fieldBg)
+
+        // Name display
+        let nameDisplay = SKLabelNode(text: startupName.isEmpty ? "Tap to enter name" : startupName)
+        nameDisplay.fontName = PixelFont.name
+        nameDisplay.fontSize = PixelFont.large
+        nameDisplay.fontColor = startupName.isEmpty ? SKColor(white: 0.7, alpha: 0.8) : .white
+        nameDisplay.position = CGPoint(x: size.width / 2, y: fieldY)
+        nameDisplay.horizontalAlignmentMode = .center
+        nameDisplay.verticalAlignmentMode = .center
+        nameDisplay.name = "startupNameDisplay"
+        contentNode.addChild(nameDisplay)
+
+        // Tap hint
+        let tapHint = SKLabelNode(text: "Tap the field to type")
+        tapHint.fontName = PixelFont.regularName
+        tapHint.fontSize = PixelFont.small
+        tapHint.fontColor = SKColor(red: 0.6, green: 0.5, blue: 0.7, alpha: 0.8)
+        tapHint.position = CGPoint(x: size.width / 2, y: fieldY - 55)
+        tapHint.horizontalAlignmentMode = .center
+        tapHint.name = "startupTapHint"
+        contentNode.addChild(tapHint)
+    }
+
+    private func promptForStartupName() {
+        guard let skView = self.view else { return }
+        nameTextField?.removeFromSuperview()
+
+        let fieldWidth = size.width - 60
+        let fieldHeight: CGFloat = 65
+        let fieldY = size.height / 2 - 60
+        let uiFieldY = size.height - fieldY - fieldHeight / 2
+        let uiFieldX = (size.width - fieldWidth) / 2
+
+        let textField = UITextField(frame: CGRect(x: uiFieldX, y: uiFieldY, width: fieldWidth, height: fieldHeight))
+        textField.backgroundColor = UIColor(red: 0.35, green: 0.15, blue: 0.45, alpha: 0.95)
+        textField.layer.cornerRadius = 20
+        textField.layer.borderWidth = 3
+        textField.layer.borderColor = UIColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0).cgColor
+        textField.textColor = .white
+        textField.font = UIFont(name: PixelFont.name, size: PixelFont.large) ?? UIFont.systemFont(ofSize: 22, weight: .bold)
+        textField.textAlignment = .center
+        textField.autocapitalizationType = .words
+        textField.autocorrectionType = .no
+        textField.returnKeyType = .done
+        textField.attributedPlaceholder = NSAttributedString(
+            string: "Enter startup name...",
+            attributes: [.foregroundColor: UIColor(white: 0.7, alpha: 0.8)]
+        )
+        textField.text = startupName.isEmpty ? "" : startupName
+        textField.tintColor = UIColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 1.0)
+
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: fieldHeight))
+        textField.leftView = paddingView
+        textField.leftViewMode = .always
+        textField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: fieldHeight))
+        textField.rightViewMode = .always
+
+        skView.addSubview(textField)
+        textField.tag = 1 // 0 = founderName, 1 = startupName
+        textField.delegate = self
+        textField.becomeFirstResponder()
+        nameTextField = textField
+
+        contentNode.childNode(withName: "startupNameDisplay")?.isHidden = true
+        contentNode.childNode(withName: "startupFieldBg")?.isHidden = true
+        contentNode.childNode(withName: "startupFieldGlow")?.isHidden = true
+    }
+
+    private func finishStartupNameEditing() {
+        guard let textField = nameTextField else { return }
+        if let text = textField.text, !text.trimmingCharacters(in: .whitespaces).isEmpty {
+            startupName = text.trimmingCharacters(in: .whitespaces)
+        }
+        textField.resignFirstResponder()
+        textField.removeFromSuperview()
+        nameTextField = nil
+
+        contentNode.childNode(withName: "startupNameDisplay")?.isHidden = false
+        contentNode.childNode(withName: "startupFieldBg")?.isHidden = false
+        contentNode.childNode(withName: "startupFieldGlow")?.isHidden = false
+        updateStartupNameDisplay()
+    }
+
+    private func updateStartupNameDisplay() {
+        if let display = contentNode.childNode(withName: "startupNameDisplay") as? SKLabelNode {
+            display.text = startupName.isEmpty ? "Tap to enter name" : startupName
+            display.fontColor = startupName.isEmpty ? SKColor(white: 0.7, alpha: 0.8) : .white
+        }
+        if let hint = contentNode.childNode(withName: "startupTapHint") {
+            hint.isHidden = !startupName.isEmpty
+        }
+    }
+
     private func requestNotificationsAndStart() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in
             DispatchQueue.main.async { [weak self] in
@@ -1072,7 +1314,7 @@ class OnboardingScene: SKScene {
     }
 
     private func startGame() {
-        GameManager.shared.newGame(name: founderName, archetype: selectedArchetype, city: selectedCity, startupType: selectedStartupType)
+        GameManager.shared.newGame(name: founderName, startupName: startupName, archetype: selectedArchetype, city: selectedCity, startupType: selectedStartupType)
 
         // Fade out and transition
         let fadeOut = SKAction.fadeOut(withDuration: 0.4)
@@ -1086,16 +1328,15 @@ class OnboardingScene: SKScene {
 
 extension OnboardingScene: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        finishNameEditing()
+        if textField.tag == 1 { finishStartupNameEditing() } else { finishNameEditing() }
         return true
     }
-    
+
     func textFieldDidEndEditing(_ textField: UITextField) {
-        finishNameEditing()
+        if textField.tag == 1 { finishStartupNameEditing() } else { finishNameEditing() }
     }
-    
+
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        // Limit name length to 20 characters
         let currentText = textField.text ?? ""
         guard let stringRange = Range(range, in: currentText) else { return false }
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
