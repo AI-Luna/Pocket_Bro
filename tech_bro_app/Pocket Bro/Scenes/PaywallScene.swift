@@ -168,27 +168,28 @@ class PaywallScene: SKScene {
         header.position = CGPoint(x: -widgetWidth / 2 + 20, y: 56)
         widget.addChild(header)
 
-        // 5 bullet points
+        // 5 bullet points with pixel art icons
         let bullets: [(String, String)] = [
-            ("🍼", "Co-parent Bro with Friends"),
-            ("📈", "Enhanced Fundraising Mechanics"),
-            ("🚀", "Therapy & Advanced Burnout Recovery"),
-            ("💰", "Premium Deep Work & Hustle Boosts"),
-            ("❤️", "Support Indie Development")
+            ("paywall_bottle", "Co-parent Bro with Friends"),
+            ("paywall_chart", "Enhanced Fundraising Mechanics"),
+            ("paywall_rocket", "Therapy & Advanced Burnout Recovery"),
+            ("paywall_moneybag", "Premium Deep Work & Hustle Boosts"),
+            ("paywall_heart", "Support Indie Development")
         ]
 
         let bulletSpacing: CGFloat = 24
         let firstBulletY: CGFloat = 36
+        let iconSize: CGFloat = 20
 
         for (index, bullet) in bullets.enumerated() {
             let y = firstBulletY - CGFloat(index) * bulletSpacing
 
-            let emoji = SKLabelNode(text: bullet.0)
-            emoji.fontSize = 14
-            emoji.horizontalAlignmentMode = .center
-            emoji.verticalAlignmentMode = .center
-            emoji.position = CGPoint(x: -widgetWidth / 2 + 30, y: y)
-            widget.addChild(emoji)
+            let icon = SKSpriteNode(imageNamed: bullet.0)
+            icon.texture?.filteringMode = .nearest
+            let scale = iconSize / max(icon.size.width, icon.size.height)
+            icon.setScale(scale)
+            icon.position = CGPoint(x: -widgetWidth / 2 + 30, y: y)
+            widget.addChild(icon)
 
             let text = SKLabelNode(text: bullet.1)
             text.fontName = PixelFont.name
