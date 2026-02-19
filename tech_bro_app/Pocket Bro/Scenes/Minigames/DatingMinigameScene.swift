@@ -147,28 +147,23 @@ class DatingMinigameScene: BaseGameScene {
     private func selectChoice(_ choiceScore: Int) {
         score += choiceScore
 
-        // Show feedback
-        let feedback: String
-        let color: SKColor
-        if choiceScore >= 3 {
-            feedback = "Perfect! 💕"
-            color = .green
-        } else if choiceScore >= 1 {
-            feedback = "Not bad! 💛"
-            color = .yellow
-        } else if choiceScore == 0 {
-            feedback = "Awkward... 😐"
-            color = .orange
+        // Feedback popup
+        let isGood = choiceScore >= 3
+        let isOkay = choiceScore >= 1
+        let feedbackText: String
+        let accentColor: SKColor
+        if isGood {
+            feedbackText = "PERFECT! 💕"
+            accentColor = SKColor(red: 0.2, green: 0.85, blue: 0.4, alpha: 1.0)   // pixel green
+        } else if isOkay {
+            feedbackText = "NOT BAD! 💛"
+            accentColor = SKColor(red: 0.2, green: 0.85, blue: 0.4, alpha: 1.0)   // also green
         } else {
-            feedback = "Yikes! 💔"
-            color = .red
+            feedbackText = "MISS! 💔"
+            accentColor = SKColor(red: 0.95, green: 0.2, blue: 0.3, alpha: 1.0)   // pixel red
         }
 
-        let feedbackLabel = createLabel(text: feedback, fontSize: 28)
-        feedbackLabel.fontName = PixelFont.name
-        feedbackLabel.fontColor = color
-        feedbackLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 - 160)
-        addChild(feedbackLabel)
+        showFeedbackPopup(text: feedbackText, color: accentColor)
 
         // Update vibe meter
         updateScore()
@@ -180,11 +175,51 @@ class DatingMinigameScene: BaseGameScene {
 
         // Next round after delay
         run(SKAction.sequence([
-            SKAction.wait(forDuration: 1.5),
+            SKAction.wait(forDuration: 1.6),
             SKAction.run { [weak self] in
-                feedbackLabel.removeFromParent()
+                self?.childNode(withName: "feedbackPopup")?.removeFromParent()
                 self?.showNextRound()
             }
+        ]))
+    }
+
+    private func showFeedbackPopup(text: String, color: SKColor) {
+        let popup = SKNode()
+        popup.name = "feedbackPopup"
+        popup.zPosition = 300
+        popup.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        addChild(popup)
+
+        let panelW: CGFloat = 260
+        let panelH: CGFloat = 90
+
+        // Outer pixel border (2px offset for chunky look)
+        let border = SKShapeNode(rectOf: CGSize(width: panelW + 8, height: panelH + 8), cornerRadius: 6)
+        border.fillColor = color
+        border.strokeColor = .clear
+        popup.addChild(border)
+
+        // Dark inner panel
+        let panel = SKShapeNode(rectOf: CGSize(width: panelW, height: panelH), cornerRadius: 4)
+        panel.fillColor = SKColor(red: 0.12, green: 0.08, blue: 0.22, alpha: 1.0)
+        panel.strokeColor = .clear
+        popup.addChild(panel)
+
+        // Feedback text
+        let label = SKLabelNode(text: text)
+        label.fontName = PixelFont.name
+        label.fontSize = 22
+        label.fontColor = color
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        popup.addChild(label)
+
+        // Animate: pop in, hold, fade out handled by caller
+        popup.setScale(0.6)
+        popup.alpha = 0
+        popup.run(SKAction.group([
+            SKAction.fadeIn(withDuration: 0.15),
+            SKAction.scale(to: 1.0, duration: 0.15)
         ]))
     }
 
