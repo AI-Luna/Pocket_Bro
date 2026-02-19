@@ -452,7 +452,7 @@ class SettingsScene: SKScene {
         guard let viewController = self.view?.window?.rootViewController else { return }
 
         let appURL = "https://apps.apple.com/app/idYOURAPPID" // Replace with actual App Store URL
-        let message = "Check out TechBro Tamagotchi! Raise your own startup founder! 🚀👨‍💻"
+        let message = "Check out Tiny TechBro! Raise your own startup founder! 🚀👨‍💻"
 
         let activityVC = UIActivityViewController(
             activityItems: [message, appURL],
@@ -473,7 +473,7 @@ class SettingsScene: SKScene {
         guard let viewController = self.view?.window?.rootViewController else { return }
 
         let appURL = "https://apps.apple.com/app/idYOURAPPID"
-        let message = "okay you NEED to download this app rn 👇\n\nit's called Pocket Bro — you raise a tamagotchi-style startup founder, grind through pitch decks, survive investor meetings, avoid burnout... it's unhinged and weirdly accurate 💀🚀\n\nwe should both be playing this → \(appURL)"
+        let message = "okay you NEED to download this app rn 👇\n\nit's called Tiny TechBro — you raise a tamagotchi-style startup founder, grind through pitch decks, survive investor meetings, avoid burnout... it's unhinged and weirdly accurate 💀🚀\n\nwe should both be playing this → \(appURL)"
 
         if MFMessageComposeViewController.canSendText() {
             let messageVC = MFMessageComposeViewController()

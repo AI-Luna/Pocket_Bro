@@ -199,7 +199,7 @@ class OnboardingScene: SKScene {
     // MARK: - Step 1: Choose Founder
 
     private func setupChooseFounderStep() {
-        // Main logo image - TechBro Tamagotchi
+        // Main logo image - Tiny TechBro
         let logoTexture = SKTexture(imageNamed: "TechBroLogo")
         let logo = SKSpriteNode(texture: logoTexture)
         
