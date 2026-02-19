@@ -233,22 +233,22 @@ class OnboardingScene: SKScene {
     // MARK: - Step 1: Choose Founder
 
     private func setupChooseFounderStep() {
-        // Main logo image - TechBro Tamagotchi
+        // Main logo image - Tiny TechBro
         let logoTexture = SKTexture(imageNamed: "TechBroLogo")
         let logo = SKSpriteNode(texture: logoTexture)
         
-        // Scale logo to fit nicely - about 80% of screen width
-        let targetWidth = size.width * 0.85
+        // Scale logo to fit nicely
+        let targetWidth = size.width * 1.1
         let scale = targetWidth / logoTexture.size().width
         logo.setScale(scale)
-        logo.position = CGPoint(x: size.width / 2, y: size.height - 180)  // Moved down closer to text
+        logo.position = CGPoint(x: size.width / 2 + 5, y: size.height - 180)
         logo.zPosition = 10
-        
+
         // Add pink/magenta glow behind logo
-        let glowNode = SKShapeNode(rectOf: CGSize(width: logo.size.width * 0.9, height: logo.size.height * 0.8), cornerRadius: 20)
+        let glowNode = SKShapeNode(rectOf: CGSize(width: logo.size.width * 0.7, height: logo.size.height * 0.8), cornerRadius: 20)
         glowNode.fillColor = pinkAccent.withAlphaComponent(0.2)
         glowNode.strokeColor = .clear
-        glowNode.position = logo.position
+        glowNode.position = CGPoint(x: size.width / 2, y: size.height - 180)
         glowNode.zPosition = 9
         glowNode.glowWidth = 30
         contentNode.addChild(glowNode)
@@ -265,7 +265,7 @@ class OnboardingScene: SKScene {
         // Subtitle - positioned closer to cards below
         titleLabel = createTitle("Choose your founder")
         titleLabel.fontSize = PixelFont.medium
-        titleLabel.position.y = size.height - 280  // Moved down, closer to character cards
+        titleLabel.position.y = size.height - 355
         contentNode.addChild(titleLabel)
 
         // Larger cards with bigger character icons

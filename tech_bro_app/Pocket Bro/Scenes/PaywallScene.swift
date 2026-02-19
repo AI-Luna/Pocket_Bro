@@ -169,33 +169,35 @@ class PaywallScene: SKScene {
         // Header
         let header = SKLabelNode(text: "TechBro Pro Features")
         header.fontName = PixelFont.name
-        header.fontSize = 14
+        header.fontSize = 17
         header.fontColor = accentColor
         header.horizontalAlignmentMode = .left
         header.verticalAlignmentMode = .center
-        header.position = CGPoint(x: -widgetWidth / 2 + 20, y: 56)
+        header.position = CGPoint(x: -widgetWidth / 2 + 20, y: 62)
         widget.addChild(header)
 
-        // 4 bullet points
+        // 5 bullet points with pixel art icons
         let bullets: [(String, String)] = [
-            ("🧘", "Meditation, Gym, Therapy & more"),
-            ("💪", "Exclusive Grind & Fuel boosts"),
-            ("🚀", "All future premium content"),
-            ("❤️", "Support indie development")
+            ("paywall_bottle", "Co-parent Bro with Friends"),
+            ("paywall_chart", "Enhanced Fundraising Mechanics"),
+            ("paywall_rocket", "Therapy & Advanced Burnout Recovery"),
+            ("paywall_moneybag", "Premium Deep Work & Hustle Boosts"),
+            ("paywall_heart", "Support Indie Development")
         ]
 
-        let bulletSpacing: CGFloat = 26
-        let firstBulletY: CGFloat = 26
+        let bulletSpacing: CGFloat = 24
+        let firstBulletY: CGFloat = 32
+        let iconSize: CGFloat = 20
 
         for (index, bullet) in bullets.enumerated() {
             let y = firstBulletY - CGFloat(index) * bulletSpacing
 
-            let emoji = SKLabelNode(text: bullet.0)
-            emoji.fontSize = 14
-            emoji.horizontalAlignmentMode = .center
-            emoji.verticalAlignmentMode = .center
-            emoji.position = CGPoint(x: -widgetWidth / 2 + 30, y: y)
-            widget.addChild(emoji)
+            let icon = SKSpriteNode(imageNamed: bullet.0)
+            icon.texture?.filteringMode = .nearest
+            let scale = iconSize / max(icon.size.width, icon.size.height)
+            icon.setScale(scale)
+            icon.position = CGPoint(x: -widgetWidth / 2 + 30, y: y)
+            widget.addChild(icon)
 
             let text = SKLabelNode(text: bullet.1)
             text.fontName = PixelFont.name
@@ -220,7 +222,7 @@ class PaywallScene: SKScene {
         let annualTopEdge = annualY + cardHeight / 2
 
         let line2Y = annualTopEdge + 24
-        let line1Y = line2Y + 32
+        let line1Y = line2Y + 22
 
         let line1 = SKLabelNode(text: "Unlock")
         line1.fontName = PixelFont.name
