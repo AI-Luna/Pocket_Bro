@@ -147,9 +147,9 @@ class PaywallScene: SKScene {
 
     private func setupFeatureWidget() {
         let safeTop = view?.safeAreaInsets.top ?? 50
-        let widgetY = size.height - safeTop - 258
+        let widgetY = size.height - safeTop - 293
         let widgetWidth: CGFloat = size.width - 50
-        let widgetHeight: CGFloat = 152
+        let widgetHeight: CGFloat = 178
 
         let widget = SKShapeNode(rectOf: CGSize(width: widgetWidth, height: widgetHeight), cornerRadius: 16)
         widget.fillColor = featureCardColor
@@ -168,16 +168,17 @@ class PaywallScene: SKScene {
         header.position = CGPoint(x: -widgetWidth / 2 + 20, y: 56)
         widget.addChild(header)
 
-        // 4 bullet points
+        // 5 bullet points
         let bullets: [(String, String)] = [
-            ("🧘", "Meditation, Gym, Therapy & more"),
-            ("💪", "Exclusive Grind & Fuel boosts"),
-            ("🚀", "All future premium content"),
-            ("❤️", "Support indie development")
+            ("🍼", "Co-parent Bro with Friends"),
+            ("📈", "Enhanced Fundraising Mechanics"),
+            ("🚀", "Therapy & Advanced Burnout Recovery"),
+            ("💰", "Premium Deep Work & Hustle Boosts"),
+            ("❤️", "Support Indie Development")
         ]
 
-        let bulletSpacing: CGFloat = 26
-        let firstBulletY: CGFloat = 26
+        let bulletSpacing: CGFloat = 24
+        let firstBulletY: CGFloat = 36
 
         for (index, bullet) in bullets.enumerated() {
             let y = firstBulletY - CGFloat(index) * bulletSpacing
