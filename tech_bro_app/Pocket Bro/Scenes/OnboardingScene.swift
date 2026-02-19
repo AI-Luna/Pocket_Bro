@@ -395,7 +395,7 @@ class OnboardingScene: SKScene {
         let cardW: CGFloat = (size.width - 90) / CGFloat(cols)
         let cardH: CGFloat = cardW
         let spacingX: CGFloat = 14
-        let spacingY: CGFloat = 10
+        let spacingY: CGFloat = 20
         let labelH: CGFloat = 34
 
         let totalW = CGFloat(cols) * cardW + CGFloat(cols - 1) * spacingX
