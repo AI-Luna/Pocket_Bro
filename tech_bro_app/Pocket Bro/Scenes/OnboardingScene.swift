@@ -8,9 +8,9 @@ import UserNotifications
 
 enum OnboardingStep: Int, CaseIterable {
     case chooseFounder = 0
-    case chooseStartupType = 1
-    case nameFounder = 2
-    case chooseLocation = 3
+    case nameFounder = 1
+    case chooseLocation = 2
+    case chooseStartupType = 3
     case nameStartup = 4
     case notifications = 5
 }
@@ -1007,10 +1007,6 @@ class OnboardingScene: SKScene {
     private func handleNextButton() {
         switch currentStep {
         case .chooseFounder:
-            currentStep = .chooseStartupType
-            showStep(currentStep)
-
-        case .chooseStartupType:
             currentStep = .nameFounder
             showStep(currentStep)
 
@@ -1023,6 +1019,10 @@ class OnboardingScene: SKScene {
             showStep(currentStep)
 
         case .chooseLocation:
+            currentStep = .chooseStartupType
+            showStep(currentStep)
+
+        case .chooseStartupType:
             currentStep = .nameStartup
             showStep(currentStep)
 
