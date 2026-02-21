@@ -379,6 +379,12 @@ class SettingsScene: SKScene {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
 
+        // Dismiss coming soon overlay
+        if let overlay = childNode(withName: ComingSoonOverlay.nodeName) as? ComingSoonOverlay {
+            overlay.dismiss()
+            return
+        }
+
         // Close button
         if let closeButton = childNode(withName: "closeButton"), closeButton.contains(location) {
             Haptics.selection()
@@ -391,7 +397,7 @@ class SettingsScene: SKScene {
         if let banner = childNode(withName: "proBanner"), banner.contains(location) {
             Haptics.confirm()
             animatePress(banner)
-            sceneManager?.presentScene(.paywall)
+            showComingSoon()
             return
         }
 
@@ -642,6 +648,10 @@ class SettingsScene: SKScene {
             guard let shape = node as? SKShapeNode else { return }
             shape.fillColor = newColor
         })
+    }
+
+    private func showComingSoon() {
+        ComingSoonOverlay(sceneSize: size).show(in: self)
     }
 
     private func animatePress(_ node: SKNode) {

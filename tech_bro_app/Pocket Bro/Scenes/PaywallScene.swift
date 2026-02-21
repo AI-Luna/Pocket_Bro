@@ -187,13 +187,13 @@ class PaywallScene: SKScene {
         header.position = CGPoint(x: 0, y: 60)
         widget.addChild(header)
 
-        // 5 bullet points with pixel art icons — tighter spacing
+        // 5 bullet points with pixel art icons
         let bullets: [(String, String)] = [
-            ("paywall_bottle",   "Co-parent Bro with Friends"),
-            ("paywall_chart",    "Enhanced Fundraising Mechanics"),
-            ("paywall_rocket",   "Therapy & Advanced Burnout Recovery"),
-            ("paywall_moneybag", "Premium Deep Work & Hustle Boosts"),
-            ("paywall_heart",    "Support Indie Development")
+            ("paywall_bottle",   "Pick your founder + city"),
+            ("paywall_chart",    "Balance your stats daily"),
+            ("paywall_rocket",   "Choose your grind, rest & social life"),
+            ("paywall_moneybag", "2 minigames: Lock In + Dating"),
+            ("paywall_heart",    "Grow from Garage → Unicorn Status")
         ]
 
         let bulletSpacing: CGFloat = 22

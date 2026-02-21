@@ -717,6 +717,12 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
 
+        // Dismiss coming soon overlay
+        if let overlay = childNode(withName: ComingSoonOverlay.nodeName) as? ComingSoonOverlay {
+            overlay.dismiss()
+            return
+        }
+
         // Dismiss daily greeting overlay
         if childNode(withName: "greetingOverlay") != nil {
             dismissGreeting()
@@ -875,10 +881,6 @@ class MainGameScene: BaseGameScene, ActionSelectModalDelegate {
         activeModal = nil
     }
 
-    func actionSelectModalDidSelectPremium(_ modal: ActionSelectModal) {
-        activeModal = nil
-        sceneManager?.presentScene(.paywall)
-    }
 
     private func animateButtonPress(_ button: SKNode) {
         let press = SKAction.sequence([

@@ -336,8 +336,8 @@ class CitySelectModal: SKNode {
         }
 
         guard !city.isPremium || PurchaseManager.shared.isProActive else {
-            // Show premium required
             shakeCard(card)
+            showComingSoon()
             return
         }
 
@@ -357,6 +357,11 @@ class CitySelectModal: SKNode {
 
         // Notify delegate
         delegate?.citySelectModal(self, didSelect: city)
+    }
+
+    private func showComingSoon() {
+        guard let scene = self.scene else { return }
+        ComingSoonOverlay(sceneSize: scene.size).show(in: scene)
     }
 
     private func shakeCard(_ card: SKNode) {

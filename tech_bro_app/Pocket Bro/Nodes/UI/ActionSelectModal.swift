@@ -8,7 +8,6 @@ import UIKit
 protocol ActionSelectModalDelegate: AnyObject {
     func actionSelectModal(_ modal: ActionSelectModal, didSelect action: GameAction)
     func actionSelectModalDidClose(_ modal: ActionSelectModal)
-    func actionSelectModalDidSelectPremium(_ modal: ActionSelectModal)
 }
 
 class ActionSelectModal: SKNode {
@@ -418,18 +417,17 @@ class ActionSelectModal: SKNode {
         return false
     }
 
+    private func showComingSoon() {
+        guard let scene = self.scene else { return }
+        ComingSoonOverlay(sceneSize: scene.size).show(in: scene)
+    }
+
     private func handleActionTap(_ action: GameAction, card: SKNode) {
-        // Check if premium action and user doesn't have pro - open paywall
+        // Check if premium action and user doesn't have pro - show coming soon
         if action.isPremium && !PurchaseManager.shared.isProActive {
             Haptics.selection()
             animatePress(card)
-            delegate?.actionSelectModalDidSelectPremium(self)
-            run(SKAction.sequence([
-                SKAction.wait(forDuration: 0.2),
-                SKAction.run { [weak self] in
-                    self?.dismiss()
-                }
-            ]))
+            showComingSoon()
             return
         }
 

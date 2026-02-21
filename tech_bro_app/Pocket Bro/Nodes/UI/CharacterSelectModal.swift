@@ -8,7 +8,6 @@ import SpriteKit
 protocol CharacterSelectModalDelegate: AnyObject {
     func characterSelectModal(_ modal: CharacterSelectModal, didSelect archetype: Archetype)
     func characterSelectModalDidClose(_ modal: CharacterSelectModal)
-    func characterSelectModalDidSelectPremium(_ modal: CharacterSelectModal)
 }
 
 class CharacterSelectModal: SKNode {
@@ -267,7 +266,7 @@ class CharacterSelectModal: SKNode {
         }
 
         guard !character.isPremium || PurchaseManager.shared.isProActive else {
-            // Show premium required — shake and surface paywall
+            // Show shake + coming soon overlay
             let shake = SKAction.sequence([
                 SKAction.moveBy(x: -5, y: 0, duration: 0.05),
                 SKAction.moveBy(x: 10, y: 0, duration: 0.05),
@@ -275,7 +274,7 @@ class CharacterSelectModal: SKNode {
                 SKAction.moveBy(x: 5, y: 0, duration: 0.05)
             ])
             card.run(shake)
-            delegate?.characterSelectModalDidSelectPremium(self)
+            showComingSoon()
             return
         }
 
@@ -297,6 +296,11 @@ class CharacterSelectModal: SKNode {
 
         // Notify delegate
         delegate?.characterSelectModal(self, didSelect: archetype)
+    }
+
+    private func showComingSoon() {
+        guard let scene = self.scene else { return }
+        ComingSoonOverlay(sceneSize: scene.size).show(in: scene)
     }
 
     private func animatePress(_ node: SKNode) {
